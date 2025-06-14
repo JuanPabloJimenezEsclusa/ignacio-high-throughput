@@ -1,0 +1,149 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: wiremock-ns
+  labels:
+    name: wiremock-ns
+spec: {}
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: wiremock-mappings
+  namespace: wiremock-ns
+data:
+  api-data.json: |
+    {
+      "mappings": [
+        {
+          "name": "GET /api/data",
+          "request": {
+            "method": "GET",
+            "urlPath": "/api/data"
+          },
+          "response": {
+            "status": 200,
+            "body": "{\"id\":\"{{randomValue type='UUID'}}\",\"value\":\"downstream-data-{{randomValue type='ALPHANUMERIC' length=8}}\",\"timestamp\":\"{{now format='yyyy-MM-dd'}}T{{now format='HH:mm:ss.SSS'}}Z\"}",
+            "transformers": ["response-template"],
+            "headers": {
+              "Content-Type": "application/json"
+            }
+          }
+        },
+        {
+          "name": "GET /api/data with delayMs",
+          "request": {
+            "method": "GET",
+            "urlPath": "/api/data",
+            "queryParameters": {
+              "delayMs": {
+                "matches": "[0-9]+"
+              }
+            }
+          },
+          "response": {
+            "status": 200,
+            "body": "{\"id\":\"{{randomValue type='UUID'}}\",\"value\":\"downstream-data-{{randomValue type='ALPHANUMERIC' length=8}}\",\"timestamp\":\"{{now format='yyyy-MM-dd'}}T{{now format='HH:mm:ss.SSS'}}Z\"}",
+            "delayDistribution": {
+              "type": "uniform",
+              "lower": 100,
+              "upper": 2000
+            },
+            "transformers": ["response-template"],
+            "headers": {
+              "Content-Type": "application/json"
+            }
+          }
+        },
+        {
+          "name": "GET /api/data/{id}",
+          "request": {
+            "method": "GET",
+            "urlPathPattern": "/api/data/[0-9]+"
+          },
+          "response": {
+            "status": 200,
+            "body": "{\"id\":\"{{randomValue type='UUID'}}\",\"itemId\":\"{{request.pathSegments.[2]}}\",\"value\":\"downstream-data-{{request.pathSegments.[2]}}\",\"timestamp\":\"{{now format='yyyy-MM-dd'}}T{{now format='HH:mm:ss.SSS'}}Z\"}",
+            "transformers": ["response-template"],
+            "headers": {
+              "Content-Type": "application/json"
+            }
+          }
+        }
+      ]
+    }
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: wiremock
+  namespace: wiremock-ns
+  labels:
+    app: wiremock
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: wiremock
+  template:
+    metadata:
+      labels:
+        app: wiremock
+    spec:
+      automountServiceAccountToken: false
+      containers:
+        - name: wiremock
+          image: wiremock/wiremock:3.13.2
+          args: ["--port=8080", "--global-response-templating", "--verbose"]
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+          resources:
+            limits:
+              cpu: "1"
+              memory: 512Mi
+            requests:
+              cpu: "0.5"
+              memory: 256Mi
+          volumeMounts:
+            - name: mappings
+              mountPath: /home/wiremock/mappings
+              readOnly: true
+          readinessProbe:
+            httpGet:
+              path: /__admin/health
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /__admin/health
+              port: 8080
+            initialDelaySeconds: 10
+            periodSeconds: 10
+      volumes:
+        - name: mappings
+          configMap:
+            name: wiremock-mappings
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: wiremock-svc
+  namespace: wiremock-ns
+  labels:
+    app: wiremock
+spec:
+  selector:
+    app: wiremock
+  ports:
+    - name: http
+      port: 8080
+      targetPort: 8080
+      protocol: TCP
+  type: ClusterIP

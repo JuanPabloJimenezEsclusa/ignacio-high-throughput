@@ -5,22 +5,47 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
-    open-pull-requests-limit: 10
+    groups:
+      maven-dependencies:
+        patterns:
+          - "*"
+    open-pull-requests-limit: 15
 
   - package-ecosystem: "gradle"
     directory: "/"
     schedule:
       interval: "weekly"
-    open-pull-requests-limit: 10
+    groups:
+      gradle-dependencies:
+        patterns:
+          - "*"
+    open-pull-requests-limit: 15
+
+  - package-ecosystem: "docker"
+    directory: "/deploy-orchestrator/docker-compose/monitoring/fluentd/"
+    schedule:
+      interval: "weekly"
+    groups:
+      infrastructure-dependencies:
+        patterns:
+          - "*"
 
   - package-ecosystem: "docker-compose"
     directory: "/deploy-orchestrator/docker-compose/"
     schedule:
       interval: "weekly"
-    open-pull-requests-limit: 10
+    groups:
+      infrastructure-dependencies:
+        patterns:
+          - "*"
+    open-pull-requests-limit: 5
 
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
-      interval: "weekly"
-    open-pull-requests-limit: 10
+      interval: "cron"
+      cronjob: "0 10 * * *"
+    groups:
+      github-actions-dependencies:
+        patterns:
+          - "*"

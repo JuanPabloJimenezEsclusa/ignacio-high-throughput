@@ -2417,7 +2417,7 @@
   "refresh": "",
   "schemaVersion": 41,
   "tags": [
-    "app"
+    "app", "http", "jvm", "logback", "spring-boot"
   ],
   "templating": {
     "list": [

@@ -36,16 +36,16 @@ find related reports.
 
 #### Before Submitting A Bug Report
 
-- **Check the [issues](https://gitlab.com/side-projects9205424/high-throughput/issues)** on GitLab
-  or the [issues](https://github.com/JuanPabloJimenezEsclusa/high-throughput/issues) on GitHub to
+- **Check the [issues](https://gitlab.com/side-projects9205424/ignacio-high-throughput/issues)** on GitLab
+  or the [issues](https://github.com/JuanPabloJimenezEsclusa/ignacio-high-throughput/issues) on GitHub to
   see if the bug has already been reported.
 - **Update to the latest version** and see if the bug persists.
 
 #### Submitting A Bug Report
 
 - **Open a new issue** in
-  the [issues](https://gitlab.com/side-projects9205424/high-throughput/issues) list on GitLab or
-  the [issues](https://github.com/JuanPabloJimenezEsclusa/high-throughput/issues) list on GitHub.
+  the [issues](https://gitlab.com/side-projects9205424/ignacio-high-throughput/issues) list on GitLab or
+  the [issues](https://github.com/JuanPabloJimenezEsclusa/ignacio-high-throughput/issues) list on GitHub.
 - **Provide detailed information** about the bug, including steps to reproduce, expected behavior,
   actual behavior, and any relevant screenshots or logs.
 
@@ -56,15 +56,15 @@ including completely new features and minor improvements to existing functionali
 
 #### Before Submitting An Enhancement Suggestion
 
-- **Check the [issues](https://gitlab.com/side-projects9205424/high-throughput/issues)** on GitLab
-  or the [issues](https://github.com/JuanPabloJimenezEsclusa/high-throughput/issues) on GitHub to
+- **Check the [issues](https://gitlab.com/side-projects9205424/ignacio-high-throughput/issues)** on GitLab
+  or the [issues](https://github.com/JuanPabloJimenezEsclusa/ignacio-high-throughput/issues) on GitHub to
   see if the enhancement has already been suggested.
 
 #### Submitting An Enhancement Suggestion
 
 - **Open a new issue** in
-  the [issues](https://gitlab.com/side-projects9205424/high-throughput/issues) list on GitLab or
-  the [issues](https://github.com/JuanPabloJimenezEsclusa/high-throughput/issues) list on GitHub.
+  the [issues](https://gitlab.com/side-projects9205424/ignacio-high-throughput/issues) list on GitLab or
+  the [issues](https://github.com/JuanPabloJimenezEsclusa/ignacio-high-throughput/issues) list on GitHub.
 - **Provide clear and detailed information** about the suggested enhancement, including the
   rationale behind it and how it would benefit users.
 
@@ -77,8 +77,8 @@ GitHub.
 
 ### Pull Requests
 
-- **Fork** the repository on [GitLab](https://gitlab.com/side-projects9205424/high-throughput)
-  or [GitHub](https://github.com/JuanPabloJimenezEsclusa/high-throughput).
+- **Fork** the repository on [GitLab](https://gitlab.com/side-projects9205424/ignacio-high-throughput)
+  or [GitHub](https://github.com/JuanPabloJimenezEsclusa/ignacio-high-throughput).
 - **Create a branch** from `main` for your changes.
 - **Ensure the code builds and passes tests**.
 - **Commit your changes** with clear commit messages.
@@ -102,10 +102,10 @@ GitHub.
 
 You can join the conversation in the following places:
 
-- [Issues on GitLab](https://gitlab.com/side-projects9205424/high-throughput/issues)
-- [Merge Requests on GitLab](https://gitlab.com/side-projects9205424/high-throughput/merge_requests)
-- [Issues on GitHub](https://github.com/JuanPabloJimenezEsclusa/high-throughput/issues)
-- [Pull Requests on GitHub](https://github.com/JuanPabloJimenezEsclusa/high-throughput/pulls)
+- [Issues on GitLab](https://gitlab.com/side-projects9205424/ignacio-high-throughput/issues)
+- [Merge Requests on GitLab](https://gitlab.com/side-projects9205424/ignacio-high-throughput/merge_requests)
+- [Issues on GitHub](https://github.com/JuanPabloJimenezEsclusa/ignacio-high-throughput/issues)
+- [Pull Requests on GitHub](https://github.com/JuanPabloJimenezEsclusa/ignacio-high-throughput/pulls)
 - [Email](mailto:juan.pablo.jimenez.esclusa@gmail.com)
 
 We appreciate your contributions and look forward to building an amazing project together!

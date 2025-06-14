@@ -1,0 +1,67 @@
+info:
+  name: api-data
+  type: http
+  seq: 2
+
+http:
+  method: GET
+  url: "{{wiremock_url}}/api/data?delayMs=100"
+  headers:
+    - name: Accept
+      value: application/json
+    - name: Content-Type
+      value: application/json
+    - name: Cache-Control
+      value: no-cache
+  params:
+    - name: delayMs
+      value: "100"
+      type: query
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+examples:
+  - name: example
+    request:
+      url: "{{wiremock_url}}/api/data?delayMs=100"
+      method: GET
+      headers:
+        - name: Accept
+          value: application/json
+        - name: Content-Type
+          value: application/json
+        - name: Cache-Control
+          value: no-cache
+      params:
+        - name: delayMs
+          value: "100"
+          type: query
+    response:
+      status: 200
+      statusText: OK
+      headers:
+        - name: date
+          value: Sat, 18 Apr 2026 16:02:16 GMT
+        - name: content-type
+          value: application/json
+        - name: transfer-encoding
+          value: chunked
+        - name: connection
+          value: keep-alive
+        - name: matched-stub-id
+          value: d1e23b6e-adf8-400f-881d-ace77fd9af59
+        - name: matched-stub-name
+          value: GET /api/data with delayMs
+      body:
+        type: json
+        data: |-
+          {
+            "id": "91f3658d-1833-4684-9369-b467dd4825d9",
+            "value": "downstream-data-4vyj7set",
+            "timestamp": "2026-04-18T16:02:15.924Z"
+          }

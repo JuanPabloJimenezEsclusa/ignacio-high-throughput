@@ -1,0 +1,54 @@
+name: Dependabot Automerge
+
+on:
+  pull_request_target:
+
+concurrency:
+  group: dependabot-automerge
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  automerge:
+    if: ${{ github.event.pull_request.user.login == 'dependabot[bot]' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Fetch Dependabot metadata
+        id: metadata
+        uses: dependabot/fetch-metadata@25dd0e34f4fe68f24cc83900b1fe3fe149efef98
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Approve PR
+        id: approve
+        if: steps.metadata.outputs.update-type != 'version-update:semver-major'
+        run: gh pr review --approve "$PR_URL"
+        env:
+          PR_URL: ${{ github.event.pull_request.html_url }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Enable auto-merge
+        id: automerge
+        if: steps.metadata.outputs.update-type != 'version-update:semver-major'
+        run: gh pr merge --auto --squash "$PR_URL"
+        env:
+          PR_URL: ${{ github.event.pull_request.html_url }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Comment decision summary
+        if: always()
+        run: |
+          if [ "${{ steps.metadata.outputs.update-type }}" = "version-update:semver-major" ]; then
+            BODY="🤖 **Dependabot Automerge** — skipped (major update requires manual review)"
+          elif [ "${{ steps.approve.outcome }}" = "success" ] && [ "${{ steps.automerge.outcome }}" = "success" ]; then
+            BODY="🤖 **Dependabot Automerge** — approved + auto-merge enabled (${{ steps.metadata.outputs.update-type }}). Merge will complete when CI passes."
+          else
+            BODY="🤖 **Dependabot Automerge** — failed: approve=${{ steps.approve.outcome }}, auto-merge=${{ steps.automerge.outcome }} (${{ steps.metadata.outputs.update-type }}). Manual action required."
+          fi
+          gh pr comment "$PR_URL" --body "$BODY"
+        env:
+          PR_URL: ${{ github.event.pull_request.html_url }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

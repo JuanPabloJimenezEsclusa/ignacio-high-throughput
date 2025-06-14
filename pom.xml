@@ -1,27 +1,27 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xmlns="http://maven.apache.org/POM/4.0.0"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    xmlns="http://maven.apache.org/POM/4.0.0"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-parent</artifactId>
-    <version>3.5.0</version>
+    <version>4.1.1</version>
   </parent>
 
-  <groupId>edu.ignacio.poc</groupId>
+  <groupId>dev.jpje</groupId>
   <artifactId>ignacio-high-throughput</artifactId>
   <version>1.0.0</version>
+  <packaging>pom</packaging>
   <name>high-throughput</name>
   <description>PoC to test Java high throughput</description>
-  <packaging>pom</packaging>
   <url/>
 
   <licenses>
     <license>
-      <name>GPL-3.0</name>
-      <url>https://www.gnu.org/licenses/gpl-3.0.en.html</url>
+      <name>GPL-3.0-only</name>
+      <url>https://www.gnu.org/licenses/gpl-3.0-standalone.html</url>
       <distribution>repo</distribution>
     </license>
   </licenses>
@@ -38,42 +38,191 @@
     </developer>
   </developers>
 
+  <modules>
+    <module>imperative-throughput</module>
+    <module>reactive-throughput</module>
+    <module>coverage-jacoco</module>
+  </modules>
+
   <scm>
-    <url>https://github.com/JuanPabloJimenezEsclusa/high-throughput</url>
-    <connection>scm:git:https://github.com/JuanPabloJimenezEsclusa/high-throughput.git</connection>
-    <developerConnection>scm:git:https://github.com/JuanPabloJimenezEsclusa/high-throughput.git</developerConnection>
+    <url>https://github.com/JuanPabloJimenezEsclusa/ignacio-high-throughput</url>
+    <connection>scm:git:https://github.com/JuanPabloJimenezEsclusa/ignacio-high-throughput.git</connection>
+    <developerConnection>scm:git:https://github.com/JuanPabloJimenezEsclusa/ignacio-high-throughput.git</developerConnection>
     <tag>HEAD</tag>
   </scm>
 
   <issueManagement>
     <system>Github</system>
-    <url>https://github.com/JuanPabloJimenezEsclusa/high-throughput/issues</url>
+    <url>https://github.com/JuanPabloJimenezEsclusa/ignacio-high-throughput/issues</url>
   </issueManagement>
 
   <distributionManagement>
     <repository>
       <id>github</id>
       <name>high-throughput</name>
-      <url>https://maven.pkg.github.com/JuanPabloJimenezEsclusa/high-throughput</url>
+      <url>https://maven.pkg.github.com/JuanPabloJimenezEsclusa/ignacio-high-throughput</url>
     </repository>
   </distributionManagement>
 
   <properties>
-    <java.version>24</java.version>
-    <encoding>UTF-8</encoding>
+    <java.version>25</java.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <jetty-reactive-httpclient.version>4.0.10</jetty-reactive-httpclient.version>
+    <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+
+    <!-- Plugins -->
+    <jacoco-maven-plugin.version>0.8.15</jacoco-maven-plugin.version>
+    <git-changelog-maven-plugin.version>2.4.0</git-changelog-maven-plugin.version>
+    <rewrite-maven-plugin.version>6.46.1</rewrite-maven-plugin.version>
+    <build-helper-maven-plugin.version>3.6.2</build-helper-maven-plugin.version>
+    <sonar-maven-plugin.version>5.8.0.7211</sonar-maven-plugin.version>
+
+    <!-- Testing -->
+    <wiremock-standalone.version>3.13.2</wiremock-standalone.version>
 
     <!-- Sonar -->
     <sonar.organization>juanpablojimenezesclusa</sonar.organization>
     <sonar.host.url>https://sonarcloud.io</sonar.host.url>
     <sonar.projectKey>JuanPabloJimenezEsclusa_ignacio-high-throughput</sonar.projectKey>
+    <sonar.coverage.jacoco.xmlReportPaths>${project.basedir}/coverage-jacoco/target/site/jacoco/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
     <sonar.scm.exclusions.disabled>true</sonar.scm.exclusions.disabled>
-    <sonar.branch.name>main</sonar.branch.name>
+    <sonar.branch.name>develop</sonar.branch.name>
   </properties>
 
-  <modules>
-    <module>imperative-throughput</module>
-    <module>reactive-throughput</module>
-  </modules>
+  <build>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-resources-plugin</artifactId>
+          <executions>
+            <execution>
+              <id>copy-license-to-meta-inf</id>
+              <phase>process-resources</phase>
+              <goals>
+                <goal>copy-resources</goal>
+              </goals>
+              <configuration>
+                <outputDirectory>${project.build.outputDirectory}</outputDirectory>
+                <resources>
+                  <resource>
+                    <!--suppress UnresolvedMavenProperty -->
+                    <directory>${session.executionRootDirectory}</directory>
+                    <includes>
+                      <include>LICENSE.txt</include>
+                    </includes>
+                    <targetPath>META-INF/</targetPath>
+                  </resource>
+                </resources>
+              </configuration>
+            </execution>
+          </executions>
+        </plugin>
+        <plugin>
+          <groupId>org.openrewrite.maven</groupId>
+          <artifactId>rewrite-maven-plugin</artifactId>
+          <version>${rewrite-maven-plugin.version}</version>
+          <configuration>
+            <activeRecipes>
+              <recipe>org.openrewrite.maven.BestPractices</recipe>
+              <recipe>org.openrewrite.maven.ModernizeObsoletePoms</recipe>
+              <recipe>org.openrewrite.maven.OrderPomElements</recipe>
+              <recipe>org.openrewrite.yaml.format.Indents</recipe>
+              <recipe>org.openrewrite.java.format.EmptyNewlineAtEndOfFile</recipe>
+              <recipe>org.openrewrite.java.format.MethodParamPad</recipe>
+              <recipe>org.openrewrite.java.format.NormalizeFormat</recipe>
+              <recipe>org.openrewrite.java.format.NoWhitespaceAfter</recipe>
+              <recipe>org.openrewrite.java.format.NoWhitespaceBefore</recipe>
+              <recipe>org.openrewrite.java.format.PadEmptyForLoopComponents</recipe>
+              <recipe>org.openrewrite.java.format.RemoveTrailingWhitespace</recipe>
+              <recipe>org.openrewrite.java.format.Spaces</recipe>
+              <recipe>org.openrewrite.java.RemoveUnusedImports</recipe>
+              <recipe>org.openrewrite.java.search.FindDeprecatedUses</recipe>
+            </activeRecipes>
+            <activeStyles>
+              <style>org.openrewrite.java.IntelliJ</style>
+              <style>org.openrewrite.java.SpringFormat</style>
+            </activeStyles>
+            <failOnDryRunResults>false</failOnDryRunResults>
+            <sizeThresholdMb>20</sizeThresholdMb>
+            <plainTextMasks>
+              <plainTextMask>**/.txt</plainTextMask>
+            </plainTextMasks>
+          </configuration>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-resources-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-enforcer-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>enforce</id>
+            <goals>
+              <goal>enforce</goal>
+            </goals>
+            <configuration>
+              <rules>
+                <banDuplicatePomDependencyVersions/>
+                <requireReleaseDeps/>
+                <requireUpperBoundDeps>
+                </requireUpperBoundDeps>
+                <requireMavenVersion>
+                  <version>[3.9.4,4.0.0)</version>
+                </requireMavenVersion>
+                <requireJavaVersion>
+                  <version>[25,30)</version>
+                </requireJavaVersion>
+              </rules>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.graalvm.buildtools</groupId>
+        <artifactId>native-maven-plugin</artifactId>
+        <configuration>
+          <skip>true</skip>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>se.bjurr.gitchangelog</groupId>
+        <artifactId>git-changelog-maven-plugin</artifactId>
+        <version>${git-changelog-maven-plugin.version}</version>
+        <inherited>false</inherited>
+        <executions>
+          <execution>
+            <id>GenerateGitChangelog</id>
+            <phase>generate-sources</phase>
+            <goals>
+              <goal>git-changelog</goal>
+            </goals>
+            <configuration>
+              <templateFile>src/main/resources/changelog.mustache</templateFile>
+              <file>CHANGELOG.md</file>
+              <readableTagName>-([^-]+?)$</readableTagName>
+              <dateFormat>yyyy-MM-dd HH:mm:ss</dateFormat>
+              <ignoreCommitsIfMessageMatches>^\[maven-release-plugin\].*</ignoreCommitsIfMessageMatches>
+              <timeZone>UTC</timeZone>
+              <removeIssueFromMessage>true</removeIssueFromMessage>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.openrewrite.maven</groupId>
+        <artifactId>rewrite-maven-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <groupId>org.sonarsource.scanner.maven</groupId>
+        <artifactId>sonar-maven-plugin</artifactId>
+        <version>${sonar-maven-plugin.version}</version>
+      </plugin>
+    </plugins>
+  </build>
 </project>

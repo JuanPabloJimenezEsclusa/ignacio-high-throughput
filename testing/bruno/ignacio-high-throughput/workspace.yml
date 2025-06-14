@@ -1,0 +1,14 @@
+opencollection: 1.0.0
+info:
+  name: "ignacio-high-throughput"
+  type: workspace
+
+collections:
+  - name: "ignacio-high-throughput"
+    path: "collections"
+
+specs:
+
+docs: ''
+
+activeEnvironmentUid: 2cz49y000000000000000

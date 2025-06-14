@@ -1,4 +1,9 @@
-# Jmeter testing
+---
+layout: default
+title: testing (jmeter)
+---
+
+# testing (jmeter)
 
 > • [Dependencies](#-dependencies)
   • [Architecture](#-architecture)
@@ -10,17 +15,18 @@ Performance testing project using JMeter
 
 ---
 
-* [JDK >= 24+](https://openjdk.org/projects/jdk/24/)
-* JMeter >= 5.6+
+* [JDK ~25](https://openjdk.org/projects/jdk/25/)
+* [JMeter ~5.6](https://jmeter.apache.org/changes.html)
 
 ## 🏗️ Architecture
 
 ---
 
-| File                            | Description                         |
-|---------------------------------|-------------------------------------|
-| high-throughput-performance.jmx | Test plan file                      |
-| run.sh                          | Shell script for executing the test |
+| File                                                                 | Description                         |
+|----------------------------------------------------------------------|-------------------------------------|
+| [high-throughput-performance.jmx](./high-throughput-performance.jmx) | Test plan file                      |
+| [run.sh](./run.sh)                                                   | Shell script for executing the test |
+| [index.html](./reports/html/index.html)                              | HTML summary report                 |
 
 ## 🚀 Running the Tests
 
