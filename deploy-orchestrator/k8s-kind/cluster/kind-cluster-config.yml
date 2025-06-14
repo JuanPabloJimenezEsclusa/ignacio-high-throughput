@@ -16,28 +16,32 @@ kubeadmConfigPatchesJSON6902:
 nodes:
   - role: control-plane
     extraMounts:
-      - hostPath: ./kind-pvc-hostpath.yml
-        containerPath: /kind/manifests/default-storage.yaml
-      - hostPath: /tmp/hostpath-provisioner
-        containerPath: /tmp/hostpath-provisioner
       - hostPath: /tmp/shared
         containerPath: /tmp/shared
       - hostPath: /tmp/kind/_default
         containerPath: /etc/containerd/certs.d/_default
     extraPortMappings:
+      # Expose prometheus metrics
+      - containerPort: 30000
+        hostPort: 30000
+      # Expose grafana
+      - containerPort: 31000
+        hostPort: 31000
       # Expose imperative rest api
       - containerPort: 30088
         hostPort: 8888
       # Expose reactive rest api
       - containerPort: 30099
         hostPort: 9999
-
     kubeadmConfigPatches:
       - |
         kind: InitConfiguration
         nodeRegistration:
           kubeletExtraArgs:
             node-labels: "ingress-ready=true"
+    labels:
+      tier: control-plane
+      node: control-plane
   - role: worker
     extraMounts:
       - hostPath: /tmp/hostpath-provisioner
@@ -48,6 +52,7 @@ nodes:
         containerPath: /etc/containerd/certs.d/_default
     labels:
       tier: utils
+      node: worker1
   - role: worker
     extraMounts:
       - hostPath: /tmp/hostpath-provisioner
@@ -58,6 +63,7 @@ nodes:
         containerPath: /etc/containerd/certs.d/_default
     labels:
       tier: backend
+      node: worker2
   - role: worker
     extraMounts:
       - hostPath: /tmp/hostpath-provisioner
@@ -68,3 +74,4 @@ nodes:
         containerPath: /etc/containerd/certs.d/_default
     labels:
       tier: backend
+      node: worker3

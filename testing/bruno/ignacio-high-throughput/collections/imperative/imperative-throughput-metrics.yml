@@ -1,0 +1,99 @@
+info:
+  name: imperative-throughput-metrics
+  type: http
+  seq: 2
+
+http:
+  method: GET
+  url: "{{imperative_url}}/imperative-throughput/actuator/metrics/:metric"
+  headers:
+    - name: Accept
+      value: application/json
+    - name: Content-Type
+      value: application/json
+    - name: Cache-Control
+      value: no-cache
+  params:
+    - name: metric
+      value: http.request.duration
+      type: path
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+examples:
+  - name: example
+    request:
+      url: "{{imperative_url}}/imperative-throughput/actuator/metrics/:metric"
+      method: GET
+      headers:
+        - name: Accept
+          value: application/json
+        - name: Content-Type
+          value: application/json
+        - name: Cache-Control
+          value: no-cache
+      params:
+        - name: metric
+          value: http.request.duration
+          type: path
+    response:
+      status: 200
+      statusText: OK
+      headers:
+        - name: date
+          value: Sat, 18 Apr 2026 15:34:20 GMT
+        - name: content-type
+          value: application/json;charset=UTF-8
+        - name: content-length
+          value: "364"
+        - name: connection
+          value: keep-alive
+        - name: set-cookie
+          value: AWSALB=xxxxxxxx==; Expires=Sat, 25 Apr 2026 15:34:20 GMT; Path=/; SameSite=None; Secure
+        - name: content-disposition
+          value: inline;filename=f.txt
+      body:
+        type: json
+        data: |-
+          {
+            "availableTags": [
+              {
+                "tag": "endpoint",
+                "values": [
+                  "smoke",
+                  "cpu",
+                  "resilience",
+                  "io",
+                  "aggregate"
+                ]
+              },
+              {
+                "tag": "module",
+                "values": [
+                  "imperative"
+                ]
+              }
+            ],
+            "baseUnit": "seconds",
+            "description": "smoke endpoint request duration",
+            "measurements": [
+              {
+                "statistic": "COUNT",
+                "value": 5.0
+              },
+              {
+                "statistic": "TOTAL_TIME",
+                "value": 0.729831225
+              },
+              {
+                "statistic": "MAX",
+                "value": 0.0
+              }
+            ],
+            "name": "http.request.duration"
+          }

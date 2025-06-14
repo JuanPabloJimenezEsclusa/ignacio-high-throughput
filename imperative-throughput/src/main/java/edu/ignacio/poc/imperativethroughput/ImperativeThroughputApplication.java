@@ -7,7 +7,12 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
  * The type Imperative throughput application.
  */
 @SpringBootApplication
+@SuppressWarnings("PMD.ClassWithOnlyPrivateConstructorsShouldBeFinal")
 public class ImperativeThroughputApplication {
+
+  private ImperativeThroughputApplication() {
+  }
+
   /**
    * The entry point of application.
    *

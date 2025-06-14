@@ -51,6 +51,14 @@ __loadImages() {
   kind load docker-image docker.io/library/reactive-throughput:1.0.0 --name kind-cluster
 }
 
+__applyWireMock() {
+  cd "${workspace}"
+  echo -e "${SEPARATOR} 📦 Apply wiremock k8s resources. ${SEPARATOR}"
+  kubectl apply -f ./wiremock.yml
+  echo -e "${SEPARATOR} ⏳ Wait for wiremock to be ready. ${SEPARATOR}"
+  kubectl wait --for=condition=ready pod -l app=wiremock -n wiremock-ns --timeout=2m
+}
+
 __applyImperativeThroughput() {
   cd "${workspace}"
   echo -e "${SEPARATOR} 📦 Apply imperative k8s resources. ${SEPARATOR}"
@@ -69,6 +77,7 @@ __applyReactiveThroughput() {
 
 __getResources() {
   echo -e "${SEPARATOR} 📋 Get the resources. ${SEPARATOR}"
+  kubectl get all,resourcequotas,ingress -n wiremock-ns -o wide --show-labels
   kubectl get all,resourcequotas,ingress -n imperative-api-ns -o wide --show-labels
   kubectl get all,resourcequotas,ingress -n reactive-api-ns -o wide --show-labels
 }
@@ -77,6 +86,7 @@ main() {
   __removeImages
   __buildProjects
   __loadImages
+  __applyWireMock
   __applyImperativeThroughput
   __applyReactiveThroughput
   __getResources

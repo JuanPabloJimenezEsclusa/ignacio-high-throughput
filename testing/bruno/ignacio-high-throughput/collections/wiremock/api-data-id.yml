@@ -1,0 +1,68 @@
+info:
+  name: api-data-id
+  type: http
+  seq: 3
+
+http:
+  method: GET
+  url: "{{wiremock_url}}/api/data/:id"
+  headers:
+    - name: Accept
+      value: application/json
+    - name: Content-Type
+      value: application/json
+    - name: Cache-Control
+      value: no-cache
+  params:
+    - name: id
+      value: "123"
+      type: path
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+examples:
+  - name: example
+    request:
+      url: "{{wiremock_url}}/api/data/:id"
+      method: GET
+      headers:
+        - name: Accept
+          value: application/json
+        - name: Content-Type
+          value: application/json
+        - name: Cache-Control
+          value: no-cache
+      params:
+        - name: id
+          value: "123"
+          type: path
+    response:
+      status: 200
+      statusText: OK
+      headers:
+        - name: date
+          value: Sat, 18 Apr 2026 16:02:32 GMT
+        - name: content-type
+          value: application/json
+        - name: transfer-encoding
+          value: chunked
+        - name: connection
+          value: keep-alive
+        - name: matched-stub-id
+          value: 7a1664d7-4760-44b3-afd1-07e3ed6bfc81
+        - name: matched-stub-name
+          value: GET /api/data/{id}
+      body:
+        type: json
+        data: |-
+          {
+            "id": "e7b7780c-0a54-4f0f-9d9d-4b9f7758d003",
+            "itemId": "123",
+            "value": "downstream-data-123",
+            "timestamp": "2026-04-18T16:02:32.824Z"
+          }

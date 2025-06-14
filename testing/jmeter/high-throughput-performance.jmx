@@ -22,7 +22,7 @@
             <stringProp name="Argument.name">BASE_URL</stringProp>
             <stringProp name="Argument.metadata">=</stringProp>
             <stringProp name="Argument.value">${__P(BASE_URL,localhost)}</stringProp>
-            <stringProp name="Argument.desc">localhost | poc.jpje-kops.xyz</stringProp>
+            <stringProp name="Argument.desc">localhost | tech.jpje.xyz</stringProp>
           </elementProp>
           <elementProp name="THREADS" elementType="Argument">
             <stringProp name="Argument.name">THREADS</stringProp>

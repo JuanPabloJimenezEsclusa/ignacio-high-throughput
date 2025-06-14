@@ -2,8 +2,6 @@ package edu.ignacio.poc.reactivethroughput.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.containsString;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.web.reactive.function.server.RequestPredicates.GET;
 import static org.springframework.web.reactive.function.server.RouterFunctions.route;
 
@@ -15,17 +13,21 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.webtestclient.autoconfigure.AutoConfigureWebTestClient;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.web.reactive.function.server.RouterFunction;
 import org.springframework.web.reactive.function.server.ServerResponse;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
+@AutoConfigureWebTestClient
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@TestPropertySource(properties = "downstream.service.url=http://localhost:9090")
 @DisplayName("Smoke Controller Test")
 class SmokeControllerTest {
 
@@ -42,7 +44,7 @@ class SmokeControllerTest {
   @DisplayName("Should return OK response with correct headers")
   void shouldReturnOkResponseWithCorrectHeaders() {
     // When
-    final var response = webTestClient
+    final var response = this.webTestClient
       .get()
       .uri(THROUGHPUT_SMOKES)
       .exchange();
@@ -51,7 +53,7 @@ class SmokeControllerTest {
     response.expectStatus().isOk()
       .expectHeader().contentType(MediaType.APPLICATION_JSON)
       .expectHeader().valueMatches(HttpHeaders.CACHE_CONTROL, "no-cache")
-      .expectBody(String.class).value(containsString(EXPECTED_BODY));
+      .expectBody(String.class).value(_ -> containsString(EXPECTED_BODY));
   }
 
   @ParameterizedTest
@@ -62,14 +64,14 @@ class SmokeControllerTest {
   @DisplayName("Should handle different path variations")
   void shouldHandlePathVariations(final String path) {
     // When, Then
-    webTestClient
+    this.webTestClient
       .get()
       .uri(path)
       .exchange()
       .expectStatus().isOk()
       .expectHeader().contentType(MediaType.APPLICATION_JSON)
       .expectHeader().valueMatches(HttpHeaders.CACHE_CONTROL, "no-cache")
-      .expectBody(String.class).value(containsString(EXPECTED_BODY));
+      .expectBody(String.class).value(_ -> containsString(EXPECTED_BODY));
   }
 
   @Test
@@ -79,7 +81,7 @@ class SmokeControllerTest {
     final long startTime = System.currentTimeMillis();
 
     // When
-    webTestClient
+    this.webTestClient
       .get()
       .uri(THROUGHPUT_SMOKES)
       .exchange()
@@ -87,32 +89,31 @@ class SmokeControllerTest {
 
     // Then
     final long executionTime = System.currentTimeMillis() - startTime;
-    assertTrue(executionTime >= 300,
-      "Expected execution time to be at least 300ms but was %dms".formatted(executionTime));
+    assertThat(executionTime).isGreaterThanOrEqualTo(300);
   }
 
   @Test
   @DisplayName("Should properly configure router function")
   void shouldProperlyConfigureRouterFunction() {
     // Given
-    final var routerFunction = controller.smokesRoutes();
+    final var routerFunction = this.controller.smokesRoutes(this.controller.virtualThreadScheduler());
 
     // When
-    assertNotNull(routerFunction);
+    assertThat(routerFunction).isNotNull();
 
     // Then
     WebTestClient.bindToRouterFunction(routerFunction).build()
       .get().uri(THROUGHPUT_SMOKES)
       .exchange()
       .expectStatus().isOk()
-      .expectBody(String.class).value(containsString(EXPECTED_BODY));
+      .expectBody(String.class).value(_ -> containsString(EXPECTED_BODY));
   }
 
   @Test
   @DisplayName("Should include delay in response")
   void shouldIncludeDelayInResponse() {
     // When, Then
-    webTestClient
+    this.webTestClient
       .get()
       .uri(THROUGHPUT_SMOKES)
       .exchange()
@@ -130,7 +131,8 @@ class SmokeControllerTest {
   @DisplayName("Should set correct cache control headers in router function")
   void shouldSetCorrectCacheControlHeadersInRouterFunction() {
     // Given
-    final var routerClient = WebTestClient.bindToRouterFunction(controller.smokesRoutes()).build();
+    final var routerClient = WebTestClient.bindToRouterFunction(this.controller
+      .smokesRoutes(this.controller.virtualThreadScheduler())).build();
 
     // When
     final var response = routerClient
@@ -143,15 +145,14 @@ class SmokeControllerTest {
       .getResponseHeaders()
       .getFirst(HttpHeaders.CACHE_CONTROL);
 
-    assertNotNull(cacheControlHeader);
-    assertThat(cacheControlHeader).contains("no-cache");
+    assertThat(cacheControlHeader).isNotNull().contains("no-cache");
   }
 
   @Test
   @DisplayName("Should handle exceptions through GlobalExceptionHandler")
   void shouldHandleExceptionsWithGlobalHandler() {
     // When, Then
-    webTestClient.get()
+    this.webTestClient.get()
       .uri("/non-existent-path")
       .exchange()
       .expectStatus().is5xxServerError()
