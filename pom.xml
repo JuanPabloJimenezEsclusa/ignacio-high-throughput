@@ -69,7 +69,7 @@
     <sonar.host.url>https://sonarcloud.io</sonar.host.url>
     <sonar.projectKey>JuanPabloJimenezEsclusa_ignacio-high-throughput</sonar.projectKey>
     <sonar.scm.exclusions.disabled>true</sonar.scm.exclusions.disabled>
-    <sonar.branch.name>main</sonar.branch.name>
+    <sonar.branch.name>develop</sonar.branch.name>
   </properties>
 
   <modules>

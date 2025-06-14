@@ -351,9 +351,9 @@ Here's a table explaining 6 scenarios with performance indicators:
 | 1 | Imperative | ❌                   | ❌                | 🚨                          | 🚨            | 🚨               | 🚨               | 💪++               |
 | 2 | Imperative | ✅                   | ❌                | 💪                          | 💪            | 💪+              | 🚨               | 💪+                |
 | 3 | Imperative | ✅                   | ✅                | 💪+                         | 💪++          | 💪+              | 💪               | 💪                 |
-| 4 | Reactive   | ❌                   | ❌                | 💪+                         | 💪+           | 💪+              | 🚨               | 💪                 |
-| 5 | Reactive   | ❌                   | ✅                | 💪+                         | 💪+           | 💪+              | 💪               | 🚨                 |
-| 6 | Reactive   | ✅                   | ✅                | 💪+                         | 💪++          | 💪++             | 💪               | 🚨--               |
+| 4 | Reactive   | ❌                   | ❌                | 💪++                        | 💪+           | 💪+              | 🚨               | 💪                 |
+| 5 | Reactive   | ❌                   | ✅                | 💪++                        | 💪++          | 💪+              | 💪               | 🚨                 |
+| 6 | Reactive   | ✅                   | ✅                | 💪++                        | 💪++          | 💪++             | 💪               | 🚨--               |
 
 #### Legend
 
