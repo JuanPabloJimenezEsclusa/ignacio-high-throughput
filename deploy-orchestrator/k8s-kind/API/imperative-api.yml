@@ -1,0 +1,187 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: imperative-api-ns
+  labels:
+    name: imperative-api-ns
+spec: {}
+
+---
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: imperative-api-ns-quota
+  namespace: imperative-api-ns
+spec:
+  hard:
+    limits.cpu: "8"
+    limits.memory: 8192Mi
+    pods: "6"
+    requests.cpu: "8"
+    requests.memory: 8192Mi
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: imperative-api-config
+  namespace: imperative-api-ns
+data:
+  LANG: "en_US.utf8"
+  LANGUAGE: "en_US.utf8"
+  LC_ALL: "en_US.utf8"
+  TIME_ZONE: "UTC"
+  JVM_OPTIONS: "-Xms512m -Xmx1024m"
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: imperative-api
+  name: imperative-api
+  namespace: imperative-api-ns
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: imperative-api
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+  minReadySeconds: 0
+  revisionHistoryLimit: 5
+  template:
+    metadata:
+      labels:
+        app: imperative-api
+    spec:
+      automountServiceAccountToken: false
+      containers:
+        - image: docker.io/library/imperative-throughput:1.0.0
+          name: imperative-api
+          resources:
+            limits:
+              cpu: "1"
+              memory: 1024Mi
+              ephemeral-storage: "1Gi"
+            requests:
+              cpu: "1"
+              memory: 1024Mi
+              ephemeral-storage: "1Gi"
+          imagePullPolicy: Never
+          env:
+            - name: LANG
+              valueFrom:
+                configMapKeyRef:
+                  name: imperative-api-config
+                  key: LANG
+            - name: LANGUAGE
+              valueFrom:
+                configMapKeyRef:
+                  name: imperative-api-config
+                  key: LANGUAGE
+            - name: LC_ALL
+              valueFrom:
+                configMapKeyRef:
+                  name: imperative-api-config
+                  key: LC_ALL
+            - name: TIME_ZONE
+              valueFrom:
+                configMapKeyRef:
+                  name: imperative-api-config
+                  key: TIME_ZONE
+            - name: JVM_OPTIONS
+              valueFrom:
+                configMapKeyRef:
+                  name: imperative-api-config
+                  key: JVM_OPTIONS
+          ports:
+            - name: api-port
+              containerPort: 8888
+              hostPort: 8888
+              protocol: TCP
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 1000
+            runAsGroup: 1000
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: imperative-api
+  name: imperative-api-nodeport-svc
+  namespace: imperative-api-ns
+spec:
+  ports:
+    - name: api-port
+      port: 8888
+      protocol: TCP
+      targetPort: 8888
+      nodePort: 30088
+  selector:
+    app: imperative-api
+  type: NodePort
+
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: imperative-api-ingress
+  namespace: imperative-api-ns
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+    nginx.ingress.kubernetes.io/use-regex: "true"
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+    nginx.ingress.kubernetes.io/enable-cors: "true"
+    nginx.ingress.kubernetes.io/cors-allow-origin: "*"
+    nginx.ingress.kubernetes.io/cors-allow-methods: "GET, POST, PUT, DELETE, OPTIONS"
+    nginx.ingress.kubernetes.io/cors-allow-headers: "DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization"
+    nginx.ingress.kubernetes.io/cors-expose-headers: "Content-Length,Content-Range"
+    nginx.ingress.kubernetes.io/cors-allow-credentials: "true"
+    nginx.ingress.kubernetes.io/cors-max-age: "3600"
+    nginx.ingress.kubernetes.io/enable-modsecurity: "true"
+spec:
+  rules:
+    - http:
+        paths:
+          - pathType: Prefix
+            path: /imperative-throughput
+            backend:
+              service:
+                name: imperative-api-nodeport-svc
+                port:
+                  number: 30088
+
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: imperative-api-hpa
+  namespace: imperative-api-ns
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: imperative-api
+  minReplicas: 1
+  maxReplicas: 5
+  metrics:
+    - type: Pods
+      pods:
+        metric:
+          name: http_requests_per_second
+        target:
+          type: AverageValue
+          averageValue: 1m
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 40

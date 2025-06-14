@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>edu.ignacio.poc</groupId>
+    <artifactId>ignacio-high-throughput</artifactId>
+    <version>1.0.0</version>
+  </parent>
+
+  <groupId>edu.ignacio.poc.high-throughput</groupId>
+  <artifactId>reactive-throughput</artifactId>
+  <version>1.0.0</version>
+  <name>reactive-throughput</name>
+  <description>reactive-throughput</description>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-actuator</artifactId>
+      <exclusions>
+        <exclusion>
+          <groupId>org.springframework.boot</groupId>
+          <artifactId>spring-boot-starter-logging</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-webflux</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>ch.qos.logback</groupId>
+      <artifactId>logback-classic</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-devtools</artifactId>
+      <scope>runtime</scope>
+      <optional>true</optional>
+    </dependency>
+    <dependency>
+      <groupId>io.micrometer</groupId>
+      <artifactId>micrometer-registry-prometheus</artifactId>
+      <scope>runtime</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-configuration-processor</artifactId>
+      <optional>true</optional>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-test</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>io.projectreactor</groupId>
+      <artifactId>reactor-test</artifactId>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>build-helper-maven-plugin</artifactId>
+        <version>3.6.0</version> <executions>
+        <execution>
+          <id>timestamp-property</id>
+          <goals>
+            <goal>timestamp-property</goal>
+          </goals>
+          <configuration>
+            <name>build.timestamp</name>
+            <pattern>yyyy-MM-dd'T'HH:mm:ssZ</pattern>
+            <locale>es</locale>
+            <timeZone>Europe/Madrid</timeZone>
+          </configuration>
+        </execution>
+      </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <configuration>
+          <annotationProcessorPaths>
+            <path>
+              <groupId>org.springframework.boot</groupId>
+              <artifactId>spring-boot-configuration-processor</artifactId>
+            </path>
+          </annotationProcessorPaths>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.graalvm.buildtools</groupId>
+        <artifactId>native-maven-plugin</artifactId>
+        <configuration>
+          <buildArgs>
+            <!-- https://bell-sw.com/blog/how-to-set-up-graalvm-native-image-debugging/ -->
+            <buildArg>-g</buildArg>
+            <!-- https://www.graalvm.org/jdk24/reference-manual/native-image/debugging-and-diagnostics/jcmd/ -->
+            <buildArg>--enable-monitoring=jcmd,jvmstat,jfr</buildArg>
+            <!--
+            (compile) Recommendations:
+             G1GC: Use the G1 GC ('-gc=G1') for improved latency and throughput.
+             PGO:  Use Profile-Guided Optimizations ('-pgo') for improved throughput.
+             HEAP: Set max heap for improved and more predictable memory usage.
+             CPU:  Enable more CPU features with '-march=native' for improved performance.
+             QBM:  Use the quick build mode ('-Ob') to speed up builds during development.
+            -->
+            <buildArg>--emit build-report</buildArg>
+            <buildArg>--gc=G1</buildArg>
+            <buildArg>-R:MaxHeapSize=1g</buildArg>
+            <buildArg>-march=native</buildArg>
+            <buildArg>-Ob</buildArg>
+            <buildArg>-J-Xmx4g</buildArg>
+          </buildArgs>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-maven-plugin</artifactId>
+        <configuration>
+          <layers>
+            <enabled>true</enabled>
+          </layers>
+          <image>
+            <builder>paketobuildpacks/builder-noble-java-tiny:latest</builder>
+            <env>
+              <!-- https://github.com/paketo-buildpacks/bellsoft-liberica -->
+              <BP_JVM_VERSION>24</BP_JVM_VERSION>
+              <BP_JVM_TYPE>JDK</BP_JVM_TYPE>
+              <BP_JVM_JMXREMOTE>true</BP_JVM_JMXREMOTE>
+              <BP_JVM_HEAD_ROOM>5</BP_JVM_HEAD_ROOM>
+              <BP_JVM_JAVA_OPTS>-XX:+UseG1GC -XX:+PrintGCDetails</BP_JVM_JAVA_OPTS>
+              <BP_MAVEN_BUILT_ARTIFACT>target/*.jar</BP_MAVEN_BUILT_ARTIFACT>
+              <BP_MAVEN_BUILD_ARGUMENTS>package -DskipTests=true</BP_MAVEN_BUILD_ARGUMENTS>
+              <BP_OCI_SOURCE>true</BP_OCI_SOURCE>
+              <BP_OCI_AUTHORS>Juan Pablo Jimenez Esclusa</BP_OCI_AUTHORS>
+              <BP_OCI_CREATED>${build.timestamp}</BP_OCI_CREATED>
+              <BP_NATIVE_IMAGE_BUILD_ARGUMENTS>-R:MaxHeapSize=2g -Ob -J-Xmx4g</BP_NATIVE_IMAGE_BUILD_ARGUMENTS>
+              <BP_SPRING_AOT_ENABLED>true</BP_SPRING_AOT_ENABLED>
+              <BP_SPRING_CLOUD_BINDINGS_DISABLED>true</BP_SPRING_CLOUD_BINDINGS_DISABLED>
+
+              <BPL_FILE_ENCODING>UTF-8</BPL_FILE_ENCODING>
+              <BPL_JFR_ENABLED>true</BPL_JFR_ENABLED>
+              <BPL_JFR_ARGS>filename=/tmp/profiling/reactive-recording.jfr,settings=/tmp/profiling/custom.jfc,dumponexit=true,duration=20m</BPL_JFR_ARGS>
+              <BPL_JMX_ENABLED>true</BPL_JMX_ENABLED>
+              <BPL_JMX_SSL>false</BPL_JMX_SSL>
+              <BPL_JMX_AUTHENTICATE>false</BPL_JMX_AUTHENTICATE>
+              <BPL_JMX_LOCAL_ONLY>false</BPL_JMX_LOCAL_ONLY>
+              <BPL_JMX_PORT>5099</BPL_JMX_PORT>
+              <BPL_JMX_RMI_PORT>5099</BPL_JMX_RMI_PORT>
+              <BPL_JMX_HOST>0.0.0.0</BPL_JMX_HOST>
+              <BPL_JMX_RMI_HOST>0.0.0.0</BPL_JMX_RMI_HOST>
+              <BPL_JVM_THREAD_COUNT>2000</BPL_JVM_THREAD_COUNT>
+              <BPL_JVM_HEAP_SIZE>1g</BPL_JVM_HEAP_SIZE>
+              <BPL_SPRING_AOT_ENABLED>true</BPL_SPRING_AOT_ENABLED>
+            </env>
+          </image>
+          <arguments>
+            <argument>-Dspring.aot.enabled=true</argument>
+            <argument>--enable-native-access=ALL-UNNAMED</argument>
+          </arguments>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+</project>

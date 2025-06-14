@@ -1,0 +1,248 @@
+services:
+  ## Artefacts
+  imperative-throughput:
+    image: docker.io/library/imperative-throughput:1.0.0
+    container_name: imperative-throughput
+    hostname: imperative-throughput
+    restart: "on-failure"
+    env_file:
+      - .env
+    deploy:
+      resources:
+        limits:
+          memory: "1024m"
+          cpus: "1"
+        reservations:
+          memory: "1024m"
+          cpus: "1"
+    ports:
+      - "8888:8888"
+      - "5088:5088"
+    expose:
+      - 8888  #API
+      - 5088  #JMX
+    links:
+      - fluentd
+    volumes:
+      - ./profiling:/tmp/profiling:rw
+      - imperative_throughput_tmp:/tmp
+    logging:
+      driver: fluentd
+      options:
+        fluentd-address: fluentd:24224
+        fluentd-async: "true"
+        fluentd-async-reconnect-interval: 10s
+        tag: docker.app
+    networks:
+      high_throughput_network:
+  reactive-throughput:
+    image: docker.io/library/reactive-throughput:1.0.0
+    container_name: reactive-throughput
+    hostname: reactive-throughput
+    restart: "on-failure"
+    env_file:
+      - .env
+    deploy:
+      resources:
+        limits:
+          memory: "1024m"
+          cpus: "1"
+        reservations:
+          memory: "1024m"
+          cpus: "1"
+    ports:
+      - "9999:9999"
+      - "5099:5099"
+    expose:
+      - 9999  #API
+      - 5099  #JMX
+    links:
+      - fluentd
+    volumes:
+      - ./profiling:/tmp/profiling:rw
+      - reactive_throughput_tmp:/tmp
+    logging:
+      driver: fluentd
+      options:
+        fluentd-address: fluentd:24224
+        fluentd-async: "true"
+        fluentd-async-reconnect-interval: 10s
+        tag: docker.app
+    networks:
+      high_throughput_network:
+  ## Monitorization
+  prometheus:
+    image: prom/prometheus:v3.4.0
+    container_name: prometheus
+    hostname: prometheus
+    restart: "on-failure"
+    deploy:
+      resources:
+        limits:
+          memory: "512m"
+          cpus: "1"
+    env_file:
+      - .env
+    ports:
+      - "9090:9090"
+    expose:
+      - 9090
+    volumes:
+      - ./monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+    healthcheck:
+      test: ps aux | grep prometheus || exit 1
+      interval: 5s
+      timeout: 2s
+      retries: 3
+      start_period: 5s
+    networks:
+      high_throughput_network:
+  grafana:
+    image: grafana/grafana:12.0.1
+    container_name: grafana
+    hostname: grafana
+    restart: "on-failure"
+    deploy:
+      resources:
+        limits:
+          memory: "512m"
+          cpus: "1"
+    env_file:
+      - .env
+    ports:
+      - "3000:3000"
+    expose:
+      - 3000
+    volumes:
+      - ./monitoring/datasources:/etc/grafana/provisioning/datasources
+      - ./monitoring/dashboards:/etc/grafana/provisioning/dashboards
+      - grafana_data:/var/lib/grafana
+    links:
+      - prometheus
+    healthcheck:
+      test: ps aux | grep grafana || exit 1
+      interval: 5s
+      timeout: 2s
+      retries: 3
+      start_period: 5s
+    networks:
+      high_throughput_network:
+  ## Observability (EFK)
+  # https://docs.fluentd.org/container-deployment/docker-compose
+  elasticsearch:
+    image: elasticsearch:9.0.1
+    container_name: elasticsearch
+    hostname: elasticsearch
+    restart: on-failure
+    deploy:
+      resources:
+        limits:
+          memory: "2048m"
+          cpus: "2"
+    environment:
+      # service failed if it use .env
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - cluster.name=elasticsearch
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms512m -Xmx1000m"
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    expose:
+      - 9200
+      - 9300
+    volumes:
+      - elasticsearch_data:/usr/share/elasticsearch/data
+    healthcheck:
+      test: ["CMD", "curl","-s" ,"-f", "http://localhost:9200/_cat/health"]
+    networks:
+      high_throughput_network:
+  fluentd:
+    image: fluentd:0.0.1
+    build: ./monitoring/fluentd/.
+    container_name: fluentd
+    hostname: fluentd
+    restart: on-failure
+    deploy:
+      resources:
+        limits:
+          memory: "2048m"
+          cpus: "4"
+    env_file:
+      - .env
+    ports:
+      - "24224:24224"
+      - "24224:24224/udp"
+    expose:
+      - 24224
+    links:
+      - elasticsearch
+    volumes:
+      - fluentd_logs:/fluentd/log
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+    networks:
+      high_throughput_network:
+  kibana:
+    image: kibana:9.0.1
+    container_name: kibana
+    hostname: kibana
+    restart: "no"
+    deploy:
+      resources:
+        limits:
+          memory: "2048m"
+          cpus: "2"
+    env_file:
+      - .env
+    ports:
+      - "5601:5601"
+    expose:
+      - 5601
+    depends_on:
+      - elasticsearch
+    links:
+      - elasticsearch
+    healthcheck:
+      test: ["CMD", "curl", "-s", "-f", "http://localhost:5601/login"]
+      retries: 5
+    networks:
+      high_throughput_network:
+
+volumes:
+  imperative_throughput_tmp:
+    name: imperative_throughput_tmp
+    driver_opts:
+      type: tmpfs
+      device: tmpfs
+  reactive_throughput_tmp:
+    name: reactive_throughput_tmp
+    driver_opts:
+      type: tmpfs
+      device: tmpfs
+  grafana_data:
+    name: grafana_data
+    driver_opts:
+      type: tmpfs
+      device: tmpfs
+  elasticsearch_data:
+    name: elasticsearch_data
+    driver_opts:
+      type: tmpfs
+      device: tmpfs
+  fluentd_logs:
+    name: fluentd_logs
+    driver_opts:
+      type: tmpfs
+      device: tmpfs
+
+networks:
+  high_throughput_network:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.18.0.0/24
+          gateway: 172.18.0.1

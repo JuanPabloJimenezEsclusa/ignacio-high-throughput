@@ -1,0 +1,88 @@
+plugins {
+  id 'java-library'
+  id 'org.springframework.boot' version '3.5.0' apply false
+  id 'org.graalvm.buildtools.native' version '0.10.6' apply false
+  id 'io.spring.dependency-management' version '1.1.3' apply false
+  id 'maven-publish'
+}
+
+allprojects {
+  group = 'edu.ignacio.poc'
+  version = '1.0.0'
+
+  repositories {
+    mavenCentral()
+  }
+}
+
+subprojects {
+  apply plugin: 'java'
+  apply plugin: 'org.springframework.boot'
+  apply plugin: 'io.spring.dependency-management'
+  apply plugin: 'maven-publish'
+
+  java {
+    toolchain {
+      languageVersion = JavaLanguageVersion.of(24)
+    }
+  }
+
+  test {
+    useJUnitPlatform()
+  }
+
+  publishing {
+    repositories {
+      maven {
+        name = 'GitHubPackages'
+        url = uri('https://maven.pkg.github.com/JuanPabloJimenezEsclusa/high-throughput')
+        credentials {
+          username = project.findProperty('gpr.user') ?: System.getenv('GITHUB_USERNAME')
+          password = project.findProperty('gpr.key') ?: System.getenv('GITHUB_TOKEN')
+        }
+      }
+    }
+
+    publications {
+      maven(MavenPublication) {
+        from components.java
+
+        pom {
+          name = project.name
+          description = project.description
+          url = 'https://github.com/JuanPabloJimenezEsclusa/high-throughput'
+
+          licenses {
+            license {
+              name = 'GPL-3.0'
+              url = 'https://www.gnu.org/licenses/gpl-3.0.en.html'
+              distribution = 'repo'
+            }
+          }
+
+          developers {
+            developer {
+              id = 'juan.pablo.jimenez.esclusa'
+              name = 'Juan Pablo Jimenez Esclusa'
+              email = 'juan.pablo.jimenez.esclusa@gmail.com'
+              roles = ['Developer', 'Architect']
+            }
+          }
+
+          scm {
+            url = 'https://github.com/JuanPabloJimenezEsclusa/high-throughput'
+            connection = 'scm:git:https://github.com/JuanPabloJimenezEsclusa/high-throughput.git'
+            developerConnection = 'scm:git:https://github.com/JuanPabloJimenezEsclusa/high-throughput.git'
+          }
+
+          issueManagement {
+            system = 'Github'
+            url = 'https://github.com/JuanPabloJimenezEsclusa/high-throughput/issues'
+          }
+        }
+      }
+    }
+  }
+}
+
+description = 'PoC to test Java high throughput'

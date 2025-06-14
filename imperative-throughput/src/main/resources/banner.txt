@@ -1,0 +1,11 @@
+ ╔════════════════════════════════════════════════════════════════════════════════════════╗
+ ║                   ▓▒░ ▓▒░ ▓▒░ ► IMPERATIVE-THROUGHPUT ◄ ░▒▓ ░▒▓ ░▒▓                    ║
+ ║   ┌─────────┐     ┌───────────┐     ┌───────────┐     ┌───────────┐     ┌───────────┐  ║
+ ║   │ REQUEST │───► │  PROCESS  │───► │   I/O OPS │───► │ TRANSFORM │───► │  RESPONSE │  ║
+ ║   └────┬────┘     └─────┬─────┘     └─────┬─────┘     └─────┬─────┘     └───────────┘  ║
+ ║        │                │                 │                 │                          ║
+ ║        │     (Sequential Execution)       │                 │                          ║
+ ║        │<─────────────────────────────────┴─────────────────> (Virtual Threads)        ║
+ ║        │(Blocking I/O operations are offloaded efficiently without resource exhaustion)║
+ ╚════════════════════════════════════════════════════════════════════════════════════════╝
+   « ${spring.application.name}:${spring.application.version} » « Spring-boot:${spring-boot.formatted-version} »

@@ -1,0 +1,47 @@
+### Imperative Health check
+GET {{imperative_url}}/imperative-throughput/actuator/health/ping HTTP/1.1
+accept: application/json
+content-type: application/json
+cache-control: no-cache
+
+> {%
+  client.test("Request executed successfully", function () {
+    client.assert(response.status === 200, "Response status is not 200");
+  });
+%}
+
+### Reactive Health check
+GET {{reactive_url}}/reactive-throughput/actuator/health/ping HTTP/1.1
+accept: application/json
+content-type: application/json
+cache-control: no-cache
+
+> {%
+  client.test("Request executed successfully", function () {
+    client.assert(response.status === 200, "Response status is not 200");
+  });
+%}
+
+### Imperative throughput test
+GET {{imperative_url}}/imperative-throughput/smokes HTTP/1.1
+accept: application/json
+content-type: application/json
+cache-control: no-cache
+
+> {%
+  client.test("Request executed successfully", function () {
+    client.assert(response.status === 200, "Response status is not 200");
+  });
+%}
+
+### Reactive throughput test
+GET {{reactive_url}}/reactive-throughput/smokes HTTP/1.1
+accept: application/json
+content-type: application/json
+cache-control: no-cache
+
+> {%
+  client.test("Request executed successfully", function () {
+    client.assert(response.status === 200, "Response status is not 200");
+  });
+%}

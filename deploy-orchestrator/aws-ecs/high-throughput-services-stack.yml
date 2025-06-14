@@ -1,0 +1,1128 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: CloudFormation template to high throughput services in AWS ECS
+# https://docs.aws.amazon.com/acm/latest/userguide/acm-bestpractices.html#best-practices-cloudformation
+# https://docs.aws.amazon.com/acm/latest/userguide/acm-limits.html
+
+Parameters:
+  HostedZoneId:
+    Type: String
+    Description: The ID of the Route 53 hosted zone
+    Default: Z102528520PCT47CK313B
+  DomainName:
+    Type: String
+    Description: The domain name for the Route 53 record set
+    Default: poc.jpje-kops.xyz
+    AllowedPattern: (?!-)[a-zA-Z0-9-.]{1,63}(?<!-)
+  ImperativeImageName:
+    Type: String
+    Description: Imperative Docker image name
+    Default: "public.ecr.aws/q9k9a5q7/imperative-throughput:1.0.0"
+  ReactiveImageName:
+    Type: String
+    Description: Reactive Docker image name
+    Default: "public.ecr.aws/q9k9a5q7/reactive-throughput:1.0.0"
+
+Resources:
+  #################################################################################################
+  ###################################### Network ##################################################
+  # Create a VPC
+  VPC:
+    Type: "AWS::EC2::VPC"
+    Properties:
+      CidrBlock: "10.10.0.0/16" # /16 maximum /28 minimum
+      EnableDnsSupport: true
+      EnableDnsHostnames: true
+      Tags:
+        - Key: "Name"
+          Value: "high-throughput-vpc"
+        - Key: "ENTORN"
+          Value: "PRO"
+
+  # Create Subnets in different Availability Zones
+  PublicSubnetA:
+    Type: "AWS::EC2::Subnet"
+    Description:  "Public Subnet A"
+    Properties:
+      VpcId: !Ref VPC
+      CidrBlock: "10.10.1.0/24"
+      MapPublicIpOnLaunch: true
+      AvailabilityZone: !Select [ 0, !GetAZs '' ]
+      Tags:
+        - Key: "Name"
+          Value: "high-throughput-public-subnet-a"
+        - Key: "ENTORN"
+          Value: "PRO"
+
+  PublicSubnetB:
+    Type: "AWS::EC2::Subnet"
+    Description:  "Public Subnet B"
+    Properties:
+      VpcId: !Ref VPC
+      CidrBlock: "10.10.2.0/24"
+      MapPublicIpOnLaunch: true
+      AvailabilityZone: !Select [ 1, !GetAZs '' ]
+      Tags:
+        - Key: "Name"
+          Value: "high-throughput-public-subnet-b"
+        - Key: "ENTORN"
+          Value: "PRO"
+
+  PrivateSubnetA:
+    Type: "AWS::EC2::Subnet"
+    Description:  "Private Subnet A"
+    Properties:
+      VpcId: !Ref VPC
+      CidrBlock: "10.10.16.0/20"
+      MapPublicIpOnLaunch: false
+      AvailabilityZone: !Select [ 0, !GetAZs '' ]
+      Tags:
+        - Key: "Name"
+          Value: "high-throughput-private-subnet-a"
+        - Key: "ENTORN"
+          Value: "PRO"
+
+  PrivateSubnetB:
+    Type: "AWS::EC2::Subnet"
+    Description:  "Private Subnet B"
+    Properties:
+      VpcId: !Ref VPC
+      CidrBlock: "10.10.32.0/20"
+      MapPublicIpOnLaunch: false
+      AvailabilityZone: !Select [ 1, !GetAZs '' ]
+      Tags:
+        - Key: "Name"
+          Value: "high-throughput-private-subnet-b"
+        - Key: "ENTORN"
+          Value: "PRO"
+
+  # Create an Internet Gateway
+  InternetGateway:
+    Type: "AWS::EC2::InternetGateway"
+    Properties:
+      Tags:
+        - Key: "Name"
+          Value: "high-throughput-igw"
+        - Key: "ENTORN"
+          Value: "PRO"
+
+  # Attach the Internet Gateway to the VPC
+  VPCGatewayAttachment:
+    Type: "AWS::EC2::VPCGatewayAttachment"
+    Properties:
+      VpcId: !Ref VPC
+      InternetGatewayId: !Ref InternetGateway
+
+  # Create Route Tables
+  PublicRouteTable:
+    Type: "AWS::EC2::RouteTable"
+    Properties:
+      VpcId: !Ref VPC
+      Tags:
+        - Key: "Name"
+          Value: "high-throughput-public-route-table"
+        - Key: "ENTORN"
+          Value: "PRO"
+
+  PrivateRouteTable:
+    Type: "AWS::EC2::RouteTable"
+    Properties:
+      VpcId: !Ref VPC
+      Tags:
+        - Key: "Name"
+          Value: "high-throughput-private-route-table"
+        - Key: "ENTORN"
+          Value: "PRO"
+
+  # Create Routes to the Internet Gateway
+  PublicRoute:
+    Type: "AWS::EC2::Route"
+    Description: "Public Route to Internet Gateway"
+    Properties:
+      RouteTableId: !Ref PublicRouteTable
+      DestinationCidrBlock: "0.0.0.0/0"
+      GatewayId: !Ref InternetGateway
+
+  PrivateRoute:
+    Type: "AWS::EC2::Route"
+    Description: "Private Route to Internet Gateway"
+    Properties:
+      RouteTableId: !Ref PrivateRouteTable
+      DestinationCidrBlock: "0.0.0.0/0"
+      GatewayId: !Ref InternetGateway
+
+  # Associate the Subnets with the Route Tables
+  PublicSubnetRouteTableAssociationA:
+    Type: "AWS::EC2::SubnetRouteTableAssociation"
+    Description: "Associate Public Subnet A with Public Route Table"
+    Properties:
+      SubnetId: !Ref PublicSubnetA
+      RouteTableId: !Ref PublicRouteTable
+
+  PublicSubnetRouteTableAssociationB:
+    Type: "AWS::EC2::SubnetRouteTableAssociation"
+    Description: "Associate Public Subnet B with Public Route Table"
+    Properties:
+      SubnetId: !Ref PublicSubnetB
+      RouteTableId: !Ref PublicRouteTable
+
+  PrivateSubnetRouteTableAssociationA:
+    Type: "AWS::EC2::SubnetRouteTableAssociation"
+    Description: "Associate Private Subnet A with Private Route Table"
+    Properties:
+      SubnetId: !Ref PrivateSubnetA
+      RouteTableId: !Ref PrivateRouteTable
+
+  PrivateSubnetRouteTableAssociationB:
+    Type: "AWS::EC2::SubnetRouteTableAssociation"
+    Description: "Associate Private Subnet B with Private Route Table"
+    Properties:
+      SubnetId: !Ref PrivateSubnetB
+      RouteTableId: !Ref PrivateRouteTable
+
+  # Create deny NACL rules
+  NetworkACL:
+    Type: AWS::EC2::NetworkAcl
+    Properties:
+      VpcId: !Ref VPC
+      Tags:
+        - Key: "Name"
+          Value: "high-throughput-network-acl"
+        - Key: "ENTORN"
+          Value: "PRO"
+
+  # Deny all inbound traffic to the NACL
+  SSHDenyInboundNACLEntry:
+    Type: AWS::EC2::NetworkAclEntry
+    Properties:
+      NetworkAclId: !Ref NetworkACL
+      RuleNumber: 100
+      Protocol: 6 # TCP
+      RuleAction: deny
+      Egress: false # Inbound rule
+      CidrBlock: 0.0.0.0/0
+      PortRange:
+        From: 22
+        To: 22
+
+  # Deny all outbound traffic to the NACL
+  SSHDenyOutboundNACLEntry:
+    Type: AWS::EC2::NetworkAclEntry
+    Properties:
+      NetworkAclId: !Ref NetworkACL
+      RuleNumber: 200
+      Protocol: 6 # TCP
+      RuleAction: deny
+      Egress: true # Outbound rule
+      CidrBlock: 0.0.0.0/0
+      PortRange:
+        From: 22
+        To: 22
+
+  # Allow all other inbound traffic
+  AllowAllInboundNACLEntry:
+    Type: AWS::EC2::NetworkAclEntry
+    Properties:
+      NetworkAclId: !Ref NetworkACL
+      RuleNumber: 300
+      Protocol: -1 # All protocols
+      RuleAction: allow
+      Egress: false # Inbound rule
+      CidrBlock: 0.0.0.0/0
+      PortRange:
+        From: 0
+        To: 65535
+
+  # Allow all other outbound traffic
+  AllowAllOutboundNACLEntry:
+    Type: AWS::EC2::NetworkAclEntry
+    Properties:
+      NetworkAclId: !Ref NetworkACL
+      RuleNumber: 400
+      Protocol: -1 # All protocols
+      RuleAction: allow
+      Egress: true # Outbound rule
+      CidrBlock: 0.0.0.0/0
+      PortRange:
+        From: 0
+        To: 65535
+
+  # Associate the NACL with the private subnets
+  PrivateSubnetANACLAssociation:
+    Type: AWS::EC2::SubnetNetworkAclAssociation
+    Properties:
+      SubnetId: !Ref PrivateSubnetA
+      NetworkAclId: !Ref NetworkACL
+
+  PrivateSubnetBNACLAssociation:
+    Type: AWS::EC2::SubnetNetworkAclAssociation
+    Properties:
+      SubnetId: !Ref PrivateSubnetB
+      NetworkAclId: !Ref NetworkACL
+
+  # Add Flow logs
+  VPCLogGroup:
+    Type: "AWS::Logs::LogGroup"
+    Description: "VPC Flow Logs Group"
+    Properties:
+      LogGroupName: !Sub '/vpc/${AWS::StackName}'
+      RetentionInDays: 1
+      Tags:
+        - Key: "ENTORN"
+          Value: "PRO"
+
+  VPCFlowLog:
+    Type: AWS::EC2::FlowLog
+    Properties:
+      ResourceId: !Ref VPC
+      ResourceType: VPC
+      TrafficType: ALL
+      LogDestinationType: cloud-watch-logs
+      LogDestination: !GetAtt VPCLogGroup.Arn
+      DeliverLogsPermissionArn: !GetAtt VPCFlowLogRole.Arn
+      Tags:
+        - Key: "ENTORN"
+          Value: "PRO"
+
+  VPCFlowLogRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: vpc-flow-logs.amazonaws.com
+            Action: 'sts:AssumeRole'
+      ManagedPolicyArns:
+        - !Ref VPCFlowLogPolicy
+
+  VPCFlowLogPolicy:
+    Type: AWS::IAM::ManagedPolicy
+    Properties:
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Action:
+              - 'logs:CreateLogGroup'
+              - 'logs:CreateLogStream'
+              - 'logs:PutLogEvents'
+              - 'logs:DescribeLogGroups'
+              - 'logs:DescribeLogStreams'
+            Resource: !Sub 'arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/vpc/${AWS::StackName}:*'
+
+  #################################################################################################
+  ###################################### SERVICES #################################################
+  # Create an ECS Cluster
+  ECSCluster:
+    Type: "AWS::ECS::Cluster"
+    Description: "ECS Cluster"
+    Properties:
+      ClusterName: "high-throughput-cluster"
+      CapacityProviders: ["FARGATE", "FARGATE_SPOT"]
+      ClusterSettings:
+        - Name: "containerInsights"
+          Value: "enabled"
+      DefaultCapacityProviderStrategy:
+        - CapacityProvider: "FARGATE_SPOT"
+          Weight: 1
+          Base: 0
+      Configuration:
+        ExecuteCommandConfiguration:
+          Logging: "DEFAULT"
+      Tags:
+        - Key: "ENTORN"
+          Value: "PRO"
+
+  # Create CloudWatch Logs groups
+  ImperativeLogGroup:
+    Type: "AWS::Logs::LogGroup"
+    Description: "CloudWatch Logs group"
+    Properties:
+      LogGroupName: "/ecs/imperative-throughput"
+      RetentionInDays: 1
+      Tags:
+        - Key: "ENTORN"
+          Value: "PRO"
+
+  ReactiveLogGroup:
+    Type: "AWS::Logs::LogGroup"
+    Description: "CloudWatch Logs group"
+    Properties:
+      LogGroupName: "/ecs/reactive-throughput"
+      RetentionInDays: 1
+      Tags:
+        - Key: "ENTORN"
+          Value: "PRO"
+
+  # Create a Task Definitions
+  ImperativeTaskDefinition:
+    Type: "AWS::ECS::TaskDefinition"
+    Description: "Task Definition"
+    DeletionPolicy: Delete
+    Properties:
+      Family: "imperative-definition"
+      NetworkMode: "awsvpc"
+      RequiresCompatibilities: ["FARGATE"]
+      Cpu: "512"
+      Memory: "1024"
+      ExecutionRoleArn: !Ref TaskExecutionRole
+      TaskRoleArn: !GetAtt TaskExecutionRole.Arn
+      Tags:
+        - Key: "ENTORN"
+          Value: "PRO"
+      # https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-ecs-taskdefinition-containerdefinition.html
+      ContainerDefinitions:
+        - Name: "imperative-api"
+          Image: !Ref ImperativeImageName
+          Cpu: "512"
+          Memory: "1024"
+          PortMappings:
+            - Name: "http-8888"
+              ContainerPort: 8888
+              HostPort: 8888
+              Protocol: "tcp"
+              AppProtocol: "http"
+          Essential: true
+          LinuxParameters:
+            # https://docs.aws.amazon.com/AmazonECS/latest/developerguide/ecs-exec.html#ecs-exec-enabling-and-using
+            InitProcessEnabled: true
+          LogConfiguration:
+            LogDriver: "awslogs"
+            Options:
+              awslogs-group: !Ref ImperativeLogGroup
+              awslogs-region: !Ref "AWS::Region"
+              awslogs-stream-prefix: "ecs"
+          Environment:
+            - Name: LANGUAGE
+              Value: "en_US.utf8"
+            - Name: LANG
+              Value: "en_US.utf8"
+            - Name: LC_ALL
+              Value: "en_US.utf8"
+            - Name: TIME_ZONE
+              Value: "UTC"
+            - Name: JVM_OPTIONS
+              Value: "-Xms512m -Xmx1024m"
+
+  ReactiveTaskDefinition:
+    Type: "AWS::ECS::TaskDefinition"
+    Description: "Task Definition"
+    DeletionPolicy: Delete
+    Properties:
+      Family: "reactive-definition"
+      NetworkMode: "awsvpc"
+      RequiresCompatibilities: ["FARGATE"]
+      Cpu: "512"
+      Memory: "1024"
+      ExecutionRoleArn: !Ref TaskExecutionRole
+      TaskRoleArn: !GetAtt TaskExecutionRole.Arn
+      Tags:
+        - Key: "ENTORN"
+          Value: "PRO"
+      # https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-ecs-taskdefinition-containerdefinition.html
+      ContainerDefinitions:
+        - Name: "reactive-api"
+          Image: !Ref ReactiveImageName
+          Cpu: "512"
+          Memory: "1024"
+          PortMappings:
+            - Name: "http-9999"
+              ContainerPort: 9999
+              HostPort: 9999
+              Protocol: "tcp"
+              AppProtocol: "http"
+          Essential: true
+          LinuxParameters:
+            # https://docs.aws.amazon.com/AmazonECS/latest/developerguide/ecs-exec.html#ecs-exec-enabling-and-using
+            InitProcessEnabled: true
+          LogConfiguration:
+            LogDriver: "awslogs"
+            Options:
+              awslogs-group: !Ref ReactiveLogGroup
+              awslogs-region: !Ref "AWS::Region"
+              awslogs-stream-prefix: "ecs"
+          Environment:
+            - Name: LANGUAGE
+              Value: "en_US.utf8"
+            - Name: LANG
+              Value: "en_US.utf8"
+            - Name: LC_ALL
+              Value: "en_US.utf8"
+            - Name: TIME_ZONE
+              Value: "UTC"
+            - Name: JVM_OPTIONS
+              Value: "-Xms512m -Xmx1024m"
+
+  # Create an ECS Service
+  # https://aws.amazon.com/es/fargate/pricing/
+  # https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-ecs-service.html
+  ImperativeECSService:
+    Type: "AWS::ECS::Service"
+    Description: "Imperative ECS Service"
+    DependsOn:
+      - ListenerHTTP
+    Properties:
+      ServiceName: "imperative-service"
+      Cluster: !Ref ECSCluster
+      DesiredCount: 2
+      LaunchType: "FARGATE"
+      TaskDefinition: !Ref ImperativeTaskDefinition
+      HealthCheckGracePeriodSeconds: 30
+      EnableExecuteCommand: true
+      NetworkConfiguration:
+        AwsvpcConfiguration:
+          # Although the service is on a private subnet, the public IP is necessary to have visibility of the image repository.
+          # Otherwise, a NAT Gateway or a VPC Peering Endpoint would be needed, which have a higher cost.
+          AssignPublicIp: "ENABLED"
+          Subnets:
+            - !Ref PrivateSubnetA
+            - !Ref PrivateSubnetB
+          SecurityGroups:
+            - !Ref ImperativeECSServiceSecurityGroup
+            - !Ref AdminSecurityGroup
+      LoadBalancers:
+        - ContainerName: "imperative-api"
+          ContainerPort: 8888
+          TargetGroupArn: !Ref ImperativeTargetGroup
+      Tags:
+        - Key: "ENTORN"
+          Value: "PRO"
+
+  ReactiveECSService:
+    Type: "AWS::ECS::Service"
+    Description: "Reactive ECS Service"
+    DependsOn:
+      - ListenerHTTP
+    Properties:
+      ServiceName: "reactive-service"
+      Cluster: !Ref ECSCluster
+      DesiredCount: 2
+      LaunchType: "FARGATE"
+      TaskDefinition: !Ref ReactiveTaskDefinition
+      HealthCheckGracePeriodSeconds: 30
+      EnableExecuteCommand: true
+      NetworkConfiguration:
+        AwsvpcConfiguration:
+          # Although the service is on a private subnet, the public IP is necessary to have visibility of the image repository.
+          # Otherwise, a NAT Gateway or a VPC Peering Endpoint would be needed, which have a higher cost.
+          AssignPublicIp: "ENABLED"
+          Subnets:
+            - !Ref PrivateSubnetA
+            - !Ref PrivateSubnetB
+          SecurityGroups:
+            - !Ref ReactiveECSServiceSecurityGroup
+            - !Ref AdminSecurityGroup
+      LoadBalancers:
+        - ContainerName: "reactive-api"
+          ContainerPort: 9999
+          TargetGroupArn: !Ref ReactiveTargetGroup
+      Tags:
+        - Key: "ENTORN"
+          Value: "PRO"
+
+  # Create a Security Group for the Load Balancer
+  LoadBalancerSecurityGroup:
+    Type: "AWS::EC2::SecurityGroup"
+    Description: "Security group for the load balancer"
+    Properties:
+      GroupDescription: "Security group for the load balancer"
+      VpcId: !Ref VPC
+      GroupName: "high-throughput-lb-sg"
+      SecurityGroupIngress:
+        - IpProtocol: "tcp"
+          FromPort: 80
+          ToPort: 80
+          CidrIp: "0.0.0.0/0"
+          Description: "Allow 80 HTTP traffic"
+        - IpProtocol: "tcp"
+          FromPort: 443
+          ToPort: 443
+          CidrIp: "0.0.0.0/0"
+          Description: "Allow 443 HTTPS traffic"
+      Tags:
+        - Key: "Name"
+          Value: "high-throughput-lb-sg"
+        - Key: "ENTORN"
+          Value: "PRO"
+
+  # Security Group for ECS Tasks
+  ImperativeECSServiceSecurityGroup:
+    Type: "AWS::EC2::SecurityGroup"
+    Description: "Security group for the imperative ECS task"
+    Properties:
+      GroupDescription: "Allow traffic to ECS tasks"
+      VpcId: !Ref VPC
+      GroupName: "imperative-ecs-sg"
+      SecurityGroupIngress:
+        - IpProtocol: "tcp"
+          FromPort: 8888
+          ToPort: 8888
+          SourceSecurityGroupId: !Ref LoadBalancerSecurityGroup
+          Description: "Allow http traffic from the load balancer"
+      SecurityGroupEgress:
+        - IpProtocol: "-1"
+          FromPort: -1
+          ToPort: -1
+          CidrIp: "0.0.0.0/0"
+          Description: "Allow all outbound traffic"
+      Tags:
+        - Key: "Name"
+          Value: "imperative-ecs-sg"
+        - Key: "ENTORN"
+          Value: "PRO"
+
+  ReactiveECSServiceSecurityGroup:
+    Type: "AWS::EC2::SecurityGroup"
+    Description: "Security group for the reactive ECS task"
+    Properties:
+      GroupDescription: "Allow traffic to ECS tasks"
+      VpcId: !Ref VPC
+      GroupName: "reactive-ecs-sg"
+      SecurityGroupIngress:
+        - IpProtocol: "tcp"
+          FromPort: 9999
+          ToPort: 9999
+          SourceSecurityGroupId: !Ref LoadBalancerSecurityGroup
+          Description: "Allow http traffic from the load balancer"
+      SecurityGroupEgress:
+        - IpProtocol: "-1"
+          FromPort: -1
+          ToPort: -1
+          CidrIp: "0.0.0.0/0"
+          Description: "Allow all outbound traffic"
+      Tags:
+        - Key: "Name"
+          Value: "reactive-ecs-sg"
+        - Key: "ENTORN"
+          Value: "PRO"
+
+  # Security Group for Admin Tasks
+  AdminSecurityGroup:
+    Type: "AWS::EC2::SecurityGroup"
+    Description: "Security group for the Admin tasks"
+    Properties:
+      GroupDescription: "Allow traffic to Admin tasks"
+      VpcId: !Ref VPC
+      GroupName: "high-throughput-admin-sg"
+      SecurityGroupIngress:
+        - IpProtocol: "icmp"
+          FromPort: 8
+          ToPort: -1
+          CidrIp: "0.0.0.0/32"
+          Description: "Allow ping traffic"
+      SecurityGroupEgress:
+        - IpProtocol: "-1"
+          FromPort: -1
+          ToPort: -1
+          CidrIp: "0.0.0.0/0"
+          Description: "Allow all outbound traffic"
+      Tags:
+        - Key: "Name"
+          Value: "high-throughput-admin-sg"
+        - Key: "ENTORN"
+          Value: "PRO"
+
+  ################################################################################################
+  ######################################## Load Balancer #########################################
+  # Create an Application Load Balancer
+  # https://aws.amazon.com/es/elasticloadbalancing/pricing/
+  LoadBalancer:
+    Type: "AWS::ElasticLoadBalancingV2::LoadBalancer"
+    Description: "Application Load Balancer"
+    Properties:
+      Name: "high-throughput-lb"
+      Type: "application"
+      Subnets:
+        - !Ref PublicSubnetA
+        - !Ref PublicSubnetB
+      SecurityGroups:
+        - !Ref LoadBalancerSecurityGroup
+      Scheme: "internet-facing"
+      LoadBalancerAttributes:
+        - Key: "deletion_protection.enabled"
+          Value: "false"
+          # If true, deletion protection is enabled. Default is false.
+        - Key: "routing.http.drop_invalid_header_fields.enabled"
+          Value: "true"
+          # If true, the HTTP listener will reject requests with invalid headers.
+          # The default is false, which sends a 400 response to the client.
+        - Key: "routing.http2.enabled"
+          Value: "true"
+          # If true, the load balancer supports HTTP/2.
+        - Key: "idle_timeout.timeout_seconds"
+          Value: "120"
+          # The number of seconds before the connection is considered idle.
+      IpAddressType: "ipv4"
+      Tags:
+        - Key: "Name"
+          Value: "high-throughput-lb"
+        - Key: "ENTORN"
+          Value: "PRO"
+
+  # Create a Target Group for the Load Balancer
+  ImperativeTargetGroup:
+    Type: "AWS::ElasticLoadBalancingV2::TargetGroup"
+    Description: "Imperative Target Group for the Load Balancer"
+    Properties:
+      Name: "imperative-target-group"
+      VpcId: !Ref VPC
+      Protocol: "HTTP"
+      Port: 8888
+      HealthCheckEnabled: true
+      HealthCheckProtocol: "HTTP"
+      HealthCheckPort: "8888"
+      HealthCheckPath: "/imperative-throughput/actuator/health/ping"
+      HealthCheckTimeoutSeconds: 30
+      HealthCheckIntervalSeconds: 120
+      HealthyThresholdCount: 2
+      UnhealthyThresholdCount: 3
+      TargetType: "ip"
+      TargetGroupAttributes:
+        - Key: load_balancing.algorithm.type
+          Value: "round_robin"
+          # The load balancing algorithm to use. Required if load_balancing.algorithm.preserve_host_header is set.
+        - Key: stickiness.enabled
+          Value: "true"
+          # If true, the load balancer will send the same session cookie to the client if it fails to establish a connection with a target.
+        - Key: stickiness.type
+          Value: "lb_cookie"
+          # The type of stickiness to use. Required if stickiness.enabled is set.
+      Tags:
+        - Key: "ENTORN"
+          Value: "PRO"
+
+  ReactiveTargetGroup:
+    Type: "AWS::ElasticLoadBalancingV2::TargetGroup"
+    Description: "Reactive Target Group for the Load Balancer"
+    Properties:
+      Name: "reactive-target-group"
+      VpcId: !Ref VPC
+      Protocol: "HTTP"
+      Port: 9999
+      HealthCheckEnabled: true
+      HealthCheckProtocol: "HTTP"
+      HealthCheckPort: "9999"
+      HealthCheckPath: "/reactive-throughput/actuator/health/ping"
+      HealthCheckTimeoutSeconds: 30
+      HealthCheckIntervalSeconds: 120
+      HealthyThresholdCount: 2
+      UnhealthyThresholdCount: 3
+      TargetType: "ip"
+      TargetGroupAttributes:
+        - Key: load_balancing.algorithm.type
+          Value: "round_robin"
+          # The load balancing algorithm to use. Required if load_balancing.algorithm.preserve_host_header is set.
+        - Key: stickiness.enabled
+          Value: "true"
+          # If true, the load balancer will send the same session cookie to the client if it fails to establish a connection with a target.
+        - Key: stickiness.type
+          Value: "lb_cookie"
+          # The type of stickiness to use. Required if stickiness.enabled is set.
+      Tags:
+        - Key: "ENTORN"
+          Value: "PRO"
+
+  # Request a certificate from ACM
+  # https://docs.aws.amazon.com/acm/latest/userguide/acm-services.html
+  Certificate:
+    Type: "AWS::CertificateManager::Certificate"
+    Description: "Certificate for the Load Balancer"
+    Properties:
+      DomainName: !Ref DomainName
+      ValidationMethod: DNS
+      CertificateTransparencyLoggingPreference: DISABLED
+      DomainValidationOptions:
+        - DomainName: !Ref DomainName
+          HostedZoneId: !Ref HostedZoneId
+      Tags:
+        - Key: "ENTORN"
+          Value: "PRO"
+
+  # Create a Listener for the Load Balancer
+  ListenerHTTP:
+    Type: "AWS::ElasticLoadBalancingV2::Listener"
+    Description: "Listener for the Load Balancer"
+    Properties:
+      DefaultActions:
+        - Type: "redirect"
+          RedirectConfig:
+            Protocol: "HTTPS"
+            Port: "443"
+            StatusCode: "HTTP_301"
+      LoadBalancerArn: !Ref LoadBalancer
+      Port: 80
+      Protocol: HTTP
+
+  ListenerHTTPS:
+    Type: "AWS::ElasticLoadBalancingV2::Listener"
+    Description: "Listener for the Load Balancer"
+    Properties:
+      DefaultActions:
+        - Type: "forward"
+          TargetGroupArn: !Ref ImperativeTargetGroup
+      LoadBalancerArn: !Ref LoadBalancer
+      Port: 443
+      Protocol: HTTPS
+      Certificates:
+        - CertificateArn: !Ref Certificate
+
+  # Add listener rules for path-based routing
+  ImperativeListenerRule:
+    Type: "AWS::ElasticLoadBalancingV2::ListenerRule"
+    Properties:
+      ListenerArn: !Ref ListenerHTTPS
+      Priority: 10
+      Conditions:
+        - Field: "path-pattern"
+          Values:
+            - "/imperative-throughput/*"
+      Actions:
+        - Type: "forward"
+          TargetGroupArn: !Ref ImperativeTargetGroup
+
+  ReactiveListenerRule:
+    Type: "AWS::ElasticLoadBalancingV2::ListenerRule"
+    Properties:
+      ListenerArn: !Ref ListenerHTTPS
+      Priority: 20
+      Conditions:
+        - Field: "path-pattern"
+          Values:
+            - "/reactive-throughput/*"
+      Actions:
+        - Type: "forward"
+          TargetGroupArn: !Ref ReactiveTargetGroup
+
+
+  # Create an IAM Role for ECS Task Execution
+  TaskExecutionRole:
+    Type: "AWS::IAM::Role"
+    Description: "IAM Role for ECS Task Execution"
+    Properties:
+      RoleName: "imperative-task-execution-role"
+      Description: "IAM Role for ECS Task Execution"
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: "Allow"
+            Principal:
+              Service: "ecs-tasks.amazonaws.com"
+            Action: "sts:AssumeRole"
+      Policies:
+        - PolicyName: "ecsTaskExecutionPolicy"
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: "Allow"
+                Action:
+                  - "ecs:ExecuteCommand"
+                  - "ecs:DescribeTasks"
+                  - "ecr:GetDownloadUrlForLayer"
+                  - "ecr:BatchGetImage"
+                  - "ecr:GetAuthorizationToken"
+                  - "logs:CreateLogStream"
+                  - "logs:DescribeLogStreams"
+                  - "logs:PutLogEvents"
+                  - "cloudwatch:PutMetricData"
+                  - "secretsmanager:GetSecretValue"
+                Resource: "*"
+      Tags:
+        - Key: "ENTORN"
+          Value: "PRO"
+
+  ################################################################################################
+  ####################################### Autoscaling ############################################
+  # Scale the ECS Service
+  ImperativeScalableTarget:
+    Type: "AWS::ApplicationAutoScaling::ScalableTarget"
+    Description: "Scale the Imperative ECS Service"
+    Properties:
+      MaxCapacity: 3
+      MinCapacity: 1
+      ResourceId: !Join
+        - "/"
+        - - service
+          - !Ref ECSCluster
+          - !GetAtt ImperativeECSService.Name
+      RoleARN: !GetAtt AutoScalingRole.Arn
+      ScalableDimension: ecs:service:DesiredCount
+      ServiceNamespace: ecs
+
+  ReactiveScalableTarget:
+    Type: "AWS::ApplicationAutoScaling::ScalableTarget"
+    Description: "Scale the Reactive ECS Service"
+    Properties:
+      MaxCapacity: 3
+      MinCapacity: 1
+      ResourceId: !Join
+        - "/"
+        - - service
+          - !Ref ECSCluster
+          - !GetAtt ReactiveECSService.Name
+      RoleARN: !GetAtt AutoScalingRole.Arn
+      ScalableDimension: ecs:service:DesiredCount
+      ServiceNamespace: ecs
+
+  # Create an IAM Role for Auto Scaling
+  AutoScalingRole:
+    Type: "AWS::IAM::Role"
+    Description: "IAM Role for Auto Scaling"
+    Properties:
+      RoleName: "high-throughput-auto-scaling-role"
+      Description: "IAM Role for Auto Scaling"
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: "Allow"
+            Principal:
+              Service: "application-autoscaling.amazonaws.com"
+            Action: "sts:AssumeRole"
+      Policies:
+        - PolicyName: high-throughput-scaling-policy
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: "Allow"
+                Action:
+                  - "application-autoscaling:*"
+                  - "cloudwatch:ListMetrics"
+                  - "cloudwatch:DescribeAlarms"
+                  - "cloudwatch:GetMetricStatistics"
+                  - "cloudwatch:SetAlarmState"
+                  - "cloudwatch:DeleteAlarms"
+                  - "cloudwatch:PutMetricAlarm"
+                  - "cloudwatch:PutMetricData"
+                  - "ecs:CreateService"
+                  - "ecs:UpdateService"
+                  - "ecs:DescribeServices"
+                  - "ecs:DescribeClusters"
+                Resource: "*"
+      Tags:
+        - Key: "ENTORN"
+          Value: "PRO"
+
+  # Alarms for the Scaling Policy
+  ImperativeScaleOutPolicy:
+    Type: "AWS::ApplicationAutoScaling::ScalingPolicy"
+    Description: "Scale Imperative Out Policy"
+    Properties:
+      PolicyName: imperative-scale-out-policy
+      PolicyType: StepScaling
+      ScalingTargetId: !Ref ImperativeScalableTarget
+      StepScalingPolicyConfiguration:
+        AdjustmentType: ChangeInCapacity
+        # it is necessary to comment the  MetricAggregationType  to  avoid  an  error
+        #MetricAggregationType: Average
+        StepAdjustments:
+          - MetricIntervalLowerBound: 0.0
+            ScalingAdjustment: 1
+        Cooldown: 180
+
+  ReactiveScaleOutPolicy:
+    Type: "AWS::ApplicationAutoScaling::ScalingPolicy"
+    Description: "Scale Reactive Out Policy"
+    Properties:
+      PolicyName: reactive-scale-out-policy
+      PolicyType: StepScaling
+      ScalingTargetId: !Ref ReactiveScalableTarget
+      StepScalingPolicyConfiguration:
+        AdjustmentType: ChangeInCapacity
+        # it is necessary to comment the  MetricAggregationType  to  avoid  an  error
+        #MetricAggregationType: Average
+        StepAdjustments:
+          - MetricIntervalLowerBound: 0.0
+            ScalingAdjustment: 1
+        Cooldown: 180
+
+  ImperativeScaleInPolicy:
+    Type: "AWS::ApplicationAutoScaling::ScalingPolicy"
+    Description: "Scale Imperative In Policy"
+    Properties:
+      PolicyName: imperative-scale-in-policy
+      PolicyType: StepScaling
+      ScalingTargetId: !Ref ImperativeScalableTarget
+      StepScalingPolicyConfiguration:
+        AdjustmentType: ChangeInCapacity
+        # it is necessary to comment the  MetricAggregationType  to  avoid  an  error
+        #MetricAggregationType: Average
+        StepAdjustments:
+          - MetricIntervalUpperBound: 0.0
+            ScalingAdjustment: -1
+        Cooldown: 180
+
+  ReactiveScaleInPolicy:
+    Type: "AWS::ApplicationAutoScaling::ScalingPolicy"
+    Description: "Scale Reactive In Policy"
+    Properties:
+      PolicyName: reactive-scale-in-policy
+      PolicyType: StepScaling
+      ScalingTargetId: !Ref ReactiveScalableTarget
+      StepScalingPolicyConfiguration:
+        AdjustmentType: ChangeInCapacity
+        # it is necessary to comment the  MetricAggregationType  to  avoid  an  error
+        #MetricAggregationType: Average
+        StepAdjustments:
+          - MetricIntervalUpperBound: 0.0
+            ScalingAdjustment: -1
+        Cooldown: 180
+
+  # CloudWatch Alarm for CPU Utilization
+  ImperativeCPUAlarmHigh:
+    Type: "AWS::CloudWatch::Alarm"
+    Description: "High CloudWatch Alarm Imperative for CPU Utilization"
+    Properties:
+      AlarmName: imperative-cpu-alarm-high
+      AlarmDescription: "Alarm if CPU exceeds 50%"
+      Namespace: "AWS/ECS"
+      MetricName: "CPUUtilization"
+      Dimensions:
+        - Name: "ClusterName"
+          Value: !Ref ECSCluster
+        - Name: "ServiceName"
+          Value: !GetAtt ImperativeECSService.Name
+      Statistic: "Average"
+      Period: 60
+      EvaluationPeriods: 1
+      Threshold: 50
+      ComparisonOperator: "GreaterThanOrEqualToThreshold"
+      TreatMissingData: notBreaching
+      ActionsEnabled: true
+      AlarmActions:
+        - !Ref ImperativeScaleOutPolicy
+
+  ReactiveCPUAlarmHigh:
+    Type: "AWS::CloudWatch::Alarm"
+    Description: "High CloudWatch Alarm Reactive for CPU Utilization"
+    Properties:
+      AlarmName: reactive-cpu-alarm-high
+      AlarmDescription: "Alarm if CPU exceeds 50%"
+      Namespace: "AWS/ECS"
+      MetricName: "CPUUtilization"
+      Dimensions:
+        - Name: "ClusterName"
+          Value: !Ref ECSCluster
+        - Name: "ServiceName"
+          Value: !GetAtt ReactiveECSService.Name
+      Statistic: "Average"
+      Period: 60
+      EvaluationPeriods: 1
+      Threshold: 50
+      ComparisonOperator: "GreaterThanOrEqualToThreshold"
+      TreatMissingData: notBreaching
+      ActionsEnabled: true
+      AlarmActions:
+        - !Ref ReactiveScaleOutPolicy
+
+  ImperativeCPUAlarmLow:
+    Type: "AWS::CloudWatch::Alarm"
+    Description: "Low CloudWatch Alarm Imperative for CPU Utilization"
+    Properties:
+      AlarmName: imperative-cpu-alarm-low
+      AlarmDescription: "Alarm if CPU is below 10%"
+      Namespace: "AWS/ECS"
+      MetricName: "CPUUtilization"
+      Dimensions:
+        - Name: "ClusterName"
+          Value: !Ref ECSCluster
+        - Name: "ServiceName"
+          Value: !GetAtt ImperativeECSService.Name
+      Statistic: "Average"
+      Period: 180
+      EvaluationPeriods: 2
+      Threshold: 10
+      ComparisonOperator: "LessThanOrEqualToThreshold"
+      TreatMissingData: notBreaching
+      ActionsEnabled: true
+      AlarmActions:
+        - !Ref ImperativeScaleInPolicy
+
+  ReactiveCPUAlarmLow:
+    Type: "AWS::CloudWatch::Alarm"
+    Description: "Low CloudWatch Alarm Reactive for CPU Utilization"
+    Properties:
+      AlarmName: reactive-cpu-alarm-low
+      AlarmDescription: "Alarm if CPU is below 10%"
+      Namespace: "AWS/ECS"
+      MetricName: "CPUUtilization"
+      Dimensions:
+        - Name: "ClusterName"
+          Value: !Ref ECSCluster
+        - Name: "ServiceName"
+          Value: !GetAtt ReactiveECSService.Name
+      Statistic: "Average"
+      Period: 180
+      EvaluationPeriods: 2
+      Threshold: 10
+      ComparisonOperator: "LessThanOrEqualToThreshold"
+      TreatMissingData: notBreaching
+      ActionsEnabled: true
+      AlarmActions:
+        - !Ref ReactiveScaleInPolicy
+
+  # CloudWatch Alarm for load balancer count
+  LoadBalancerRequestCountAlarm:
+    Type: "AWS::CloudWatch::Alarm"
+    Properties:
+      AlarmName: imperative-elb-request-count-alarm
+      AlarmDescription: "Alarm when request count exceeds 0"
+      Namespace: "AWS/ApplicationELB"
+      MetricName: "RequestCount"
+      Dimensions:
+        - Name: "LoadBalancer"
+          Value: !GetAtt LoadBalancer.LoadBalancerFullName
+      Statistic: "Sum"
+      Period: 10
+      EvaluationPeriods: 1
+      DatapointsToAlarm: 1
+      Threshold: 1
+      ComparisonOperator: "GreaterThanOrEqualToThreshold"
+      TreatMissingData: notBreaching
+      ActionsEnabled: true
+      AlarmActions:
+        - !Ref ImperativeScaleOutPolicy
+        - !Ref ReactiveScaleOutPolicy
+
+  # Create a Route 53 Alias Record to the Load Balancer
+  RecordSet:
+    Type: "AWS::Route53::RecordSet"
+    Description: "Route 53 Alias Record to the Load Balancer"
+    Properties:
+      HostedZoneId: !Ref HostedZoneId
+      Name: !Ref DomainName
+      Type: "A"
+      AliasTarget:
+        DNSName: !GetAtt LoadBalancer.DNSName
+        HostedZoneId: !GetAtt LoadBalancer.CanonicalHostedZoneID
+
+Outputs:
+  VPCId:
+    Description: The ID of the VPC where the resources are deployed
+    Value: !Ref VPC
+  PublicSubnetAId:
+    Description: The ID of the public subnet A where the resources are deployed
+    Value: !Ref PublicSubnetA
+  PublicSubnetBId:
+    Description: The ID of the public subnet B where the resources are deployed
+    Value: !Ref PublicSubnetB
+  ECSClusterName:
+    Description: The name of the ECS cluster
+    Value: !Ref ECSCluster
+  ImperativeECSServiceName:
+    Description: The name of the Imperative ECS service
+    Value: !Ref ImperativeECSService
+  ReactiveECSServiceName:
+    Description: The name of the ECS service
+    Value: !Ref ReactiveECSService
+  LoadBalancerDNSName:
+    Description: The DNS name of the Elastic Load Balancing load balancer
+    Value: !GetAtt LoadBalancer.DNSName
+  RecordSetName:
+    Description: The domain name or subdomain that the Route 53 Alias Record points to
+    Value: !Ref DomainName
+  ImperativeLogGroupName:
+    Description: The name of the CloudWatch Imperative Log Group
+    Value: !Ref ImperativeLogGroup
+  ReactiveLogGroupName:
+    Description: The name of the CloudWatch Reactive Log Group
+    Value: !Ref ReactiveLogGroup

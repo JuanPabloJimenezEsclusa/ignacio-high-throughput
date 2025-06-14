@@ -1,0 +1,42 @@
+<FindBugsFilter>
+  <!-- Include specific bug categories with appropriate ranking -->
+  <Match>
+    <Bug category="BAD_PRACTICE"/>
+    <Rank value="9"/>
+  </Match>
+
+  <Match>
+    <Bug category="CORRECTNESS"/>
+    <Rank value="9"/>
+  </Match>
+
+  <Match>
+    <Bug category="MT_CORRECTNESS"/>
+    <Rank value="9"/>
+  </Match>
+
+  <Match>
+    <Bug category="MALICIOUS_CODE"/>
+    <Rank value="9"/>
+  </Match>
+
+  <Match>
+    <Bug category="NOISE"/>
+    <Rank value="9"/>
+  </Match>
+
+  <Match>
+    <Bug category="PERFORMANCE"/>
+    <Rank value="9"/>
+  </Match>
+
+  <Match>
+    <Bug category="SECURITY"/>
+    <Confidence value="2"/>
+  </Match>
+
+  <Match>
+    <Bug category="STYLE"/>
+    <Rank value="9"/>
+  </Match>
+</FindBugsFilter>

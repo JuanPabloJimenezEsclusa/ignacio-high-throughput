@@ -1,0 +1,45 @@
+server:
+  port: 9999
+  error:
+    include-message: never
+    include-path: never
+    include-exception: false
+
+spring:
+  application:
+    name: reactive-throughput
+    version: 1.0.0
+  # https://docs.spring.io/spring-boot/reference/features/spring-application.html#features.spring-application.virtual-threads
+  threads:
+    virtual:
+      enabled: true
+  webflux:
+    base-path: /reactive-throughput
+  banner:
+    location: banner.txt
+    charset: UTF-8
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, metrics, prometheus
+    jmx:
+      exposure:
+        include: health, metrics, prometheus
+  endpoint:
+    health:
+      show-details: always
+      cache:
+        time-to-live: 0ms
+    metrics:
+      access: read_only
+      cache:
+        time-to-live: 0ms
+    prometheus:
+      access: read_only
+
+logging:
+  level:
+    root: info
+    web: warn

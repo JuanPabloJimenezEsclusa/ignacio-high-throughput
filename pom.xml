@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-parent</artifactId>
+    <version>3.5.0</version>
+  </parent>
+
+  <groupId>edu.ignacio.poc</groupId>
+  <artifactId>ignacio-high-throughput</artifactId>
+  <version>1.0.0</version>
+  <name>high-throughput</name>
+  <description>PoC to test Java high throughput</description>
+  <packaging>pom</packaging>
+  <url/>
+
+  <licenses>
+    <license>
+      <name>GPL-3.0</name>
+      <url>https://www.gnu.org/licenses/gpl-3.0.en.html</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
+
+  <developers>
+    <developer>
+      <id>juan.pablo.jimenez.esclusa</id>
+      <name>Juan Pablo Jimenez Esclusa</name>
+      <email>juan.pablo.jimenez.esclusa@gmail.com</email>
+      <roles>
+        <role>Developer</role>
+        <role>Architect</role>
+      </roles>
+    </developer>
+  </developers>
+
+  <scm>
+    <url>https://github.com/JuanPabloJimenezEsclusa/high-throughput</url>
+    <connection>scm:git:https://github.com/JuanPabloJimenezEsclusa/high-throughput.git</connection>
+    <developerConnection>scm:git:https://github.com/JuanPabloJimenezEsclusa/high-throughput.git</developerConnection>
+    <tag>HEAD</tag>
+  </scm>
+
+  <issueManagement>
+    <system>Github</system>
+    <url>https://github.com/JuanPabloJimenezEsclusa/high-throughput/issues</url>
+  </issueManagement>
+
+  <distributionManagement>
+    <repository>
+      <id>github</id>
+      <name>high-throughput</name>
+      <url>https://maven.pkg.github.com/JuanPabloJimenezEsclusa/high-throughput</url>
+    </repository>
+  </distributionManagement>
+
+  <properties>
+    <java.version>24</java.version>
+    <encoding>UTF-8</encoding>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <jetty-reactive-httpclient.version>4.0.10</jetty-reactive-httpclient.version>
+
+    <!-- Sonar -->
+    <sonar.organization>juanpablojimenezesclusa</sonar.organization>
+    <sonar.host.url>https://sonarcloud.io</sonar.host.url>
+    <sonar.projectKey>JuanPabloJimenezEsclusa_ignacio-high-throughput</sonar.projectKey>
+    <sonar.scm.exclusions.disabled>true</sonar.scm.exclusions.disabled>
+    <sonar.branch.name>main</sonar.branch.name>
+  </properties>
+
+  <modules>
+    <module>imperative-throughput</module>
+    <module>reactive-throughput</module>
+  </modules>
+</project>

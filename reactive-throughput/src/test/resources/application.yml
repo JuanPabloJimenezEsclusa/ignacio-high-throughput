@@ -1,0 +1,6 @@
+logging:
+  level:
+    # don't log exceptions made by the test
+    org.springframework.web.HttpLogging: off
+    org.springframework.web.server.adapter.HttpWebHandlerAdapter: off
+    org.springframework.boot.autoconfigure.web.reactive.error.AbstractErrorWebExceptionHandler: off

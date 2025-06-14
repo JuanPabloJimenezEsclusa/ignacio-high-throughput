@@ -1,0 +1,49 @@
+server:
+  port: 8888
+  error:
+    include-message: never
+    include-path: never
+    include-exception: false
+  servlet:
+    application-display-name: application
+    context-path: /imperative-throughput
+    encoding:
+      charset: UTF-8
+      force: true
+
+spring:
+  application:
+    name: imperative-throughput
+    version: 1.0.0
+  # https://docs.spring.io/spring-boot/reference/features/spring-application.html#features.spring-application.virtual-threads
+  threads:
+    virtual:
+      enabled: true
+  banner:
+    location: banner.txt
+    charset: UTF-8
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, metrics, prometheus
+    jmx:
+      exposure:
+        include: health, metrics, prometheus
+  endpoint:
+    health:
+      show-details: always
+      cache:
+        time-to-live: 0ms
+    metrics:
+      access: read_only
+      cache:
+        time-to-live: 0ms
+    prometheus:
+      access: read_only
+
+logging:
+  level:
+    root: info
+    web: warn

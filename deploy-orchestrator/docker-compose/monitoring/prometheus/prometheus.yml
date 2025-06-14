@@ -1,0 +1,21 @@
+global:
+  scrape_interval: 10s # Scrape targets every 15 seconds
+  scrape_timeout: 10s # Timeout after 15 seconds
+
+scrape_configs:
+  - job_name: "high-throughput"
+    metrics_path: '/actuator'
+    relabel_configs:
+      - source_labels: [__meta_discovery_path]
+        target_label: __metrics_path__
+    static_configs:
+      - targets: ['imperative-throughput:8888']
+        labels:
+          __meta_discovery_path: '/imperative-throughput/actuator/prometheus'
+          group: 'throughput-namespace'
+          application: 'imperative-throughput'
+      - targets: ['reactive-throughput:9999']
+        labels:
+          __meta_discovery_path: '/reactive-throughput/actuator/prometheus'
+          group: 'throughput-namespace'
+          application: 'reactive-throughput'

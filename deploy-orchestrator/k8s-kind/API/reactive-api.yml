@@ -1,0 +1,187 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: reactive-api-ns
+  labels:
+    name: reactive-api-ns
+spec: {}
+
+---
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: reactive-api-ns-quota
+  namespace: reactive-api-ns
+spec:
+  hard:
+    limits.cpu: "8"
+    limits.memory: 8192Mi
+    pods: "6"
+    requests.cpu: "8"
+    requests.memory: 8192Mi
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: reactive-api-config
+  namespace: reactive-api-ns
+data:
+  LANG: "en_US.utf8"
+  LANGUAGE: "en_US.utf8"
+  LC_ALL: "en_US.utf8"
+  TIME_ZONE: "UTC"
+  JVM_OPTIONS: "-Xms512m -Xmx1024m"
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: reactive-api
+  name: reactive-api
+  namespace: reactive-api-ns
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: reactive-api
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+  minReadySeconds: 0
+  revisionHistoryLimit: 5
+  template:
+    metadata:
+      labels:
+        app: reactive-api
+    spec:
+      automountServiceAccountToken: false
+      containers:
+        - image: docker.io/library/reactive-throughput:1.0.0
+          name: reactive-api
+          resources:
+            limits:
+              cpu: "1"
+              memory: 1024Mi
+              ephemeral-storage: "1Gi"
+            requests:
+              cpu: "1"
+              memory: 1024Mi
+              ephemeral-storage: "1Gi"
+          imagePullPolicy: Never
+          env:
+            - name: LANG
+              valueFrom:
+                configMapKeyRef:
+                  name: reactive-api-config
+                  key: LANG
+            - name: LANGUAGE
+              valueFrom:
+                configMapKeyRef:
+                  name: reactive-api-config
+                  key: LANGUAGE
+            - name: LC_ALL
+              valueFrom:
+                configMapKeyRef:
+                  name: reactive-api-config
+                  key: LC_ALL
+            - name: TIME_ZONE
+              valueFrom:
+                configMapKeyRef:
+                  name: reactive-api-config
+                  key: TIME_ZONE
+            - name: JVM_OPTIONS
+              valueFrom:
+                configMapKeyRef:
+                  name: reactive-api-config
+                  key: JVM_OPTIONS
+          ports:
+            - name: api-port
+              containerPort: 9999
+              hostPort: 9999
+              protocol: TCP
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 1000
+            runAsGroup: 1000
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: reactive-api
+  name: reactive-api-nodeport-svc
+  namespace: reactive-api-ns
+spec:
+  ports:
+    - name: api-port
+      port: 9999
+      protocol: TCP
+      targetPort: 9999
+      nodePort: 30099
+  selector:
+    app: reactive-api
+  type: NodePort
+
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: reactive-api-ingress
+  namespace: reactive-api-ns
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+    nginx.ingress.kubernetes.io/use-regex: "true"
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+    nginx.ingress.kubernetes.io/enable-cors: "true"
+    nginx.ingress.kubernetes.io/cors-allow-origin: "*"
+    nginx.ingress.kubernetes.io/cors-allow-methods: "GET, POST, PUT, DELETE, OPTIONS"
+    nginx.ingress.kubernetes.io/cors-allow-headers: "DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization"
+    nginx.ingress.kubernetes.io/cors-expose-headers: "Content-Length,Content-Range"
+    nginx.ingress.kubernetes.io/cors-allow-credentials: "true"
+    nginx.ingress.kubernetes.io/cors-max-age: "3600"
+    nginx.ingress.kubernetes.io/enable-modsecurity: "true"
+spec:
+  rules:
+    - http:
+        paths:
+          - pathType: Prefix
+            path: /reactive-throughput
+            backend:
+              service:
+                name: reactive-api-nodeport-svc
+                port:
+                  number: 30099
+
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: reactive-api-hpa
+  namespace: reactive-api-ns
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: reactive-api
+  minReplicas: 1
+  maxReplicas: 5
+  metrics:
+    - type: Pods
+      pods:
+        metric:
+          name: http_requests_per_second
+        target:
+          type: AverageValue
+          averageValue: 1m
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 40

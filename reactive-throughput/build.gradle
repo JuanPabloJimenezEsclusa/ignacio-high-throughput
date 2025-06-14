@@ -1,0 +1,68 @@
+import java.text.SimpleDateFormat
+
+plugins {
+  id 'org.springframework.boot'
+  id 'org.graalvm.buildtools.native'
+  id 'io.spring.dependency-management'
+}
+
+description = 'reactive-throughput'
+
+dependencies {
+  implementation('org.springframework.boot:spring-boot-starter-actuator') {
+    exclude group: 'org.springframework.boot', module: 'spring-boot-starter-logging'
+  }
+  implementation 'org.springframework.boot:spring-boot-starter-webflux'
+  implementation 'ch.qos.logback:logback-classic'
+
+  developmentOnly 'org.springframework.boot:spring-boot-devtools'
+  runtimeOnly 'io.micrometer:micrometer-registry-prometheus'
+  annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
+
+  testImplementation 'org.springframework.boot:spring-boot-starter-test'
+  testImplementation 'io.projectreactor:reactor-test'
+}
+
+tasks.register('createBuildTimestamp') {
+  def df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ")
+  df.setTimeZone(TimeZone.getTimeZone("Europe/Madrid"))
+  ext.buildTimestamp = df.format(new Date())
+}
+
+tasks.named('bootBuildImage') {
+  dependsOn createBuildTimestamp
+
+  builder = "paketobuildpacks/builder-noble-java-tiny:latest"
+  environment = [
+    "BP_JVM_VERSION": "24",
+    "BP_JVM_TYPE": "JDK",
+    "BPL_JVM_THREAD_COUNT": "2000",
+    "BP_JVM_JMXREMOTE": "true",
+    "BP_JVM_HEAD_ROOM": "5",
+    "BP_JVM_JAVA_OPTS": "-XX:+UseParallelGC -XX:+UseStringDeduplication -Dfile.encoding=UTF-8",
+    "BP_OCI_SOURCE": "true",
+    "BP_MAVEN_BUILT_ARTIFACT": "target/*.jar",
+    "BP_MAVEN_BUILD_ARGUMENTS": "package -DskipTests=true",
+    "BPL_JMX_ENABLED": "true",
+    "BPL_SPRING_AOT_ENABLED": "true",
+    "BP_SPRING_AOT_ENABLED": "true",
+    "BP_OCI_AUTHORS": "Juan Pablo Jimenez Esclusa",
+    "BP_OCI_CREATED": "${tasks.createBuildTimestamp.buildTimestamp}"
+  ]
+}
+
+tasks.named('bootRun') {
+  optimizedLaunch = true
+  jvmArgs = ["-Dspring.aot.enabled=false"]
+}
+
+springBoot {
+  buildInfo() {
+    properties {
+      group = 'edu.ignacio.poc.high-throughput'
+      artifact = 'reactive-throughput'
+      version = '1.0.0'
+      name = 'reactive-throughput'
+    }
+  }
+}
