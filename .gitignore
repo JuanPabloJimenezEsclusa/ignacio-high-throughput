@@ -2,12 +2,19 @@
 /.theia/**
 .idea/codeStyles/**
 .env
-.qodo
+.atl/
+.opencode/
+.mimocode/
+.codegraph/
+odd/
+openspec/
 
 testing/k6/result/**
-testing/jmeter/reports/**
+testing/jmeter/reports**
 **.hprof.json
 **.jfr
+
+!/.claude/settings.json
 
 # Created by https://www.toptal.com/developers/gitignore/api/java,linux,macos,maven,sonar,jmeter,eclipse,windows,database,intellij,sonarqube,terraform,intellij+all,intellij+iml,visualstudiocode,gradle,kate
 # Edit at https://www.toptal.com/developers/gitignore?templates=java,linux,macos,maven,sonar,jmeter,eclipse,windows,database,intellij,sonarqube,terraform,intellij+all,intellij+iml,visualstudiocode,gradle,kate

@@ -1,0 +1,88 @@
+info:
+  name: imperative-throughput-health
+  type: http
+  seq: 1
+
+http:
+  method: GET
+  url: "{{imperative_url}}/imperative-throughput/actuator/health"
+  headers:
+    - name: Accept
+      value: application/json
+    - name: Content-Type
+      value: application/json
+    - name: Cache-Control
+      value: no-cache
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+examples:
+  - name: example
+    request:
+      url: "{{imperative_url}}/imperative-throughput/actuator/health"
+      method: GET
+      headers:
+        - name: Accept
+          value: application/json
+        - name: Content-Type
+          value: application/json
+        - name: Cache-Control
+          value: no-cache
+    response:
+      status: 200
+      statusText: OK
+      headers:
+        - name: date
+          value: Sat, 18 Apr 2026 15:50:28 GMT
+        - name: content-type
+          value: application/json;charset=UTF-8
+        - name: transfer-encoding
+          value: chunked
+        - name: connection
+          value: keep-alive
+        - name: set-cookie
+          value: AWSALB=xxxxxxxx==; Expires=Sat, 25 Apr 2026 15:50:28 GMT; Path=/; SameSite=None; Secure
+      body:
+        type: json
+        data: |-
+          {
+            "components": {
+              "diskSpace": {
+                "details": {
+                  "total": 31526391808,
+                  "free": 19671543808,
+                  "threshold": 10485760,
+                  "path": "/workspace/.",
+                  "exists": true
+                },
+                "status": "UP"
+              },
+              "livenessState": {
+                "status": "UP"
+              },
+              "ping": {
+                "status": "UP"
+              },
+              "readinessState": {
+                "status": "UP"
+              },
+              "ssl": {
+                "details": {
+                  "expiringChains": [],
+                  "invalidChains": [],
+                  "validChains": []
+                },
+                "status": "UP"
+              }
+            },
+            "groups": [
+              "liveness",
+              "readiness"
+            ],
+            "status": "UP"
+          }

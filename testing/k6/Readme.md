@@ -1,4 +1,9 @@
-# K6 Testing
+---
+layout: default
+title: testing (k6)
+---
+
+# testing (k6)
 
 > • [Dependencies](#-dependencies)
   • [Architecture](#-architecture)
@@ -10,9 +15,8 @@ This module contains performance tests for the Spring Boot application using the
 
 ---
 
-* K6 >= 1.0.0
-* Docker >= 28
-* Docker Compose >= v2.35
+* [K6 ~0.57](https://grafana.com/docs/k6/next/release-notes/)
+* [Docker ~29](https://docs.docker.com/engine/release-notes/29/)
 
 ## 🏗️ Architecture
 
@@ -21,8 +25,8 @@ This module contains performance tests for the Spring Boot application using the
 | File                                                                    | Description                          |
 |-------------------------------------------------------------------------|--------------------------------------|
 | [high-throughput-load-tests.js](./script/high-throughput-load-tests.js) | Test plan file                       |
-| [summary.html](./result/summary.html)                                   | HTML summary report                  |
 | [run.sh](./run.sh)                                                      | Shell script for executing the tests |
+| [summary.html](./result/summary.html)                                   | HTML summary report                  |
 
 ## 🚀 Running the Tests
 
@@ -34,6 +38,7 @@ This module contains performance tests for the Spring Boot application using the
 ```
 ```bash
 # Run the test using the provided shell script
+# During execution, dashboard metrics will be displayed in http://localhost:5665/ui/
 ./run.sh
 ```
 ```bash

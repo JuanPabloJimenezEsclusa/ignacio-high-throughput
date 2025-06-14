@@ -1,11 +1,33 @@
-# Docker Compose
+---
+layout: default
+title: orchestrator (compose)
+---
 
-> • [Usage](#-usage)
+# orchestrator (compose)
+
+> • [Dependencies](#-dependencies)
+  • [Architecture](#-architecture)
+  • [Usage](#-usage)
   • [Links](#-links)
 
 Based on `docker-compose`
 
-## 🌐 Usage
+## ⚙️ Dependencies
+
+---
+
+* [Docker ~29](https://docs.docker.com/engine/release-notes/29/)
+* [Docker-compose ~2.40](https://docs.docker.com/compose/install/standalone/)
+
+## 🏗️ Architecture
+
+---
+
+Basic deployment with Docker Compose to prioritize simplicity and local development.
+
+![High Throughput Docker](./images/high-throughput-docker-diagram.svg)
+
+## 🚀 Usage
 
 ---
 
@@ -15,11 +37,11 @@ Based on `docker-compose`
 
 ```bash
 # Start the services
-./start.sh
+./start.sh buildProjects=true
 ```
 ```bash
 # Stop the services
-./stop.sh
+./stop.sh removeImages=true
 ```
 
 ## 🔗 Links
@@ -29,6 +51,7 @@ Based on `docker-compose`
 * **API:**
   * [imperative-throughput](http://localhost:8888/imperative-throughput/smokes)
   * [reactive-throughput](http://localhost:9999/reactive-throughput/smokes)
+  * [WireMock (API Mocking)](http://localhost:8080/__admin/)
 * **Prometheus (Monitoring):**
   * [Prometheus monitoring dashboard](http://localhost:9090)
 * **Grafana (Monitoring Visualization):**
