@@ -114,7 +114,7 @@
             -->
             <buildArg>--emit build-report</buildArg>
             <buildArg>--gc=G1</buildArg>
-            <buildArg>-R:MaxHeapSize=1g</buildArg>
+            <buildArg>-R:MaxHeapSize=2g</buildArg>
             <buildArg>-march=native</buildArg>
             <buildArg>-Ob</buildArg>
             <buildArg>-J-Xmx4g</buildArg>

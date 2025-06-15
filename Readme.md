@@ -1,9 +1,14 @@
 # Ignacio High-Throughput Java Application
 
+[![Deploy](https://github.com/JuanPabloJimenezEsclusa/ignacio-high-throughput/actions/workflows/maven.yml/badge.svg)](https://github.com/JuanPabloJimenezEsclusa/ignacio-high-throughput/actions/workflows/maven.yml)
+[![SonarQube](https://github.com/JuanPabloJimenezEsclusa/ignacio-high-throughput/actions/workflows/sonarqube.yml/badge.svg)](https://github.com/JuanPabloJimenezEsclusa/ignacio-high-throughput/actions/workflows/sonarqube.yml)
+[![Dependencies](https://github.com/JuanPabloJimenezEsclusa/ignacio-high-throughput/actions/workflows/dependency-review.yml/badge.svg)](https://github.com/JuanPabloJimenezEsclusa/ignacio-high-throughput/actions/workflows/dependency-review.yml)
+[![License](https://img.shields.io/github/license/JuanPabloJimenezEsclusa/ignacio-high-throughput)](https://github.com/JuanPabloJimenezEsclusa/ignacio-high-throughput/LICENSE.md)
+
 > • [Project Structure](#-project-structure)
   • [Technologies](#-technologies)
-  • [Building the Applications](#-building-the-applications)
-  • [Running the Applications](#-running-the-applications)
+  • [Building Modules](#-building-modules)
+  • [Running Modules](#-running-modules)
   • [API Endpoints](#-api-endpoints)
   • [Implementation Details](#-implementation-details)
   • [Profiling](#-profiling)
@@ -44,7 +49,7 @@ This is a multi-module project consisting of:
 [![Kubernetes](https://img.shields.io/badge/Kubernetes-1.33+-brown.svg)](https://kubernetes.io/releases/)
 [![AWS CLI](https://img.shields.io/badge/AWS%20CLI-2.27+-brown.svg)](https://aws.amazon.com/es/cli/)
 
-## 🔨 Building the Applications
+## 🔨 Building modules
 
 ```bash
 # Build all modules
@@ -63,6 +68,9 @@ mvn -P"${SPRING_PROFILES_ACTIVE}" \
   -Dmaven.build.cache.enabled=false \
   --projects imperative-throughput,reactive-throughput
 ```
+```bash
+gradle nativeBuild
+```
 
 - [Build Native Report - imperative-throughput](./imperative-throughput/target/imperative-throughput-build-report.html)
 - [Build Native Report - reactive-throughput](./reactive-throughput/target/reactive-throughput-build-report.html)
@@ -80,7 +88,7 @@ mvn -P"${SPRING_PROFILES_ACTIVE}" \
 gradle bootBuildImage
 ````
 
-## 🚀 Running the Applications
+## 🚀 Running modules
 
 ### Imperative Module
 
@@ -94,7 +102,7 @@ gradle bootRun --project-dir imperative-throughput
 ```
 ```bash
 # Run java -jar
-# Include init profiling for recording during 1 hour and dump when exit
+# Include init profiling for recording during 10 minutes and dump when exit
 java -XX:+FlightRecorder \
   -XX:StartFlightRecording=filename=resource-profiling/imperative-recording.jfr,settings=resource-profiling/custom.jfc,dumponexit=true,duration=10m \
   -jar ./imperative-throughput/target/imperative-throughput-1.0.0.jar
@@ -105,7 +113,10 @@ java -XX:+FlightRecorder \
   -XX:+FlightRecorder \
   -XX:StartFlightRecording=filename=resource-profiling/imperative-recording.jfr,settings=resource-profiling/custom.jfc,dumponexit=true,duration=10m
 ```
-
+```bash
+# Run native artifact built with Gradle
+./imperative-throughput/build/native/nativeCompile/imperative-throughput
+```
 ```bash
 # Run docker image
 docker run -it --rm \
@@ -148,7 +159,10 @@ java -XX:+FlightRecorder \
   -XX:+FlightRecorder \
   -XX:StartFlightRecording=filename=resource-profiling/reactive-recording.jfr,settings=resource-profiling/custom.jfc,dumponexit=true,duration=10m
 ```
-
+```bash
+# Run native artifact built with Gradle
+./reactive-throughput/build/native/nativeCompile/reactive-throughput
+```
 ```bash
 # Run docker image
 docker run -it --rm \
@@ -176,7 +190,7 @@ The application will be available at `http://localhost:9999/reactive-throughput/
 - `GET /imperative-throughput/smokes` - Returns "OK" after a 300ms delay using blocking Thread#sleep
 
 ```bash
-# Smoke test
+# Request endpoint
 curl -sv http://localhost:8888/imperative-throughput/smokes
 ```
 ```bash
@@ -194,7 +208,7 @@ curl -sv http://localhost:8888/imperative-throughput/actuator/metrics | jq
 - `GET /reactive-throughput/smokes` - Returns "OK" after a 300ms delay using reactive non-blocking delay
 
 ```bash
-# Smoke test
+# Request endpoint
 curl -sv http://localhost:9999/reactive-throughput/smokes
 ```
 ```bash

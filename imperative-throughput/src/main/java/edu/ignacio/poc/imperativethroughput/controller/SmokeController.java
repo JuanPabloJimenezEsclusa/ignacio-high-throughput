@@ -32,11 +32,12 @@ public class SmokeController  {
       throw new IllegalCallerException("Interrupted while sleeping");
     }
 
-    log.info("Smoke imperative endpoint");
-    return ResponseEntity.ok()
+    final var response = ResponseEntity.ok()
       .cacheControl(CacheControl.noCache())
       .contentType(MediaType.APPLICATION_JSON)
       .headers(httpHeaders -> httpHeaders.setAccept(List.of(MediaType.APPLICATION_JSON)))
       .body("OK:Imperative:%s".formatted(Thread.currentThread().toString()));
+    log.info("Smoke imperative endpoint - status: {} - thread: {}", response.getStatusCode(), Thread.currentThread());
+    return response;
   }
 }
