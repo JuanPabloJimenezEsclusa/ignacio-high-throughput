@@ -14,6 +14,9 @@ import io.gatling.javaapi.core.ScenarioBuilder;
 import io.gatling.javaapi.core.Simulation;
 import io.gatling.javaapi.http.HttpRequestActionBuilder;
 
+/**
+ * The type Gatling high throughput simulation.
+ */
 public class GatlingHighThroughputSimulation extends Simulation {
 
   private static final HttpRequestActionBuilder IMPERATIVE_CONFIG = setupGetConfiguration(
@@ -55,6 +58,9 @@ public class GatlingHighThroughputSimulation extends Simulation {
       .randomized();
   }
 
+  /**
+   * Instantiates a new Gatling high throughput simulation.
+   */
   public GatlingHighThroughputSimulation() {
     this.setUp(buildImperativeScenario()
       .injectOpen(buildConstantRateStep(), buildRampRateStep()));

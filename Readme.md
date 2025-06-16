@@ -131,7 +131,6 @@ docker run -it --rm \
   --env BPL_JMX_RMI_HOST=0.0.0.0 \
   --publish 8888:8888 \
   --publish 5088:5088 \
-  --oom-kill-disable \
   imperative-throughput:1.0.0
 ```
 
@@ -177,7 +176,6 @@ docker run -it --rm \
   --env BPL_JMX_RMI_HOST=0.0.0.0 \
   --publish 9999:9999 \
   --publish 5099:5099 \
-  --oom-kill-disable \
   reactive-throughput:1.0.0
 ```
 

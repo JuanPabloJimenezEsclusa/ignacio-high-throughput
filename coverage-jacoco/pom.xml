@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>edu.ignacio.poc</groupId>
+    <artifactId>ignacio-high-throughput</artifactId>
+    <version>1.0.0</version>
+  </parent>
+
+  <groupId>edu.ignacio.poc.high-throughput</groupId>
+  <artifactId>coverage-jacoco</artifactId>
+  <version>1.0.0</version>
+  <name>coverage-jacoco</name>
+  <description>coverage-jacoco</description>
+
+  <dependencies>
+    <dependency>
+      <groupId>edu.ignacio.poc.high-throughput</groupId>
+      <artifactId>imperative-throughput</artifactId>
+      <version>1.0.0</version>
+    </dependency>
+    <dependency>
+      <groupId>edu.ignacio.poc.high-throughput</groupId>
+      <artifactId>reactive-throughput</artifactId>
+      <version>1.0.0</version>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.jacoco</groupId>
+        <artifactId>jacoco-maven-plugin</artifactId>
+        <version>${jacoco-maven-plugin.version}</version>
+        <executions>
+          <execution>
+            <id>jacoco-site-aggregate</id>
+            <phase>verify</phase>
+            <goals>
+              <goal>report-aggregate</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+</project>

@@ -46,7 +46,7 @@ tasks.named('bootBuildImage') {
     "BP_SPRING_AOT_ENABLED": "true",
     "BP_OCI_AUTHORS": "Juan Pablo Jimenez Esclusa",
     "BP_OCI_CREATED": "${tasks.createBuildTimestamp.buildTimestamp}",
-    "BP_NATIVE_IMAGE_BUILD_ARGUMENTS": "-R:MaxHeapSize=2g -Ob -J-Xmx4g",
+    "BP_NATIVE_IMAGE_BUILD_ARGUMENTS": "-R:MaxHeapSize=4g -Ob -J-Xmx8g",
     "BP_SPRING_CLOUD_BINDINGS_DISABLED": "true",
 
     "BPL_FILE_ENCODING": "UTF-8",
@@ -88,10 +88,10 @@ graalvmNative {
         '-g',
         '--enable-monitoring=jcmd,jvmstat,jfr',
         '--gc=G1',
-        '-R:MaxHeapSize=2g',
+        '-R:MaxHeapSize=4g',
         '-march=native',
         '-Ob',
-        '-J-Xmx4g'
+        '-J-Xmx8g'
       ]
     }
   }
