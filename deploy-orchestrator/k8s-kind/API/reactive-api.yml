@@ -15,11 +15,11 @@ metadata:
   namespace: reactive-api-ns
 spec:
   hard:
-    limits.cpu: "8"
-    limits.memory: 8192Mi
-    pods: "6"
-    requests.cpu: "8"
-    requests.memory: 8192Mi
+    limits.cpu: "5"
+    limits.memory: 5120Mi
+    pods: "5"
+    requests.cpu: "5"
+    requests.memory: 5120Mi
 
 ---
 apiVersion: v1
@@ -32,7 +32,9 @@ data:
   LANGUAGE: "en_US.utf8"
   LC_ALL: "en_US.utf8"
   TIME_ZONE: "UTC"
-  JVM_OPTIONS: "-Xms512m -Xmx1024m"
+  JVM_OPTIONS: "-Xms512m -Xmx900m"
+  JAVA_TOOL_OPTIONS: "--enable-native-access=ALL-UNNAMED"
+  BPL_JVM_THREAD_COUNT: "600"
 
 ---
 apiVersion: apps/v1
@@ -60,6 +62,17 @@ spec:
         app: reactive-api
     spec:
       automountServiceAccountToken: false
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: node
+                    operator: In
+                    values:
+                      - worker1
+                      - worker2
+                      - worker3
       containers:
         - image: docker.io/library/reactive-throughput:1.0.0
           name: reactive-api
@@ -69,40 +82,16 @@ spec:
               memory: 1024Mi
               ephemeral-storage: "1Gi"
             requests:
-              cpu: "1"
-              memory: 1024Mi
-              ephemeral-storage: "1Gi"
+              cpu: "0.5"
+              memory: 500Mi
+              ephemeral-storage: "500Mi"
           imagePullPolicy: Never
-          env:
-            - name: LANG
-              valueFrom:
-                configMapKeyRef:
-                  name: reactive-api-config
-                  key: LANG
-            - name: LANGUAGE
-              valueFrom:
-                configMapKeyRef:
-                  name: reactive-api-config
-                  key: LANGUAGE
-            - name: LC_ALL
-              valueFrom:
-                configMapKeyRef:
-                  name: reactive-api-config
-                  key: LC_ALL
-            - name: TIME_ZONE
-              valueFrom:
-                configMapKeyRef:
-                  name: reactive-api-config
-                  key: TIME_ZONE
-            - name: JVM_OPTIONS
-              valueFrom:
-                configMapKeyRef:
-                  name: reactive-api-config
-                  key: JVM_OPTIONS
+          envFrom:
+            - configMapRef:
+                name: reactive-api-config
           ports:
             - name: api-port
               containerPort: 9999
-              hostPort: 9999
               protocol: TCP
           securityContext:
             runAsNonRoot: true
@@ -170,18 +159,25 @@ spec:
     kind: Deployment
     name: reactive-api
   minReplicas: 1
-  maxReplicas: 5
+  maxReplicas: 3
+  behavior:
+    scaleDown:
+      stabilizationWindowSeconds: 60
+      selectPolicy: Min
+      policies:
+        - periodSeconds: 120
+          type: Pods
+          value: 1
   metrics:
-    - type: Pods
-      pods:
-        metric:
-          name: http_requests_per_second
-        target:
-          type: AverageValue
-          averageValue: 1m
     - type: Resource
       resource:
         name: cpu
         target:
           type: Utilization
-          averageUtilization: 40
+          averageUtilization: 50
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: 75

@@ -1,4 +1,4 @@
-# Ignacio High-Throughput Java Application
+# Ignacio High Throughput Java Project
 
 [![Deploy](https://github.com/JuanPabloJimenezEsclusa/ignacio-high-throughput/actions/workflows/maven.yml/badge.svg)](https://github.com/JuanPabloJimenezEsclusa/ignacio-high-throughput/actions/workflows/maven.yml)
 [![SonarQube](https://github.com/JuanPabloJimenezEsclusa/ignacio-high-throughput/actions/workflows/sonarqube.yml/badge.svg)](https://github.com/JuanPabloJimenezEsclusa/ignacio-high-throughput/actions/workflows/sonarqube.yml)
@@ -10,7 +10,7 @@
   • [Building Modules](#-building-modules)
   • [Running Modules](#-running-modules)
   • [API Endpoints](#-api-endpoints)
-  • [Implementation Details](#-implementation-details)
+  • [Deployment](#-deployment)
   • [Profiling](#-profiling)
   • [Testing](#-testing)
   • [Performance Comparison](#-performance-comparison)
@@ -24,12 +24,16 @@ Quantitative performance metrics are systematically collected through industry-s
 
 ## 📦 Project Structure
 
+---
+
 This is a multi-module project consisting of:
 
 - [**imperative-throughput**](./imperative-throughput): Traditional Spring MVC implementation using blocking operations
 - [**reactive-throughput**](./reactive-throughput): Spring WebFlux implementation using non-blocking reactive streams
 
 ## 🛠️ Technologies
+
+---
 
 [![OpenJDK](https://img.shields.io/badge/OpenJDK-24+-005571.svg)](https://adoptium.net/es/temurin/releases/?os=any&arch=any&version=24)
 [![GraalVM](https://img.shields.io/badge/GraalVM-24+-005571.svg)](https://www.graalvm.org/jdk24/getting-started/linux/#script-friendly-urls)
@@ -44,12 +48,14 @@ This is a multi-module project consisting of:
 [![JMeter](https://img.shields.io/badge/JMeter-5.6+-orange.svg)](https://jmeter.apache.org/)
 [![Gatling](https://img.shields.io/badge/Gatling-3.14+-orange.svg)](https://github.com/gatling/gatling)
 
-[![Docker](https://img.shields.io/badge/Docker-28+-brown.svg)](https://www.docker.com/)
-[![Docker-compose](https://img.shields.io/badge/Docker%20Compose-v2.35+-brown.svg)](https://docs.docker.com/compose/install/)
+[![Docker](https://img.shields.io/badge/Docker-28+-brown.svg)](https://docs.docker.com/engine/release-notes/28/)
+[![Docker-compose](https://img.shields.io/badge/Docker%20Compose-v2.37+-brown.svg)](https://docs.docker.com/compose/install/standalone/)
 [![Kubernetes](https://img.shields.io/badge/Kubernetes-1.33+-brown.svg)](https://kubernetes.io/releases/)
 [![AWS CLI](https://img.shields.io/badge/AWS%20CLI-2.27+-brown.svg)](https://aws.amazon.com/es/cli/)
 
 ## 🔨 Building modules
+
+---
 
 ```bash
 # Build all modules
@@ -89,6 +95,8 @@ gradle bootBuildImage
 ````
 
 ## 🚀 Running modules
+
+---
 
 ### Imperative Module
 
@@ -183,6 +191,8 @@ The application will be available at `http://localhost:9999/reactive-throughput/
 
 ## 🔌 API Endpoints
 
+---
+
 ### Imperative Module
 
 - `GET /imperative-throughput/smokes` - Returns "OK" after a 300ms delay using blocking Thread#sleep
@@ -219,21 +229,16 @@ curl -sv http://localhost:9999/reactive-throughput/actuator/prometheus
 curl -sv http://localhost:9999/reactive-throughput/actuator/metrics | jq
 ```
 
-## 🧪 Implementation Details
+## 🛠️ Deployment
 
-### Imperative Approach
+---
 
-Uses traditional Spring MVC with blocking operations:
-- Thread.sleep for simulating work
-- Synchronous request processing
-- One thread per request model
+Deploy the application to a local or cloud environment using one of the following options:
 
-### Reactive Approach
 
-Uses Spring WebFlux with non-blocking operations:
-- Mono/Flux reactive types
-- Non-blocking delays
-- Functional endpoint definitions
+| [![Docker Compose](https://img.shields.io/badge/Local-Docker%20Compose-005571.svg)](./deploy-orchestrator/docker-compose/Readme.md) | [![K8s Kind](https://img.shields.io/badge/Local-K8s%20Kind-005571.svg)](./deploy-orchestrator/k8s-kind/Readme.md) | [![AWS ECS](https://img.shields.io/badge/Cloud-AWS%20ECS-005571.svg)](./deploy-orchestrator/aws-ecs/Readme.md)    |
+|:------------------------------------------------------------------------------------------------------------------------------------|:------------------------------------------------------------------------------------------------------------------|:------------------------------------------------------------------------------------------------------------------|
+| ![Compose Diagram](./deploy-orchestrator/docker-compose/images/high-throughput-docker-diagram.svg)                                  | ![Kind Diagram](./deploy-orchestrator/k8s-kind/images/high-throughput-k8s-diagram.svg)                            | ![ECS Diagram](./deploy-orchestrator/aws-ecs/images/high-throughput-aws-cf-diagram.svg)                           |
 
 ## 📊 Profiling
 
@@ -329,6 +334,8 @@ unzip visualvm_22.zip
 
 ## 🔍 Testing
 
+---
+
 Both modules include comprehensive test coverage including:
 - Unit tests
 - Loading tests
@@ -344,6 +351,8 @@ mvn test && gradle test
 ```
 
 ## ⚡ Performance Comparison
+
+---
 
 This project allows comparing:
 
@@ -425,7 +434,7 @@ Here's a table explaining 6 scenarios with performance indicators:
 
 ## 📚 References
 
---
+---
 
 - [Exploration of Java Virtual Threads and Performance Analysis](https://www.alibabacloud.com/blog/exploration-of-java-virtual-threads-and-performance-analysis_601860)
 - [Why Do We Need Java Reactive Programming?](https://www.tatvasoft.com/blog/java-reactive-programming/)
