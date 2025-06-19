@@ -20,8 +20,8 @@
 
   <licenses>
     <license>
-      <name>GPL-3.0</name>
-      <url>https://www.gnu.org/licenses/gpl-3.0.en.html</url>
+      <name>GPL-3.0-only</name>
+      <url>https://www.gnu.org/licenses/gpl-3.0-standalone.html</url>
       <distribution>repo</distribution>
     </license>
   </licenses>
@@ -62,18 +62,61 @@
     <java.version>24</java.version>
     <encoding>UTF-8</encoding>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <jetty-reactive-httpclient.version>4.0.10</jetty-reactive-httpclient.version>
+    <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+
+    <!-- Plugins -->
+    <jacoco-maven-plugin.version>0.8.13</jacoco-maven-plugin.version>
 
     <!-- Sonar -->
     <sonar.organization>juanpablojimenezesclusa</sonar.organization>
     <sonar.host.url>https://sonarcloud.io</sonar.host.url>
     <sonar.projectKey>JuanPabloJimenezEsclusa_ignacio-high-throughput</sonar.projectKey>
+    <sonar.coverage.jacoco.xmlReportPaths>${project.basedir}/coverage-jacoco/target/site/jacoco/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
     <sonar.scm.exclusions.disabled>true</sonar.scm.exclusions.disabled>
-    <sonar.branch.name>main</sonar.branch.name>
+    <sonar.branch.name>develop</sonar.branch.name>
   </properties>
 
   <modules>
     <module>imperative-throughput</module>
     <module>reactive-throughput</module>
+    <module>coverage-jacoco</module>
   </modules>
+
+  <build>
+    <pluginManagement> <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-resources-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>copy-license-to-meta-inf</id>
+            <phase>process-resources</phase>
+            <goals>
+              <goal>copy-resources</goal>
+            </goals>
+            <configuration>
+              <outputDirectory>${project.build.outputDirectory}</outputDirectory>
+              <resources>
+                <resource>
+                  <!--suppress UnresolvedMavenProperty -->
+                  <directory>${session.executionRootDirectory}</directory>
+                  <includes>
+                    <include>LICENSE.txt</include>
+                  </includes>
+                  <targetPath>META-INF/</targetPath>
+                </resource>
+              </resources>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+    </pluginManagement>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-resources-plugin</artifactId>
+      </plugin>
+    </plugins>
+  </build>
 </project>

@@ -15,6 +15,14 @@
   <name>reactive-throughput</name>
   <description>reactive-throughput</description>
 
+  <licenses>
+    <license>
+      <name>GPL-3.0-only</name>
+      <url>https://www.gnu.org/licenses/gpl-3.0-standalone.html</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
+
   <dependencies>
     <dependency>
       <groupId>org.springframework.boot</groupId>
@@ -68,7 +76,7 @@
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>build-helper-maven-plugin</artifactId>
-        <version>3.6.0</version> <executions>
+        <version>3.6.1</version> <executions>
         <execution>
           <id>timestamp-property</id>
           <goals>
@@ -93,6 +101,7 @@
               <artifactId>spring-boot-configuration-processor</artifactId>
             </path>
           </annotationProcessorPaths>
+          <encoding>UTF-8</encoding>
         </configuration>
       </plugin>
       <plugin>
@@ -103,6 +112,7 @@
             <!-- https://bell-sw.com/blog/how-to-set-up-graalvm-native-image-debugging/ -->
             <buildArg>-g</buildArg>
             <!-- https://www.graalvm.org/jdk24/reference-manual/native-image/debugging-and-diagnostics/jcmd/ -->
+            <!-- https://github.com/oracle/graal/blob/master/docs/reference-manual/native-image/JFR.md#jdk-flight-recorder-jfr-with-native-image -->
             <buildArg>--enable-monitoring=jcmd,jvmstat,jfr</buildArg>
             <!--
             (compile) Recommendations:
@@ -114,12 +124,32 @@
             -->
             <buildArg>--emit build-report</buildArg>
             <buildArg>--gc=G1</buildArg>
-            <buildArg>-R:MaxHeapSize=1g</buildArg>
+            <buildArg>-R:MaxHeapSize=4g</buildArg>
             <buildArg>-march=native</buildArg>
             <buildArg>-Ob</buildArg>
-            <buildArg>-J-Xmx4g</buildArg>
+            <buildArg>-J-Xmx8g</buildArg>
           </buildArgs>
         </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.jacoco</groupId>
+        <artifactId>jacoco-maven-plugin</artifactId>
+        <version>${jacoco-maven-plugin.version}</version>
+        <executions>
+          <execution>
+            <id>jacoco-initialize</id>
+            <goals>
+              <goal>prepare-agent</goal>
+            </goals>
+          </execution>
+          <execution>
+            <id>jacoco-report</id>
+            <phase>test</phase>
+            <goals>
+              <goal>report</goal>
+            </goals>
+          </execution>
+        </executions>
       </plugin>
       <plugin>
         <groupId>org.springframework.boot</groupId>
@@ -138,17 +168,17 @@
               <BP_JVM_HEAD_ROOM>5</BP_JVM_HEAD_ROOM>
               <BP_JVM_JAVA_OPTS>-XX:+UseG1GC -XX:+PrintGCDetails</BP_JVM_JAVA_OPTS>
               <BP_MAVEN_BUILT_ARTIFACT>target/*.jar</BP_MAVEN_BUILT_ARTIFACT>
-              <BP_MAVEN_BUILD_ARGUMENTS>package -DskipTests=true</BP_MAVEN_BUILD_ARGUMENTS>
+              <BP_MAVEN_BUILD_ARGUMENTS>package -DskipTests=true -Dfile.encoding=UTF-8</BP_MAVEN_BUILD_ARGUMENTS>
               <BP_OCI_SOURCE>true</BP_OCI_SOURCE>
               <BP_OCI_AUTHORS>Juan Pablo Jimenez Esclusa</BP_OCI_AUTHORS>
               <BP_OCI_CREATED>${build.timestamp}</BP_OCI_CREATED>
-              <BP_NATIVE_IMAGE_BUILD_ARGUMENTS>-R:MaxHeapSize=2g -Ob -J-Xmx4g</BP_NATIVE_IMAGE_BUILD_ARGUMENTS>
+              <BP_NATIVE_IMAGE_BUILD_ARGUMENTS>-R:MaxHeapSize=4g -Ob -J-Xmx8g</BP_NATIVE_IMAGE_BUILD_ARGUMENTS>
               <BP_SPRING_AOT_ENABLED>true</BP_SPRING_AOT_ENABLED>
               <BP_SPRING_CLOUD_BINDINGS_DISABLED>true</BP_SPRING_CLOUD_BINDINGS_DISABLED>
 
               <BPL_FILE_ENCODING>UTF-8</BPL_FILE_ENCODING>
               <BPL_JFR_ENABLED>true</BPL_JFR_ENABLED>
-              <BPL_JFR_ARGS>filename=/tmp/profiling/reactive-recording.jfr,settings=/tmp/profiling/custom.jfc,dumponexit=true,duration=20m</BPL_JFR_ARGS>
+              <BPL_JFR_ARGS>filename=/tmp/profiling/reactive-recording.jfr,settings=/tmp/profiling/custom.jfc,dumponexit=true,duration=10m</BPL_JFR_ARGS>
               <BPL_JMX_ENABLED>true</BPL_JMX_ENABLED>
               <BPL_JMX_SSL>false</BPL_JMX_SSL>
               <BPL_JMX_AUTHENTICATE>false</BPL_JMX_AUTHENTICATE>
@@ -164,6 +194,7 @@
           </image>
           <arguments>
             <argument>-Dspring.aot.enabled=true</argument>
+            <argument>-Dfile.encoding=UTF-8</argument>
             <argument>--enable-native-access=ALL-UNNAMED</argument>
           </arguments>
         </configuration>

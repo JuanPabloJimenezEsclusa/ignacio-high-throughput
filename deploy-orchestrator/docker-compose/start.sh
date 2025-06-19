@@ -26,7 +26,7 @@ __buildProjects() {
     echo -e "${SEPARATOR} 🔨 Compile and build the image. ${SEPARATOR}"
     cd "${workspace}/${baseProjectPath}"
     mvn -P"${SPRING_PROFILES_ACTIVE}" \
-      clean spring-boot:build-image \
+      spring-boot:build-image \
       -Dmaven.test.skip=true \
       -Dmaven.build.cache.enabled=false \
       --projects imperative-throughput,reactive-throughput

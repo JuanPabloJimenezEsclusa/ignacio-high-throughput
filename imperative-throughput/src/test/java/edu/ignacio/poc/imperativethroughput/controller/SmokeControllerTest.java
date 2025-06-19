@@ -26,8 +26,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
-@WebMvcTest(SmokeController.class)
+@WebMvcTest({SmokeController.class, SmokeExceptionHandler.class})
 @ContextConfiguration(classes = ImperativeThroughputApplication.class)
 @DisplayName("Smoke Controller Test")
 class SmokeControllerTest {
@@ -40,6 +41,9 @@ class SmokeControllerTest {
 
   @Autowired
   private SmokeController controller;
+
+  @Autowired
+  private SmokeExceptionHandler exceptionHandler;
 
   @Test
   @DisplayName("Should return OK with correct cache control headers")
@@ -122,5 +126,25 @@ class SmokeControllerTest {
     assertTrue(await);
     assertNotNull(thrownException.get());
     assertInstanceOf(IllegalCallerException.class, thrownException.get());
+  }
+
+  @Test
+  @DisplayName("Should handle exceptions using ExceptionHandler")
+  void shouldHandleExceptionsUsingExceptionHandler() throws Exception {
+    // Given
+    final var mockMvcWithException = MockMvcBuilders.standaloneSetup(
+        new SmokeController() {
+          @Override
+          public ResponseEntity<String> getSmoke() {
+            throw new IllegalCallerException("Interrupted while sleeping");
+          }
+        })
+      .setControllerAdvice(exceptionHandler)
+      .build();
+
+    // When, Then
+    mockMvcWithException.perform(get(SMOKES_URL))
+      .andExpect(status().is5xxServerError())
+      .andExpect(content().string("Interrupted while sleeping"));
   }
 }

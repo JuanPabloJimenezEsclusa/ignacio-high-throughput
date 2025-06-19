@@ -13,11 +13,11 @@ public class SmokeExceptionHandler {
   /**
    * Handle exceptions response entity.
    *
-   * @param ex the ex
+   * @param ex the runtimeException
    * @return the response entity
    */
-  @ExceptionHandler
-  public ResponseEntity<String> handleExceptions(final Exception ex) {
+  @ExceptionHandler(RuntimeException.class)
+  public ResponseEntity<String> handleExceptions(final RuntimeException ex) {
     return ResponseEntity.internalServerError().body(ex.getMessage());
   }
 }

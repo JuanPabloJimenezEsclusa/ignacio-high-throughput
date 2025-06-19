@@ -1,11 +1,28 @@
 # Docker Compose
 
-> • [Usage](#-usage)
+> • [Dependencies](#-dependencies)
+  • [Architecture](#-architecture)
+  • [Usage](#-usage)
   • [Links](#-links)
 
 Based on `docker-compose`
 
-## 🌐 Usage
+## ⚙️ Dependencies
+
+---
+
+* [Docker ~28](https://docs.docker.com/engine/release-notes/28/)
+* [Docker ~2.37](https://docs.docker.com/compose/install/standalone/)
+
+## 🏗️ Architecture
+
+---
+
+Basic deployment with Docker Compose to prioritize simplicity and local development.
+
+![High Throughput Docker](./images/high-throughput-docker-diagram.svg)
+
+## 🚀 Usage
 
 ---
 
