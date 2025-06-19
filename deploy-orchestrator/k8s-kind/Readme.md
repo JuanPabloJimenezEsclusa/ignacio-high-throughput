@@ -1,7 +1,9 @@
 # Kubernetes/Kind
 
 > • [Dependencies](#-dependencies)
-  • [Setup](#-setup)
+  • [Architecture](#-architecture)
+  • [Usage](#-usage)
+  • [Links](#-links)
 
 Based on [Kind](https://kind.sigs.k8s.io/) (Kubernetes IN Docker)
 
@@ -9,9 +11,18 @@ Based on [Kind](https://kind.sigs.k8s.io/) (Kubernetes IN Docker)
 
 ---
 
-- [Kind >= 0.29.0](https://kind.sigs.k8s.io/docs/user/quick-start/#installation)
+* [Docker ~28](https://docs.docker.com/engine/release-notes/28/)
+* [Kind ~0.29](https://kind.sigs.k8s.io/docs/user/quick-start/#installation)
 
-## 🚀 Setup
+## 🏗️ Architecture
+
+---
+
+Basic deployment with Kind to prioritize simplicity and local development.
+
+![High Throughput Kind](./images/high-throughput-k8s-diagram.svg)
+
+## 🚀 Usage
 
 ---
 
@@ -39,9 +50,23 @@ cd API
 
 ### 🔄 Full Setup
 
+> ⚠️ Requires sudo permissions to install tools and remove tmp files.
+
 Use the combined script to set up everything at once:
 
 ```bash
 # Run the full setup script
 ./run-cluster-with-api.sh
 ```
+
+## 🔗 Links
+
+---
+
+* **API:**
+  * [imperative-throughput](http://localhost:8888/imperative-throughput/smokes)
+  * [reactive-throughput](http://localhost:9999/reactive-throughput/smokes)
+* **Prometheus (Monitoring):**
+  * [Prometheus monitoring dashboard](http://localhost:30000)
+* **Grafana (Monitoring Visualization):**
+  * [Grafana dashboard](http://localhost:31000) (Login: admin/prom-operator)

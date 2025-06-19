@@ -11,8 +11,8 @@ Based on `AWS Cloud Provider`
 
 ---
 
-* Docker >= 28
-* AWS CLI >= 2.27.22
+* [Docker ~28](https://docs.docker.com/engine/release-notes/28/)
+* [AWS CLI ~2.27](https://github.com/aws/aws-cli/blob/v2/CHANGELOG.rst)
 
 ## 🏗️ Architecture
 
@@ -22,19 +22,19 @@ Basic deployment prioritizing simplification of the architecture and leveraging 
 
 ![High Throughput AWS Cloudformation](./images/high-throughput-aws-cf-diagram.svg)
 
-## 🌐 Usage
+## 🚀 Usage
 
 ---
 
 ❗ This infrastructure incurs costs. Avoid keeping it running if it's not in use.
 
 ```bash
-# Init containers infrastructure
+# Init container infrastructure
 ./init-aws-stack.sh buildProjects=true
 ```
 
 ```bash
-# Delete containers infrastructure
+# Delete container infrastructure
 ./delete-aws-stack.sh removeImages=true
 ```
 
@@ -50,3 +50,4 @@ Basic deployment prioritizing simplification of the architecture and leveraging 
   * [AWS ECS Cluster](https://eu-west-1.console.aws.amazon.com/ecs/v2/clusters/high-throughput-cluster/services?region=eu-west-1) 💰
   * [AWS VPC](https://eu-west-1.console.aws.amazon.com/vpcconsole/home?region=eu-west-1#vpcs) 💰
   * [AWS EC2 Load Balancer](https://eu-west-1.console.aws.amazon.com/ec2/home?region=eu-west-1#LoadBalancers) 💰
+  * [AWS Route 53](https://eu-west-1.console.aws.amazon.com/route53/v2/hostedzones?region=eu-west-1) 💰

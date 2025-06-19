@@ -7,20 +7,20 @@ Parameters:
   HostedZoneId:
     Type: String
     Description: The ID of the Route 53 hosted zone
-    Default: Z102528520PCT47CK313B
+    Default: Z05681561G3JHUOXZV5CN
   DomainName:
     Type: String
     Description: The domain name for the Route 53 record set
-    Default: poc.jpje-kops.xyz
+    Default: tech.jpje.xyz
     AllowedPattern: (?!-)[a-zA-Z0-9-.]{1,63}(?<!-)
   ImperativeImageName:
     Type: String
     Description: Imperative Docker image name
-    Default: "public.ecr.aws/q9k9a5q7/imperative-throughput:1.0.0"
+    Default: "public.ecr.aws/jpje-software-company/imperative-throughput:1.0.0"
   ReactiveImageName:
     Type: String
     Description: Reactive Docker image name
-    Default: "public.ecr.aws/q9k9a5q7/reactive-throughput:1.0.0"
+    Default: "public.ecr.aws/jpje-software-company/reactive-throughput:1.0.0"
 
 Resources:
   #################################################################################################
@@ -403,7 +403,11 @@ Resources:
             - Name: TIME_ZONE
               Value: "UTC"
             - Name: JVM_OPTIONS
-              Value: "-Xms512m -Xmx1024m"
+              Value: "-Xms512m -Xmx900m"
+            - Name: JAVA_TOOL_OPTIONS
+              Value: "--enable-native-access=ALL-UNNAMED"
+            - Name: BPL_JVM_THREAD_COUNT
+              Value: "600"
 
   ReactiveTaskDefinition:
     Type: "AWS::ECS::TaskDefinition"
@@ -452,7 +456,11 @@ Resources:
             - Name: TIME_ZONE
               Value: "UTC"
             - Name: JVM_OPTIONS
-              Value: "-Xms512m -Xmx1024m"
+              Value: "-Xms512m -Xmx900m"
+            - Name: JAVA_TOOL_OPTIONS
+              Value: "--enable-native-access=ALL-UNNAMED"
+            - Name: BPL_JVM_THREAD_COUNT
+              Value: "600"
 
   # Create an ECS Service
   # https://aws.amazon.com/es/fargate/pricing/

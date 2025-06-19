@@ -39,21 +39,62 @@ tasks.named('bootBuildImage') {
     "BPL_JVM_THREAD_COUNT": "2000",
     "BP_JVM_JMXREMOTE": "true",
     "BP_JVM_HEAD_ROOM": "5",
-    "BP_JVM_JAVA_OPTS": "-XX:+UseParallelGC -XX:+UseStringDeduplication -Dfile.encoding=UTF-8",
+    "BP_JVM_JAVA_OPTS": "-XX:+UseG1GC -XX:+PrintGCDetails",
     "BP_OCI_SOURCE": "true",
     "BP_MAVEN_BUILT_ARTIFACT": "target/*.jar",
     "BP_MAVEN_BUILD_ARGUMENTS": "package -DskipTests=true",
-    "BPL_JMX_ENABLED": "true",
-    "BPL_SPRING_AOT_ENABLED": "true",
     "BP_SPRING_AOT_ENABLED": "true",
     "BP_OCI_AUTHORS": "Juan Pablo Jimenez Esclusa",
-    "BP_OCI_CREATED": "${tasks.createBuildTimestamp.buildTimestamp}"
+    "BP_OCI_CREATED": "${tasks.createBuildTimestamp.buildTimestamp}",
+    "BP_NATIVE_IMAGE_BUILD_ARGUMENTS": "-R:MaxHeapSize=4g -Ob -J-Xmx8g",
+    "BP_SPRING_CLOUD_BINDINGS_DISABLED": "true",
+
+    "BPL_FILE_ENCODING": "UTF-8",
+    "BPL_JFR_ENABLED": "true",
+    "BPL_JFR_ARGS": "filename=/tmp/profiling/reactive-recording.jfr,settings=/tmp/profiling/custom.jfc,dumponexit=true,duration=20m",
+    "BPL_JMX_ENABLED": "true",
+    "BPL_JMX_SSL": "false",
+    "BPL_JMX_AUTHENTICATE": "false",
+    "BPL_JMX_LOCAL_ONLY": "false",
+    "BPL_JMX_PORT": "5099",
+    "BPL_JMX_RMI_PORT": "5099",
+    "BPL_JMX_HOST": "0.0.0.0",
+    "BPL_JMX_RMI_HOST": "0.0.0.0",
+    "BPL_JVM_HEAP_SIZE": "1g",
+    "BPL_SPRING_AOT_ENABLED": "true"
   ]
 }
 
 tasks.named('bootRun') {
   optimizedLaunch = true
-  jvmArgs = ["-Dspring.aot.enabled=false"]
+  jvmArgs = [
+    "-Dspring.aot.enabled=false",
+    "--enable-native-access=ALL-UNNAMED"
+  ]
+}
+
+java {
+  toolchain {
+    languageVersion = JavaLanguageVersion.of(24)
+  }
+}
+
+graalvmNative {
+  toolchainDetection = true
+  binaries {
+    main {
+      verbose = true
+      buildArgs = [
+        '-g',
+        '--enable-monitoring=jcmd,jvmstat,jfr',
+        '--gc=G1',
+        '-R:MaxHeapSize=4g',
+        '-march=native',
+        '-Ob',
+        '-J-Xmx8g'
+      ]
+    }
+  }
 }
 
 springBoot {

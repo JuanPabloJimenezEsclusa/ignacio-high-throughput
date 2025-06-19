@@ -10,22 +10,24 @@ if [[ "${debug:-}" == "true" ]]; then set -o xtrace; fi  # enable debug mode.
 SEPARATOR="\n ################################################## \n"
 
 cd "$(dirname "$0")"
+workspace="$(pwd)"
 
 __installClients() {
   echo -e "${SEPARATOR} 📦 Install clients. ${SEPARATOR}"
-  cd cluster
-  ./install-clients.sh
+  cd "${workspace}/cluster"
+  ./install.sh
 }
 
 __startCluster() {
   echo -e "${SEPARATOR} 🚀 Start cluster. ${SEPARATOR}"
+  cd "${workspace}/cluster"
   ./start-cluster.sh
 }
 
 __installAPI() {
   echo -e "${SEPARATOR} 🚀 Install API. ${SEPARATOR}"
-  cd ../API
-  ./apply.sh buildProjects=true
+  cd "${workspace}/API"
+  ./apply.sh buildProjects=false
 }
 
 main() {

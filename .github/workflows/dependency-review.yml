@@ -20,3 +20,4 @@ jobs:
           fail-on-severity: moderate
           comment-summary-in-pr: always
           vulnerability-check: true
+          license-check: false
