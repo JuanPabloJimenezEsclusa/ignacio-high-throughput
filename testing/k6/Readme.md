@@ -10,9 +10,9 @@ This module contains performance tests for the Spring Boot application using the
 
 ---
 
-* K6 >= 1.0.0
-* Docker >= 28
-* Docker Compose >= v2.35
+* [K6 ~0.57](https://grafana.com/docs/k6/next/release-notes/)
+* [Docker ~28](https://docs.docker.com/engine/release-notes/28/)
+* [Docker ~2.37](https://docs.docker.com/compose/install/standalone/)
 
 ## 🏗️ Architecture
 

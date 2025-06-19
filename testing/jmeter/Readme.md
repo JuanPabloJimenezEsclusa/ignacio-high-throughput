@@ -10,8 +10,8 @@ Performance testing project using JMeter
 
 ---
 
-* [JDK >= 24+](https://openjdk.org/projects/jdk/24/)
-* JMeter >= 5.6+
+* [JDK 24](https://openjdk.org/projects/jdk/24/)
+* [JMeter ~5.6](https://jmeter.apache.org/changes.html)
 
 ## 🏗️ Architecture
 
