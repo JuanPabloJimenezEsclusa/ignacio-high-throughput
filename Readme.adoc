@@ -3,7 +3,11 @@
 image:https://github.com/JuanPabloJimenezEsclusa/ignacio-high-throughput/actions/workflows/maven.yml/badge.svg["Deploy", link="https://github.com/JuanPabloJimenezEsclusa/ignacio-high-throughput/actions/workflows/maven.yml"]
 image:https://github.com/JuanPabloJimenezEsclusa/ignacio-high-throughput/actions/workflows/sonarqube.yml/badge.svg["SonarQube", link="https://github.com/JuanPabloJimenezEsclusa/ignacio-high-throughput/actions/workflows/sonarqube.yml"]
 image:https://github.com/JuanPabloJimenezEsclusa/ignacio-high-throughput/actions/workflows/dependency-review.yml/badge.svg["Dependencies", link="https://github.com/JuanPabloJimenezEsclusa/ignacio-high-throughput/actions/workflows/dependency-review.yml"]
-image:https://img.shields.io/github/license/JuanPabloJimenezEsclusa/ignacio-high-throughput["License", link="https://github.com/JuanPabloJimenezEsclusa/ignacio-high-throughput/LICENSE.md"]
+image:https://img.shields.io/github/license/JuanPabloJimenezEsclusa/ignacio-high-throughput?logo=github["License", link="https://github.com/JuanPabloJimenezEsclusa/ignacio-high-throughput/LICENSE.md"]
+image:https://img.shields.io/github/languages/code-size/JuanPabloJimenezEsclusa/ignacio-high-throughput?logo=github[GitHub code size in bytes]
+
+image:https://img.shields.io/sonar/tests/JuanPabloJimenezEsclusa_ignacio-high-throughput/develop?logo=sonar&server=https://sonarcloud.io[Sonar Tests]
+image:https://img.shields.io/sonar/coverage/JuanPabloJimenezEsclusa_ignacio-high-throughput/develop?logo=sonar&server=https://sonarcloud.io[Sonar Coverage]
 
 <<_project_structure,Project Structure>>
   | <<_technologies,Technologies>>
@@ -15,7 +19,6 @@ image:https://img.shields.io/github/license/JuanPabloJimenezEsclusa/ignacio-high
   | <<_testing,Testing>>
   | <<_performance_comparison,Performance Comparison>>
   | <<_references,References>>
-
 
 IMPORTANT: We're going to compare how Java virtual threads affect simple APIs, contrasting them with both traditional synchronous and reactive methods
 

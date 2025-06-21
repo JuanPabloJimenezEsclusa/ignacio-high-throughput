@@ -1,0 +1,32 @@
+stages:
+  - build
+
+# --- Maven Build Job ---
+build_with_maven:
+  stage: build
+  image: maven:3.9.9-eclipse-temurin-24-alpine
+  script:
+    - echo "Compiling with Maven on Java version:"
+    - java -version
+    - mvn -v
+    - mvn install
+    - echo "Running code coverage:"
+    - mvn org.jacoco:jacoco-maven-plugin:prepare-agent test org.jacoco:jacoco-maven-plugin:report org.jacoco:jacoco-maven-plugin:report-aggregate
+    - echo "Running code quality:"
+    - mvn com.github.spotbugs:spotbugs-maven-plugin:check
+  # This section defines rules for when the job should run.
+  # 'if: $CI_COMMIT_BRANCH' means the job will run for any commit to any branch.
+  rules:
+    - if: $CI_COMMIT_BRANCH
+
+# --- Gradle Build Job ---
+build_with_gradle:
+  stage: build
+  image: gradle:8.14.2-jdk24-alpine
+  script:
+    - echo "Compiling with Gradle on Java version:"
+    - java -version
+    - gradle -v
+    - gradle build
+  rules:
+    - if: $CI_COMMIT_BRANCH

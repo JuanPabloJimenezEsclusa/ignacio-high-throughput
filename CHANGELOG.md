@@ -5,6 +5,16 @@ Changelog of camila-services.
 ## Unreleased
 ### No issue
 
+**[GH-7] ci: add gitlab pipeline**
+
+
+[0dede386c4f86f4](https://github.com/JuanPabloJimenezEsclusa/ignacio-high-throughput/commit/0dede386c4f86f4) Juan Pablo Jimenez *2025-06-21 15:08:49*
+
+**[GH-7] docs: fix project url**
+
+
+[283c6b338f3e699](https://github.com/JuanPabloJimenezEsclusa/ignacio-high-throughput/commit/283c6b338f3e699) juan.pablo.jimenez.esclusa *2025-06-21 12:26:52*
+
 **[GH-7] docs: update aws deployment diagram**
 
 
