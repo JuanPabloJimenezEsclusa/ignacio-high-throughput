@@ -16,14 +16,8 @@ image:https://img.shields.io/github/license/JuanPabloJimenezEsclusa/ignacio-high
   | <<_performance_comparison,Performance Comparison>>
   | <<_references,References>>
 
-****
- A comprehensive empirical study evaluating the performance characteristics and scalability patterns of high-throughput data processing architectures in Java, comparing traditional thread-per-request imperative models with event-loop reactive paradigms.
 
- This research implements controlled experimental scenarios across six distinct runtime configurations, analyzing the impact of virtual thread utilization and native compilation on response latency, resource efficiency, and throughput optimization.
-
- Quantitative performance metrics are systematically collected through industry-standard profiling tools and benchmarking methodologies to provide statistically significant insights into the architectural trade-offs between imperative and reactive programming models under varying computational loads.
-****
-
+IMPORTANT: We're going to compare how Java virtual threads affect simple APIs, contrasting them with both traditional synchronous and reactive methods
 
 [#_project_structure]
 == 📦 Project Structure
@@ -103,6 +97,20 @@ mvn -P"${SPRING_PROFILES_ACTIVE}" \
 [source,bash]
 ----
 gradle bootBuildImage
+----
+
+[source,bash]
+----
+# Analyze docker images with Dive
+docker run --rm -it \
+  -v /var/run/docker.sock:/var/run/docker.sock \
+  docker.io/wagoodman/dive:latest imperative-throughput:1.0.0
+----
+
+[source,bash]
+----
+# Rewrite sources observing the best practices
+mvn rewrite:runNoFork -Popen-rewrite
 ----
 
 [#_running_modules]

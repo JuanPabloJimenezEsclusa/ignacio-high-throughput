@@ -11,10 +11,10 @@ This module contains performance tests for the Spring Boot application using the
 
 ---
 
-* [Gatling >= 3.14](https://docs.gatling.io/tutorials/scripting-intro/)
-* [JDK >= 24](https://openjdk.org/projects/jdk/24/)
-* Docker >= 28
-* Docker Compose >= v2.35
+* [Gatling ~3.14](https://docs.gatling.io/tutorials/scripting-intro/)
+* [JDK 24](https://openjdk.org/projects/jdk/24/)
+* [Docker ~28](https://docs.docker.com/engine/release-notes/28/)
+* [Docker ~2.37](https://docs.docker.com/compose/install/standalone/)
 
 ## 🏗️ Architecture
 

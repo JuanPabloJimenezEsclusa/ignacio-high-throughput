@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
  * The type Smoke controller.
  */
 @RestController
-public class SmokeController  {
+public class SmokeController {
 
   private static final Logger log = LoggerFactory.getLogger(SmokeController.class);
 
