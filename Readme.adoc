@@ -99,6 +99,20 @@ mvn -P"${SPRING_PROFILES_ACTIVE}" \
 gradle bootBuildImage
 ----
 
+[source,bash]
+----
+# Analyze docker images with Dive
+docker run --rm -it \
+  -v /var/run/docker.sock:/var/run/docker.sock \
+  docker.io/wagoodman/dive:latest imperative-throughput:1.0.0
+----
+
+[source,bash]
+----
+# Rewrite sources observing the best practices
+mvn rewrite:runNoFork -Popen-rewrite
+----
+
 [#_running_modules]
 == 🚀 Running modules
 

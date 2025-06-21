@@ -13,9 +13,9 @@
   <groupId>edu.ignacio.poc</groupId>
   <artifactId>ignacio-high-throughput</artifactId>
   <version>1.0.0</version>
+  <packaging>pom</packaging>
   <name>high-throughput</name>
   <description>PoC to test Java high throughput</description>
-  <packaging>pom</packaging>
   <url/>
 
   <licenses>
@@ -38,34 +38,41 @@
     </developer>
   </developers>
 
+  <modules>
+    <module>imperative-throughput</module>
+    <module>reactive-throughput</module>
+    <module>coverage-jacoco</module>
+  </modules>
+
   <scm>
-    <url>https://github.com/JuanPabloJimenezEsclusa/high-throughput</url>
-    <connection>scm:git:https://github.com/JuanPabloJimenezEsclusa/high-throughput.git</connection>
-    <developerConnection>scm:git:https://github.com/JuanPabloJimenezEsclusa/high-throughput.git</developerConnection>
+    <url>https://github.com/JuanPabloJimenezEsclusa/ignacio-high-throughput</url>
+    <connection>scm:git:https://github.com/JuanPabloJimenezEsclusa/ignacio-high-throughput.git</connection>
+    <developerConnection>scm:git:https://github.com/JuanPabloJimenezEsclusa/ignacio-high-throughput.git</developerConnection>
     <tag>HEAD</tag>
   </scm>
 
   <issueManagement>
     <system>Github</system>
-    <url>https://github.com/JuanPabloJimenezEsclusa/high-throughput/issues</url>
+    <url>https://github.com/JuanPabloJimenezEsclusa/ignacio-high-throughput/issues</url>
   </issueManagement>
 
   <distributionManagement>
     <repository>
       <id>github</id>
       <name>high-throughput</name>
-      <url>https://maven.pkg.github.com/JuanPabloJimenezEsclusa/high-throughput</url>
+      <url>https://maven.pkg.github.com/JuanPabloJimenezEsclusa/ignacio-high-throughput</url>
     </repository>
   </distributionManagement>
 
   <properties>
     <java.version>24</java.version>
-    <encoding>UTF-8</encoding>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
     <!-- Plugins -->
     <jacoco-maven-plugin.version>0.8.13</jacoco-maven-plugin.version>
+    <git-changelog-maven-plugin.version>2.2.5</git-changelog-maven-plugin.version>
+    <rewrite-maven-plugin.version>6.11.0</rewrite-maven-plugin.version>
 
     <!-- Sonar -->
     <sonar.organization>juanpablojimenezesclusa</sonar.organization>
@@ -76,46 +83,129 @@
     <sonar.branch.name>develop</sonar.branch.name>
   </properties>
 
-  <modules>
-    <module>imperative-throughput</module>
-    <module>reactive-throughput</module>
-    <module>coverage-jacoco</module>
-  </modules>
-
   <build>
-    <pluginManagement> <plugins>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-resources-plugin</artifactId>
-        <executions>
-          <execution>
-            <id>copy-license-to-meta-inf</id>
-            <phase>process-resources</phase>
-            <goals>
-              <goal>copy-resources</goal>
-            </goals>
-            <configuration>
-              <outputDirectory>${project.build.outputDirectory}</outputDirectory>
-              <resources>
-                <resource>
-                  <!--suppress UnresolvedMavenProperty -->
-                  <directory>${session.executionRootDirectory}</directory>
-                  <includes>
-                    <include>LICENSE.txt</include>
-                  </includes>
-                  <targetPath>META-INF/</targetPath>
-                </resource>
-              </resources>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-    </plugins>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-resources-plugin</artifactId>
+          <executions>
+            <execution>
+              <id>copy-license-to-meta-inf</id>
+              <phase>process-resources</phase>
+              <goals>
+                <goal>copy-resources</goal>
+              </goals>
+              <configuration>
+                <outputDirectory>${project.build.outputDirectory}</outputDirectory>
+                <resources>
+                  <resource>
+                    <!--suppress UnresolvedMavenProperty -->
+                    <directory>${session.executionRootDirectory}</directory>
+                    <includes>
+                      <include>LICENSE.txt</include>
+                    </includes>
+                    <targetPath>META-INF/</targetPath>
+                  </resource>
+                </resources>
+              </configuration>
+            </execution>
+          </executions>
+        </plugin>
+        <plugin>
+          <groupId>org.openrewrite.maven</groupId>
+          <artifactId>rewrite-maven-plugin</artifactId>
+          <version>${rewrite-maven-plugin.version}</version>
+          <configuration>
+            <activeRecipes>
+              <recipe>org.openrewrite.maven.BestPractices</recipe>
+              <recipe>org.openrewrite.maven.ModernizeObsoletePoms</recipe>
+              <recipe>org.openrewrite.maven.OrderPomElements</recipe>
+
+              <recipe>org.openrewrite.yaml.format.Indents</recipe>
+
+              <recipe>org.openrewrite.java.format.EmptyNewlineAtEndOfFile</recipe>
+              <recipe>org.openrewrite.java.format.MethodParamPad</recipe>
+              <recipe>org.openrewrite.java.format.NormalizeFormat</recipe>
+              <recipe>org.openrewrite.java.format.NoWhitespaceAfter</recipe>
+              <recipe>org.openrewrite.java.format.NoWhitespaceBefore</recipe>
+              <recipe>org.openrewrite.java.format.PadEmptyForLoopComponents</recipe>
+              <recipe>org.openrewrite.java.format.RemoveTrailingWhitespace</recipe>
+              <recipe>org.openrewrite.java.format.Spaces</recipe>
+              <recipe>org.openrewrite.java.RemoveUnusedImports</recipe>
+              <recipe>org.openrewrite.java.search.FindDeprecatedUses</recipe>
+            </activeRecipes>
+            <activeStyles>
+              <style>org.openrewrite.java.IntelliJ</style>
+              <style>org.openrewrite.java.SpringFormat</style>
+            </activeStyles>
+            <failOnDryRunResults>false</failOnDryRunResults>
+            <sizeThresholdMb>20</sizeThresholdMb>
+            <plainTextMasks>
+              <plainTextMask>**/.txt</plainTextMask>
+            </plainTextMasks>
+          </configuration>
+        </plugin>
+      </plugins>
     </pluginManagement>
     <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-resources-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-enforcer-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>enforce</id>
+            <goals>
+              <goal>enforce</goal>
+            </goals>
+            <configuration>
+              <rules>
+                <banDuplicatePomDependencyVersions/>
+                <requireReleaseDeps/>
+                <requireUpperBoundDeps>
+                </requireUpperBoundDeps>
+                <requireMavenVersion>
+                  <version>[3.9.4,4.0.0)</version>
+                </requireMavenVersion>
+                <requireJavaVersion>
+                  <version>[24,25)</version>
+                </requireJavaVersion>
+              </rules>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>se.bjurr.gitchangelog</groupId>
+        <artifactId>git-changelog-maven-plugin</artifactId>
+        <version>${git-changelog-maven-plugin.version}</version>
+        <inherited>false</inherited>
+        <executions>
+          <execution>
+            <id>GenerateGitChangelog</id>
+            <phase>generate-sources</phase>
+            <goals>
+              <goal>git-changelog</goal>
+            </goals>
+            <configuration>
+              <templateFile>src/main/resources/changelog.mustache</templateFile>
+              <file>CHANGELOG.md</file>
+              <readableTagName>-([^-]+?)$</readableTagName>
+              <dateFormat>yyyy-MM-dd HH:mm:ss</dateFormat>
+              <ignoreCommitsIfMessageMatches>^\[maven-release-plugin\].*</ignoreCommitsIfMessageMatches>
+              <timeZone>UTC</timeZone>
+              <removeIssueFromMessage>true</removeIssueFromMessage>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.openrewrite.maven</groupId>
+        <artifactId>rewrite-maven-plugin</artifactId>
       </plugin>
     </plugins>
   </build>

@@ -1,0 +1,54 @@
+plugins {
+  id 'java'
+  id 'jacoco'
+}
+
+description = 'coverage-jacoco'
+
+bootJar {
+  enabled = false
+}
+
+jar {
+  enabled = true
+}
+
+dependencies {
+  implementation project(':imperative-throughput')
+  implementation project(':reactive-throughput')
+}
+
+jacoco {
+  toolVersion = '0.8.13'
+}
+
+task jacocoAggregatedReport(type: JacocoReport) {
+  dependsOn(project(':imperative-throughput').tasks.test, project(':reactive-throughput').tasks.test)
+
+  additionalSourceDirs.from files(
+    project(':imperative-throughput').sourceSets.main.allSource.srcDirs,
+    project(':reactive-throughput').sourceSets.main.allSource.srcDirs
+  )
+
+  sourceDirectories.from files(
+    project(':imperative-throughput').sourceSets.main.allSource.srcDirs,
+    project(':reactive-throughput').sourceSets.main.allSource.srcDirs
+  )
+
+  classDirectories.from files(
+    project(':imperative-throughput').sourceSets.main.output,
+    project(':reactive-throughput').sourceSets.main.output
+  )
+
+  executionData.from files(
+    project(':imperative-throughput').file("build/jacoco/test.exec"),
+    project(':reactive-throughput').file("build/jacoco/test.exec")
+  )
+
+  reports {
+    xml.required = true
+    html.required = true
+  }
+}
+
+check.dependsOn jacocoAggregatedReport
