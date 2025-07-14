@@ -72,7 +72,7 @@
     <!-- Plugins -->
     <jacoco-maven-plugin.version>0.8.13</jacoco-maven-plugin.version>
     <git-changelog-maven-plugin.version>2.2.5</git-changelog-maven-plugin.version>
-    <rewrite-maven-plugin.version>6.11.0</rewrite-maven-plugin.version>
+    <rewrite-maven-plugin.version>6.13.0</rewrite-maven-plugin.version>
 
     <!-- Sonar -->
     <sonar.organization>juanpablojimenezesclusa</sonar.organization>
