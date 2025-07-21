@@ -72,7 +72,7 @@ services:
       high_throughput_network:
   ## Monitorization
   prometheus:
-    image: prom/prometheus:v3.4.1
+    image: prom/prometheus:v3.5.0
     container_name: prometheus
     hostname: prometheus
     restart: "on-failure"
