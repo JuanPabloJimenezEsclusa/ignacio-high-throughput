@@ -32,11 +32,11 @@ Basic deployment with Docker Compose to prioritize simplicity and local developm
 
 ```bash
 # Start the services
-./start.sh
+./start.sh buildProjects=true
 ```
 ```bash
 # Stop the services
-./stop.sh
+./stop.sh removeImages=true
 ```
 
 ## 🔗 Links

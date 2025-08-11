@@ -17,10 +17,11 @@ Performance testing project using JMeter
 
 ---
 
-| File                            | Description                         |
-|---------------------------------|-------------------------------------|
-| high-throughput-performance.jmx | Test plan file                      |
-| run.sh                          | Shell script for executing the test |
+| File                                                                 | Description                         |
+|----------------------------------------------------------------------|-------------------------------------|
+| [high-throughput-performance.jmx](./high-throughput-performance.jmx) | Test plan file                      |
+| [run.sh](./run.sh)                                                   | Shell script for executing the test |
+| [index.html](./reports/html/index.html)                              | HTML summary report                 |
 
 ## 🚀 Running the Tests
 

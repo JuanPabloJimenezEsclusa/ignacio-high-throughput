@@ -1,4 +1,7 @@
 = Ignacio High Throughput Java Project
+:toc:
+:toclevels: 1
+:icons: font
 
 image:https://github.com/JuanPabloJimenezEsclusa/ignacio-high-throughput/actions/workflows/maven.yml/badge.svg["Deploy", link="https://github.com/JuanPabloJimenezEsclusa/ignacio-high-throughput/actions/workflows/maven.yml"]
 image:https://github.com/JuanPabloJimenezEsclusa/ignacio-high-throughput/actions/workflows/sonarqube.yml/badge.svg["SonarQube", link="https://github.com/JuanPabloJimenezEsclusa/ignacio-high-throughput/actions/workflows/sonarqube.yml"]
@@ -8,17 +11,6 @@ image:https://img.shields.io/github/languages/code-size/JuanPabloJimenezEsclusa/
 
 image:https://img.shields.io/sonar/tests/JuanPabloJimenezEsclusa_ignacio-high-throughput/develop?logo=sonar&server=https://sonarcloud.io[Sonar Tests]
 image:https://img.shields.io/sonar/coverage/JuanPabloJimenezEsclusa_ignacio-high-throughput/develop?logo=sonar&server=https://sonarcloud.io[Sonar Coverage]
-
-<<_project_structure,Project Structure>>
-  | <<_technologies,Technologies>>
-  | <<_building_modules,Building Modules>>
-  | <<_running_modules,Running Modules>>
-  | <<_api_endpoints,API Endpoints>>
-  | <<_deployment,Deployment>>
-  | <<_profiling,Profiling>>
-  | <<_testing,Testing>>
-  | <<_performance_comparison,Performance Comparison>>
-  | <<_references,References>>
 
 IMPORTANT: We're going to compare how Java virtual threads affect simple APIs, contrasting them with both traditional synchronous and reactive methods
 
@@ -57,7 +49,7 @@ image:https://img.shields.io/badge/AWS%20CLI-2.27+-brown.svg["AWS CLI",link="htt
 [source,bash]
 ----
 # Build all modules
-mvn clean package
+mvn clean verify
 ----
 
 [source,bash]

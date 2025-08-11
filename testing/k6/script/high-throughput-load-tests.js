@@ -40,7 +40,7 @@ export function handleSummary(data) {
 
 export function checkByImperativeGroup() {
   group('imperative', function() {
-    const imperativeThroughput = 'http://imperative-throughput:8888/imperative-throughput/smokes';
+    const imperativeThroughput = __ENV.IMPERATIVE_THROUGHPUT_URL || 'http://imperative-throughput:8888/imperative-throughput/smokes';
     const params = {
       headers: {
         'Content-Type': 'application/json',
@@ -61,7 +61,7 @@ export function checkByImperativeGroup() {
 
 export function checkByReactiveGroup() {
   group('reactive', function() {
-    const reactiveThroughput = 'http://reactive-throughput:9999/reactive-throughput/smokes';
+    const reactiveThroughput = __ENV.REACTIVE_THROUGHPUT_URL || 'http://reactive-throughput:9999/reactive-throughput/smokes';
     const params = {
       headers: {
         'Content-Type': 'application/json',

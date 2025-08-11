@@ -1,5 +1,8 @@
 package edu.ignacio.poc.testing.gatling;
 
+import static edu.ignacio.poc.testing.gatling.HighThroughputOption.IMPERATIVE;
+import static edu.ignacio.poc.testing.gatling.HighThroughputOption.REACTIVE;
+import static edu.ignacio.poc.testing.gatling.HighThroughputOption.of;
 import static io.gatling.javaapi.core.CoreDsl.constantUsersPerSec;
 import static io.gatling.javaapi.core.CoreDsl.rampUsersPerSec;
 import static io.gatling.javaapi.http.HttpDsl.http;
@@ -20,14 +23,14 @@ import io.gatling.javaapi.http.HttpRequestActionBuilder;
 public class GatlingHighThroughputSimulation extends Simulation {
 
   private static final HttpRequestActionBuilder IMPERATIVE_CONFIG = setupGetConfiguration(
-    "Imperative", "http://localhost:8888/imperative-throughput/smokes");
-
+    IMPERATIVE, System.getenv("IMPERATIVE_URL"));
   private static final HttpRequestActionBuilder REACTIVE_CONFIG = setupGetConfiguration(
-    "Reactive", "http://localhost:9999/reactive-throughput/smokes");
+    REACTIVE, System.getenv("REACTIVE_URL"));
 
-  private static HttpRequestActionBuilder setupGetConfiguration(final String name, final String url) {
-    return http(name)
-      .get(url)
+  private static HttpRequestActionBuilder setupGetConfiguration(final HighThroughputOption highThroughputOption,
+                                                                final String url) {
+    return http(highThroughputOption.name())
+      .get(of(highThroughputOption, url))
       .header("Content-Type", "application/json")
       .header("Accept", "application/json")
       .header("User-Agent", "gatling/performance-testing")
