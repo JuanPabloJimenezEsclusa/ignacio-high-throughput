@@ -1,9 +1,12 @@
 plugins {
   id 'java-library'
-  id 'org.springframework.boot' version '3.5.0' apply false
-  id 'org.graalvm.buildtools.native' version '0.10.6' apply false
-  id 'io.spring.dependency-management' version '1.1.7' apply false
   id 'maven-publish'
+  id 'jacoco'
+  id 'org.springframework.boot' version '3.5.4' apply false
+  id 'org.graalvm.buildtools.native' version '0.11.0' apply false
+  id 'io.spring.dependency-management' version '1.1.7' apply false
+  id 'org.sonarqube' version '6.2.0.5505' apply false
+  id 'org.openrewrite.rewrite' version '7.12.1' apply false
 }
 
 allprojects {
@@ -20,22 +23,84 @@ subprojects {
   apply plugin: 'org.springframework.boot'
   apply plugin: 'io.spring.dependency-management'
   apply plugin: 'maven-publish'
+  apply plugin: 'jacoco'
+  apply plugin: 'org.sonarqube'
+  apply plugin: 'org.openrewrite.rewrite'
 
   java {
     toolchain {
       languageVersion = JavaLanguageVersion.of(24)
     }
+    sourceCompatibility = JavaVersion.VERSION_24
+    targetCompatibility = JavaVersion.VERSION_24
+  }
+
+  tasks.withType(JavaCompile) {
+    options.encoding = 'UTF-8'
   }
 
   test {
     useJUnitPlatform()
+    finalizedBy jacocoTestReport
+  }
+
+  jacoco {
+    toolVersion = '0.8.13'
+  }
+
+  jacocoTestReport {
+    reports {
+      xml.required = true
+      html.required = true
+    }
+  }
+
+  sonarqube {
+    properties {
+      property 'sonar.organization', 'juanpablojimenezesclusa'
+      property 'sonar.host.url', 'https://sonarcloud.io'
+      property 'sonar.projectKey', 'JuanPabloJimenezEsclusa_ignacio-high-throughput'
+      property 'sonar.coverage.jacoco.xmlReportPaths', "${rootDir}/coverage-jacoco/build/reports/jacoco/test/jacocoAggregatedReport.xml"
+      property 'sonar.scm.exclusions.disabled', 'true'
+      property 'sonar.branch.name', 'develop'
+    }
+  }
+
+  rewrite {
+    activeRecipe(
+      'org.openrewrite.maven.BestPractices',
+      'org.openrewrite.maven.ModernizeObsoletePoms',
+      'org.openrewrite.maven.OrderPomElements',
+      'org.openrewrite.yaml.format.Indents',
+      'org.openrewrite.java.format.EmptyNewlineAtEndOfFile',
+      'org.openrewrite.java.format.MethodParamPad',
+      'org.openrewrite.java.format.NormalizeFormat',
+      'org.openrewrite.java.format.NoWhitespaceAfter',
+      'org.openrewrite.java.format.NoWhitespaceBefore',
+      'org.openrewrite.java.format.PadEmptyForLoopComponents',
+      'org.openrewrite.java.format.RemoveTrailingWhitespace',
+      'org.openrewrite.java.format.Spaces',
+      'org.openrewrite.java.RemoveUnusedImports',
+      'org.openrewrite.java.search.FindDeprecatedUses'
+    )
+    activeStyle(
+      'org.openrewrite.java.IntelliJ',
+      'org.openrewrite.java.SpringFormat'
+    )
+  }
+
+  processResources {
+    from(rootDir) {
+      include 'LICENSE.txt'
+      into 'META-INF'
+    }
   }
 
   publishing {
     repositories {
       maven {
         name = 'GitHubPackages'
-        url = uri('https://maven.pkg.github.com/JuanPabloJimenezEsclusa/high-throughput')
+        url = uri('https://maven.pkg.github.com/JuanPabloJimenezEsclusa/ignacio-high-throughput')
         credentials {
           username = project.findProperty('gpr.user') ?: System.getenv('GITHUB_USERNAME')
           password = project.findProperty('gpr.key') ?: System.getenv('GITHUB_TOKEN')
@@ -50,7 +115,7 @@ subprojects {
         pom {
           name = project.name
           description = project.description
-          url = 'https://github.com/JuanPabloJimenezEsclusa/high-throughput'
+          url = 'https://github.com/JuanPabloJimenezEsclusa/ignacio-high-throughput'
 
           licenses {
             license {
@@ -70,18 +135,28 @@ subprojects {
           }
 
           scm {
-            url = 'https://github.com/JuanPabloJimenezEsclusa/high-throughput'
-            connection = 'scm:git:https://github.com/JuanPabloJimenezEsclusa/high-throughput.git'
-            developerConnection = 'scm:git:https://github.com/JuanPabloJimenezEsclusa/high-throughput.git'
+            url = 'https://github.com/JuanPabloJimenezEsclusa/ignacio-high-throughput'
+            connection = 'scm:git:https://github.com/JuanPabloJimenezEsclusa/ignacio-high-throughput.git'
+            developerConnection = 'scm:git:https://github.com/JuanPabloJimenezEsclusa/ignacio-high-throughput.git'
           }
 
           issueManagement {
             system = 'Github'
-            url = 'https://github.com/JuanPabloJimenezEsclusa/high-throughput/issues'
+            url = 'https://github.com/JuanPabloJimenezEsclusa/ignacio-high-throughput/issues'
           }
         }
       }
     }
+  }
+}
+
+task generateChangelog(type: Exec) {
+  description = "Generate CHANGELOG.md from Git commits"
+
+  commandLine 'bash', '-c', 'git log --pretty=format:"%h - %an, %ar : %s" > CHANGELOG.md'
+
+  doLast {
+    println "Generated CHANGELOG.md from Git history"
   }
 }
 

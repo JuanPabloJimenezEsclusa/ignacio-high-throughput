@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# Example of usage: ./run-cluster-with-api.sh
+# Example of usage: ./run-cluster-with-api.sh buildProjects=true
 
 set -o errexit # Exit on error. Append "|| true" if you expect an error.
 set -o errtrace # Exit on error inside any functions or subshells.
@@ -10,6 +10,11 @@ if [[ "${debug:-}" == "true" ]]; then set -o xtrace; fi  # enable debug mode.
 SEPARATOR="\n ################################################## \n"
 
 cd "$(dirname "$0")"
+
+parameter="${1:-"buildProjects=false"}"
+eval "${parameter}"
+echo "buildProjects: ${buildProjects:-}"
+
 workspace="$(pwd)"
 
 __installClients() {
@@ -27,7 +32,7 @@ __startCluster() {
 __installAPI() {
   echo -e "${SEPARATOR} 🚀 Install API. ${SEPARATOR}"
   cd "${workspace}/API"
-  ./apply.sh buildProjects=false
+  ./apply.sh buildProjects="${buildProjects}"
 }
 
 main() {

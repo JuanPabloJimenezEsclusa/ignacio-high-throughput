@@ -1,29 +1,18 @@
 = Ignacio High Throughput Java Project
+:toc:
+:toclevels: 1
+:icons: font
 
 image:https://github.com/JuanPabloJimenezEsclusa/ignacio-high-throughput/actions/workflows/maven.yml/badge.svg["Deploy", link="https://github.com/JuanPabloJimenezEsclusa/ignacio-high-throughput/actions/workflows/maven.yml"]
 image:https://github.com/JuanPabloJimenezEsclusa/ignacio-high-throughput/actions/workflows/sonarqube.yml/badge.svg["SonarQube", link="https://github.com/JuanPabloJimenezEsclusa/ignacio-high-throughput/actions/workflows/sonarqube.yml"]
 image:https://github.com/JuanPabloJimenezEsclusa/ignacio-high-throughput/actions/workflows/dependency-review.yml/badge.svg["Dependencies", link="https://github.com/JuanPabloJimenezEsclusa/ignacio-high-throughput/actions/workflows/dependency-review.yml"]
-image:https://img.shields.io/github/license/JuanPabloJimenezEsclusa/ignacio-high-throughput["License", link="https://github.com/JuanPabloJimenezEsclusa/ignacio-high-throughput/LICENSE.md"]
+image:https://img.shields.io/github/license/JuanPabloJimenezEsclusa/ignacio-high-throughput?logo=github["License", link="https://github.com/JuanPabloJimenezEsclusa/ignacio-high-throughput/LICENSE.md"]
+image:https://img.shields.io/github/languages/code-size/JuanPabloJimenezEsclusa/ignacio-high-throughput?logo=github[GitHub code size in bytes]
 
-<<_project_structure,Project Structure>>
-  | <<_technologies,Technologies>>
-  | <<_building_modules,Building Modules>>
-  | <<_running_modules,Running Modules>>
-  | <<_api_endpoints,API Endpoints>>
-  | <<_deployment,Deployment>>
-  | <<_profiling,Profiling>>
-  | <<_testing,Testing>>
-  | <<_performance_comparison,Performance Comparison>>
-  | <<_references,References>>
+image:https://img.shields.io/sonar/tests/JuanPabloJimenezEsclusa_ignacio-high-throughput/develop?logo=sonar&server=https://sonarcloud.io[Sonar Tests]
+image:https://img.shields.io/sonar/coverage/JuanPabloJimenezEsclusa_ignacio-high-throughput/develop?logo=sonar&server=https://sonarcloud.io[Sonar Coverage]
 
-****
- A comprehensive empirical study evaluating the performance characteristics and scalability patterns of high-throughput data processing architectures in Java, comparing traditional thread-per-request imperative models with event-loop reactive paradigms.
-
- This research implements controlled experimental scenarios across six distinct runtime configurations, analyzing the impact of virtual thread utilization and native compilation on response latency, resource efficiency, and throughput optimization.
-
- Quantitative performance metrics are systematically collected through industry-standard profiling tools and benchmarking methodologies to provide statistically significant insights into the architectural trade-offs between imperative and reactive programming models under varying computational loads.
-****
-
+IMPORTANT: We're going to compare how Java virtual threads affect simple APIs, contrasting them with both traditional synchronous and reactive methods
 
 [#_project_structure]
 == 📦 Project Structure
@@ -60,7 +49,7 @@ image:https://img.shields.io/badge/AWS%20CLI-2.27+-brown.svg["AWS CLI",link="htt
 [source,bash]
 ----
 # Build all modules
-mvn clean package
+mvn clean verify
 ----
 
 [source,bash]
@@ -103,6 +92,20 @@ mvn -P"${SPRING_PROFILES_ACTIVE}" \
 [source,bash]
 ----
 gradle bootBuildImage
+----
+
+[source,bash]
+----
+# Analyze docker images with Dive
+docker run --rm -it \
+  -v /var/run/docker.sock:/var/run/docker.sock \
+  docker.io/wagoodman/dive:latest imperative-throughput:1.0.0
+----
+
+[source,bash]
+----
+# Rewrite sources observing the best practices
+mvn rewrite:runNoFork -Popen-rewrite
 ----
 
 [#_running_modules]
