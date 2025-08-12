@@ -44,8 +44,8 @@ cd clusters
 ```bash
 # Deploy standard API
 cd API
-./apply.sh
-./delete.sh
+./apply.sh buildProjects=true
+./delete.sh removeImages=true
 ```
 
 ### 🔄 Full Setup
@@ -56,7 +56,7 @@ Use the combined script to set up everything at once:
 
 ```bash
 # Run the full setup script
-./run-cluster-with-api.sh
+./run-cluster-with-api.sh buildProjects=true
 ```
 
 ## 🔗 Links

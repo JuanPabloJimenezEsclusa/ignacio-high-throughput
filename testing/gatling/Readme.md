@@ -14,16 +14,15 @@ This module contains performance tests for the Spring Boot application using the
 * [Gatling ~3.14](https://docs.gatling.io/tutorials/scripting-intro/)
 * [JDK 24](https://openjdk.org/projects/jdk/24/)
 * [Docker ~28](https://docs.docker.com/engine/release-notes/28/)
-* [Docker ~2.37](https://docs.docker.com/compose/install/standalone/)
 
 ## 🏗️ Architecture
 
 ---
 
-| File                                                                        | Description                          |
-|-----------------------------------------------------------------------------|--------------------------------------|
-| [index.html](./target/gatling/gatlinghighthroughputsimulation-*/index.html) | HTML Gatling report                  |
-| [run.sh](./run.sh)                                                          | Shell script for executing the tests |
+| File                                                                             | Description                          |
+|----------------------------------------------------------------------------------|--------------------------------------|
+| [run.sh](./run.sh)                                                               | Shell script for executing the tests |
+| [index.html](./target/gatling/gatlinghighthroughputsimulation-latest/index.html) | HTML Gatling report                  |
 
 ## 🚀 Running the Tests
 

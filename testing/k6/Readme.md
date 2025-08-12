@@ -12,7 +12,6 @@ This module contains performance tests for the Spring Boot application using the
 
 * [K6 ~0.57](https://grafana.com/docs/k6/next/release-notes/)
 * [Docker ~28](https://docs.docker.com/engine/release-notes/28/)
-* [Docker ~2.37](https://docs.docker.com/compose/install/standalone/)
 
 ## 🏗️ Architecture
 
@@ -21,8 +20,8 @@ This module contains performance tests for the Spring Boot application using the
 | File                                                                    | Description                          |
 |-------------------------------------------------------------------------|--------------------------------------|
 | [high-throughput-load-tests.js](./script/high-throughput-load-tests.js) | Test plan file                       |
-| [summary.html](./result/summary.html)                                   | HTML summary report                  |
 | [run.sh](./run.sh)                                                      | Shell script for executing the tests |
+| [summary.html](./result/summary.html)                                   | HTML summary report                  |
 
 ## 🚀 Running the Tests
 
