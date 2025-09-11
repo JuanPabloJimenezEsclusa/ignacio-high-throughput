@@ -5,6 +5,246 @@ Changelog of camila-services.
 ## Unreleased
 ### No issue
 
+**[GH-7] build: updates deployment profiles**
+
+
+[fb5cb756e334605](https://github.com/JuanPabloJimenezEsclusa/ignacio-high-throughput/commit/fb5cb756e334605) juan.pablo.jimenez.esclusa *2025-09-11 20:27:45*
+
+**build(deps): bump grafana/grafana from 12.1.0 to 12.1.1 in /deploy-orchestrator/docker-compose (#44)**
+
+ * build(deps): bump grafana/grafana in /deploy-orchestrator/docker-compose
+ * Bumps grafana/grafana from 12.1.0 to 12.1.1.
+ * ---
+ * updated-dependencies:
+ * - dependency-name: grafana/grafana
+ * dependency-version: 12.1.1
+ * dependency-type: direct:production
+ * update-type: version-update:semver-patch
+ * ...
+ * Signed-off-by: dependabot[bot] &lt;support@github.com&gt;
+ * [GH-7] docs: updates compose diagram
+ * ---------
+ * Signed-off-by: dependabot[bot] &lt;support@github.com&gt;
+ * Co-authored-by: dependabot[bot] &lt;49699333+dependabot[bot]@users.noreply.github.com&gt;
+ * Co-authored-by: juan.pablo.jimenez.esclusa &lt;juan.pablo.jimenez.esclusa@gmail.com&gt;
+
+[12cb71c0b8372dd](https://github.com/JuanPabloJimenezEsclusa/ignacio-high-throughput/commit/12cb71c0b8372dd) dependabot[bot] *2025-09-11 14:30:07*
+
+**build(deps): bump elasticsearch in /deploy-orchestrator/docker-compose (#55)**
+
+ * Bumps elasticsearch from 9.1.0 to 9.1.3.
+ * ---
+ * updated-dependencies:
+ * - dependency-name: elasticsearch
+ * dependency-version: 9.1.3
+ * dependency-type: direct:production
+ * update-type: version-update:semver-patch
+ * ...
+ * Signed-off-by: dependabot[bot] &lt;support@github.com&gt;
+ * Co-authored-by: dependabot[bot] &lt;49699333+dependabot[bot]@users.noreply.github.com&gt;
+
+[57147b1bb5ddfe9](https://github.com/JuanPabloJimenezEsclusa/ignacio-high-throughput/commit/57147b1bb5ddfe9) dependabot[bot] *2025-09-11 14:03:40*
+
+**build(deps): bump kibana in /deploy-orchestrator/docker-compose (#56)**
+
+ * Bumps kibana from 9.1.0 to 9.1.3.
+ * ---
+ * updated-dependencies:
+ * - dependency-name: kibana
+ * dependency-version: 9.1.3
+ * dependency-type: direct:production
+ * update-type: version-update:semver-patch
+ * ...
+ * Signed-off-by: dependabot[bot] &lt;support@github.com&gt;
+ * Co-authored-by: dependabot[bot] &lt;49699333+dependabot[bot]@users.noreply.github.com&gt;
+
+[6b2d0beb07e5e10](https://github.com/JuanPabloJimenezEsclusa/ignacio-high-throughput/commit/6b2d0beb07e5e10) dependabot[bot] *2025-09-11 14:00:10*
+
+**build(deps): bump org.sonarqube from 6.2.0.5505 to 6.3.1.5724 (#53)**
+
+ * Bumps org.sonarqube from 6.2.0.5505 to 6.3.1.5724.
+ * ---
+ * updated-dependencies:
+ * - dependency-name: org.sonarqube
+ * dependency-version: 6.3.1.5724
+ * dependency-type: direct:production
+ * update-type: version-update:semver-minor
+ * ...
+ * Signed-off-by: dependabot[bot] &lt;support@github.com&gt;
+ * Co-authored-by: dependabot[bot] &lt;49699333+dependabot[bot]@users.noreply.github.com&gt;
+
+[2d2966c6b18d5d9](https://github.com/JuanPabloJimenezEsclusa/ignacio-high-throughput/commit/2d2966c6b18d5d9) dependabot[bot] *2025-09-11 13:56:51*
+
+**build(deps): bump org.openrewrite.rewrite from 7.12.1 to 7.15.0 (#54)**
+
+ * Bumps org.openrewrite.rewrite from 7.12.1 to 7.15.0.
+ * ---
+ * updated-dependencies:
+ * - dependency-name: org.openrewrite.rewrite
+ * dependency-version: 7.15.0
+ * dependency-type: direct:production
+ * update-type: version-update:semver-minor
+ * ...
+ * Signed-off-by: dependabot[bot] &lt;support@github.com&gt;
+ * Co-authored-by: dependabot[bot] &lt;49699333+dependabot[bot]@users.noreply.github.com&gt;
+
+[30d21e05d808efe](https://github.com/JuanPabloJimenezEsclusa/ignacio-high-throughput/commit/30d21e05d808efe) dependabot[bot] *2025-09-11 13:51:57*
+
+**build(deps): bump org.openrewrite.maven:rewrite-maven-plugin (#52)**
+
+ * Bumps [org.openrewrite.maven:rewrite-maven-plugin](https://github.com/openrewrite/rewrite-maven-plugin) from 6.15.0 to 6.17.0.
+ * - [Release notes](https://github.com/openrewrite/rewrite-maven-plugin/releases)
+ * - [Commits](https://github.com/openrewrite/rewrite-maven-plugin/compare/v6.15.0...v6.17.0)
+ * ---
+ * updated-dependencies:
+ * - dependency-name: org.openrewrite.maven:rewrite-maven-plugin
+ * dependency-version: 6.17.0
+ * dependency-type: direct:production
+ * update-type: version-update:semver-minor
+ * ...
+ * Signed-off-by: dependabot[bot] &lt;support@github.com&gt;
+ * Co-authored-by: dependabot[bot] &lt;49699333+dependabot[bot]@users.noreply.github.com&gt;
+
+[9f57913f3f961ab](https://github.com/JuanPabloJimenezEsclusa/ignacio-high-throughput/commit/9f57913f3f961ab) dependabot[bot] *2025-09-11 13:46:18*
+
+**build(deps): bump actions/setup-java from 4 to 5 (#49)**
+
+ * Bumps [actions/setup-java](https://github.com/actions/setup-java) from 4 to 5.
+ * - [Release notes](https://github.com/actions/setup-java/releases)
+ * - [Commits](https://github.com/actions/setup-java/compare/v4...v5)
+ * ---
+ * updated-dependencies:
+ * - dependency-name: actions/setup-java
+ * dependency-version: &#x27;5&#x27;
+ * dependency-type: direct:production
+ * update-type: version-update:semver-major
+ * ...
+ * Signed-off-by: dependabot[bot] &lt;support@github.com&gt;
+ * Co-authored-by: dependabot[bot] &lt;49699333+dependabot[bot]@users.noreply.github.com&gt;
+
+[c3f2f5b31402778](https://github.com/JuanPabloJimenezEsclusa/ignacio-high-throughput/commit/c3f2f5b31402778) dependabot[bot] *2025-09-11 13:37:21*
+
+**build(deps): bump actions/checkout from 4 to 5 (#43)**
+
+ * Bumps [actions/checkout](https://github.com/actions/checkout) from 4 to 5.
+ * - [Release notes](https://github.com/actions/checkout/releases)
+ * - [Changelog](https://github.com/actions/checkout/blob/main/CHANGELOG.md)
+ * - [Commits](https://github.com/actions/checkout/compare/v4...v5)
+ * ---
+ * updated-dependencies:
+ * - dependency-name: actions/checkout
+ * dependency-version: &#x27;5&#x27;
+ * dependency-type: direct:production
+ * update-type: version-update:semver-major
+ * ...
+ * Signed-off-by: dependabot[bot] &lt;support@github.com&gt;
+ * Co-authored-by: dependabot[bot] &lt;49699333+dependabot[bot]@users.noreply.github.com&gt;
+
+[53943009545d7e6](https://github.com/JuanPabloJimenezEsclusa/ignacio-high-throughput/commit/53943009545d7e6) dependabot[bot] *2025-09-11 13:33:26*
+
+**Merge pull request #50 from JuanPabloJimenezEsclusa/dependabot/gradle/org.springframework.boot-3.5.5**
+
+ * build(deps): bump org.springframework.boot from 3.5.4 to 3.5.5
+
+[d49af1b3a2069ed](https://github.com/JuanPabloJimenezEsclusa/ignacio-high-throughput/commit/d49af1b3a2069ed) Juan Pablo Jimenez Esclusa *2025-09-11 13:29:09*
+
+**build(deps): bump org.springframework.boot from 3.5.4 to 3.5.5**
+
+ * Bumps [org.springframework.boot](https://github.com/spring-projects/spring-boot) from 3.5.4 to 3.5.5.
+ * - [Release notes](https://github.com/spring-projects/spring-boot/releases)
+ * - [Commits](https://github.com/spring-projects/spring-boot/compare/v3.5.4...v3.5.5)
+ * ---
+ * updated-dependencies:
+ * - dependency-name: org.springframework.boot
+ * dependency-version: 3.5.5
+ * dependency-type: direct:production
+ * update-type: version-update:semver-patch
+ * ...
+ * Signed-off-by: dependabot[bot] &lt;support@github.com&gt;
+
+[8569d9c05e45b97](https://github.com/JuanPabloJimenezEsclusa/ignacio-high-throughput/commit/8569d9c05e45b97) dependabot[bot] *2025-09-11 13:25:01*
+
+**Merge pull request #47 from JuanPabloJimenezEsclusa/dependabot/maven/org.springframework.boot-spring-boot-starter-parent-3.5.5**
+
+ * build(deps): bump org.springframework.boot:spring-boot-starter-parent from 3.5.4 to 3.5.5
+
+[9bb48e717cacba7](https://github.com/JuanPabloJimenezEsclusa/ignacio-high-throughput/commit/9bb48e717cacba7) Juan Pablo Jimenez Esclusa *2025-09-11 13:23:19*
+
+**build(deps): bump org.springframework.boot:spring-boot-starter-parent**
+
+ * Bumps [org.springframework.boot:spring-boot-starter-parent](https://github.com/spring-projects/spring-boot) from 3.5.4 to 3.5.5.
+ * - [Release notes](https://github.com/spring-projects/spring-boot/releases)
+ * - [Commits](https://github.com/spring-projects/spring-boot/compare/v3.5.4...v3.5.5)
+ * ---
+ * updated-dependencies:
+ * - dependency-name: org.springframework.boot:spring-boot-starter-parent
+ * dependency-version: 3.5.5
+ * dependency-type: direct:production
+ * update-type: version-update:semver-patch
+ * ...
+ * Signed-off-by: dependabot[bot] &lt;support@github.com&gt;
+
+[1cdbaafe6923f17](https://github.com/JuanPabloJimenezEsclusa/ignacio-high-throughput/commit/1cdbaafe6923f17) dependabot[bot] *2025-08-25 02:12:37*
+
+**Merge pull request #39 from JuanPabloJimenezEsclusa/feature/GH-7-improve-dependencies**
+
+ * [GH-7] chore: update dependencies versions
+
+[0bb9289ef0af89a](https://github.com/JuanPabloJimenezEsclusa/ignacio-high-throughput/commit/0bb9289ef0af89a) Juan Pablo Jimenez Esclusa *2025-08-12 10:06:30*
+
+**[GH-7] chore: update dependencies versions**
+
+
+[1dff2fe748a91ad](https://github.com/JuanPabloJimenezEsclusa/ignacio-high-throughput/commit/1dff2fe748a91ad) juan.pablo.jimenez.esclusa *2025-08-11 18:32:19*
+
+**build(deps): bump se.bjurr.gitchangelog:git-changelog-maven-plugin (#36)**
+
+ * Bumps [se.bjurr.gitchangelog:git-changelog-maven-plugin](https://github.com/tomasbjerre/git-changelog-maven-plugin) from 2.2.7 to 2.2.11.
+ * - [Release notes](https://github.com/tomasbjerre/git-changelog-maven-plugin/releases)
+ * - [Changelog](https://github.com/tomasbjerre/git-changelog-maven-plugin/blob/master/CHANGELOG.md)
+ * - [Commits](https://github.com/tomasbjerre/git-changelog-maven-plugin/compare/2.2.7...2.2.11)
+ * ---
+ * updated-dependencies:
+ * - dependency-name: se.bjurr.gitchangelog:git-changelog-maven-plugin
+ * dependency-version: 2.2.11
+ * dependency-type: direct:production
+ * update-type: version-update:semver-patch
+ * ...
+ * Signed-off-by: dependabot[bot] &lt;support@github.com&gt;
+ * Co-authored-by: dependabot[bot] &lt;49699333+dependabot[bot]@users.noreply.github.com&gt;
+
+[04c412688f99650](https://github.com/JuanPabloJimenezEsclusa/ignacio-high-throughput/commit/04c412688f99650) dependabot[bot] *2025-08-11 18:30:42*
+
+**build(deps): bump kibana in /deploy-orchestrator/docker-compose (#37)**
+
+ * Bumps kibana from 9.0.4 to 9.1.0.
+ * ---
+ * updated-dependencies:
+ * - dependency-name: kibana
+ * dependency-version: 9.1.0
+ * dependency-type: direct:production
+ * update-type: version-update:semver-minor
+ * ...
+ * Signed-off-by: dependabot[bot] &lt;support@github.com&gt;
+ * Co-authored-by: dependabot[bot] &lt;49699333+dependabot[bot]@users.noreply.github.com&gt;
+
+[024c4c8669b5359](https://github.com/JuanPabloJimenezEsclusa/ignacio-high-throughput/commit/024c4c8669b5359) dependabot[bot] *2025-08-11 18:26:33*
+
+**build(deps): bump elasticsearch in /deploy-orchestrator/docker-compose (#38)**
+
+ * Bumps elasticsearch from 9.0.4 to 9.1.0.
+ * ---
+ * updated-dependencies:
+ * - dependency-name: elasticsearch
+ * dependency-version: 9.1.0
+ * dependency-type: direct:production
+ * update-type: version-update:semver-minor
+ * ...
+ * Signed-off-by: dependabot[bot] &lt;support@github.com&gt;
+ * Co-authored-by: dependabot[bot] &lt;49699333+dependabot[bot]@users.noreply.github.com&gt;
+
+[dc63d53a58ad1fc](https://github.com/JuanPabloJimenezEsclusa/ignacio-high-throughput/commit/dc63d53a58ad1fc) dependabot[bot] *2025-08-11 18:21:37*
+
 **build(deps): bump org.sonarqube from 4.0.0.2929 to 6.2.0.5505 (#14)**
 
  * Bumps org.sonarqube from 4.0.0.2929 to 6.2.0.5505.

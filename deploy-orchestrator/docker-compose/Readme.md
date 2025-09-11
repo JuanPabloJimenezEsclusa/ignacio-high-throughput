@@ -12,7 +12,7 @@ Based on `docker-compose`
 ---
 
 * [Docker ~28](https://docs.docker.com/engine/release-notes/28/)
-* [Docker ~2.37](https://docs.docker.com/compose/install/standalone/)
+* [Docker-compose ~2.39](https://docs.docker.com/compose/install/standalone/)
 
 ## 🏗️ Architecture
 

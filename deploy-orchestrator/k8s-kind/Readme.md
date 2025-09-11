@@ -12,7 +12,7 @@ Based on [Kind](https://kind.sigs.k8s.io/) (Kubernetes IN Docker)
 ---
 
 * [Docker ~28](https://docs.docker.com/engine/release-notes/28/)
-* [Kind ~0.29](https://kind.sigs.k8s.io/docs/user/quick-start/#installation)
+* [Kind ~0.30](https://kind.sigs.k8s.io/docs/user/quick-start/#installation)
 
 ## 🏗️ Architecture
 
