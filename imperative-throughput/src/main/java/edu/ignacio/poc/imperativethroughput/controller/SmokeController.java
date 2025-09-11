@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
  * The type Smoke controller.
  */
 @RestController
-public class SmokeController {
+class SmokeController {
 
   private static final Logger log = LoggerFactory.getLogger(SmokeController.class);
 
@@ -37,7 +37,8 @@ public class SmokeController {
       .contentType(MediaType.APPLICATION_JSON)
       .headers(httpHeaders -> httpHeaders.setAccept(List.of(MediaType.APPLICATION_JSON)))
       .body("OK:Imperative:%s".formatted(Thread.currentThread().toString()));
-    log.info("Smoke imperative endpoint - status: {} - thread: {}", response.getStatusCode(), Thread.currentThread());
+
+    log.info("Smoke imperative endpoint - status: {} - thread: {}", response.getStatusCode(), Thread.currentThread()); // NOPMD
     return response;
   }
 }

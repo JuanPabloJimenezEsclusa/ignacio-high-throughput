@@ -46,22 +46,23 @@ image:https://img.shields.io/badge/AWS%20CLI-2.27+-brown.svg["AWS CLI",link="htt
 [#_building_modules]
 == 🔨 Building modules
 
+=== Build all modules
 [source,bash]
 ----
-# Build all modules
-mvn clean verify
+mvn clean install
+# 'verify' no working for jacoco module, 'install' instead
 ----
 
+=== Build all modules with Gradle
 [source,bash]
 ----
-# Build all modules with Gradle
 gradle clean build
 ----
 
+=== Build native artifacts
 [source,bash]
 ----
 export SPRING_PROFILES_ACTIVE="native"
-# Build native artifacts
 mvn -P"${SPRING_PROFILES_ACTIVE}" \
   native:compile \
   -Dmaven.test.skip=true \
@@ -78,10 +79,10 @@ Reports::
 * link:./imperative-throughput/target/imperative-throughput-build-report.html[Build Native Report - imperative-throughput]
 * link:./reactive-throughput/target/reactive-throughput-build-report.html[Build Native Report - reactive-throughput]
 
+=== Build docker images
 [source,bash]
 ----
 export SPRING_PROFILES_ACTIVE="native"
-# Build docker images
 mvn -P"${SPRING_PROFILES_ACTIVE}" \
   spring-boot:build-image \
   -Dmaven.test.skip=true \
@@ -94,17 +95,17 @@ mvn -P"${SPRING_PROFILES_ACTIVE}" \
 gradle bootBuildImage
 ----
 
+=== Analyze docker images with Dive
 [source,bash]
 ----
-# Analyze docker images with Dive
 docker run --rm -it \
   -v /var/run/docker.sock:/var/run/docker.sock \
   docker.io/wagoodman/dive:latest imperative-throughput:1.0.0
 ----
 
+=== Rewrite sources observing the best practices
 [source,bash]
 ----
-# Rewrite sources observing the best practices
 mvn rewrite:runNoFork -Popen-rewrite
 ----
 
