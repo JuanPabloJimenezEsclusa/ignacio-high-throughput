@@ -9,6 +9,15 @@ SEPARATOR="\n ################################################## \n"
 
 cd "$(dirname "$0")"
 
+__install_k9s() {
+  echo -e "${SEPARATOR} 🛠️ Install k9s. ${SEPARATOR}"
+  wget https://github.com/derailed/k9s/releases/latest/download/k9s_linux_amd64.deb \
+    && sudo apt install ./k9s_linux_amd64.deb \
+    && rm k9s_linux_amd64.deb || true
+  k9s version
+  echo "End ${FUNCNAME:-} successfully!"
+}
+
 __installKubectl() {
   echo -e "${SEPARATOR} 📦 Install kubectl. ${SEPARATOR}"
   # https://kubernetes.io/docs/tasks/tools/install-kubectl-linux/#install-kubectl-binary-with-curl-on-linux
@@ -33,15 +42,16 @@ __installKind() {
   # https://kind.sigs.k8s.io/
   # https://kind.sigs.k8s.io/docs/user/quick-start/#installing-from-release-binaries
   # For AMD64 / x86_64
-  [ $(uname -m) = x86_64 ] && curl -Lo ./kind https://kind.sigs.k8s.io/dl/v0.29.0/kind-linux-amd64
+  [ $(uname -m) = x86_64 ] && curl -Lo ./kind https://kind.sigs.k8s.io/dl/v0.30.0/kind-linux-amd64
   # For ARM64
-  [ $(uname -m) = aarch64 ] && curl -Lo ./kind https://kind.sigs.k8s.io/dl/v0.29.0/kind-linux-arm64
+  [ $(uname -m) = aarch64 ] && curl -Lo ./kind https://kind.sigs.k8s.io/dl/v0.30.0/kind-linux-arm64
   chmod +x ./kind
   sudo mv ./kind /usr/local/bin/kind
   kind version
 }
 
 main() {
+  __install_k9s
   __installKubectl
   __installHelm
   __installKind

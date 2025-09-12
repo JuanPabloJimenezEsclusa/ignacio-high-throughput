@@ -9,7 +9,7 @@
     <version>1.0.0</version>
   </parent>
 
-  <groupId>edu.ignacio.poc.high-throughput</groupId>
+  <groupId>edu.ignacio.poc.ignacio-high-throughput</groupId>
   <artifactId>reactive-throughput</artifactId>
   <version>1.0.0</version>
   <name>reactive-throughput</name>
@@ -108,6 +108,7 @@
         <groupId>org.graalvm.buildtools</groupId>
         <artifactId>native-maven-plugin</artifactId>
         <configuration>
+          <skip>false</skip>
           <buildArgs>
             <!-- https://bell-sw.com/blog/how-to-set-up-graalvm-native-image-debugging/ -->
             <buildArg>-g</buildArg>

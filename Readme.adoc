@@ -3,14 +3,29 @@
 :toclevels: 1
 :icons: font
 
-image:https://github.com/JuanPabloJimenezEsclusa/ignacio-high-throughput/actions/workflows/maven.yml/badge.svg["Deploy", link="https://github.com/JuanPabloJimenezEsclusa/ignacio-high-throughput/actions/workflows/maven.yml"]
+image:https://github.com/JuanPabloJimenezEsclusa/ignacio-high-throughput/actions/workflows/build-deploy-maven.yml/badge.svg["Deploy", link="https://github.com/JuanPabloJimenezEsclusa/ignacio-high-throughput/actions/workflows/build-deploy-maven.yml.yml"]
+image:https://github.com/JuanPabloJimenezEsclusa/ignacio-high-throughput/actions/workflows/code-analysis-pmd.yml/badge.svg["Deploy", link="https://github.com/JuanPabloJimenezEsclusa/ignacio-high-throughput/actions/workflows/code-analysis-pmd.yml.yml"]
+image:https://github.com/JuanPabloJimenezEsclusa/ignacio-high-throughput/actions/workflows/dependency-review.yml/badge.svg["Dependencies", link="https://github.com/JuanPabloJimenezEsclusa/ignacio-high-throughput/actions/workflows/docker-publish.yml"]
+image:https://github.com/JuanPabloJimenezEsclusa/ignacio-high-throughput/actions/workflows/docker-publish.yml/badge.svg["Dependencies", link="https://github.com/JuanPabloJimenezEsclusa/ignacio-high-throughput/actions/workflows/dependency-review.yml"]
 image:https://github.com/JuanPabloJimenezEsclusa/ignacio-high-throughput/actions/workflows/sonarqube.yml/badge.svg["SonarQube", link="https://github.com/JuanPabloJimenezEsclusa/ignacio-high-throughput/actions/workflows/sonarqube.yml"]
-image:https://github.com/JuanPabloJimenezEsclusa/ignacio-high-throughput/actions/workflows/dependency-review.yml/badge.svg["Dependencies", link="https://github.com/JuanPabloJimenezEsclusa/ignacio-high-throughput/actions/workflows/dependency-review.yml"]
 image:https://img.shields.io/github/license/JuanPabloJimenezEsclusa/ignacio-high-throughput?logo=github["License", link="https://github.com/JuanPabloJimenezEsclusa/ignacio-high-throughput/LICENSE.md"]
 image:https://img.shields.io/github/languages/code-size/JuanPabloJimenezEsclusa/ignacio-high-throughput?logo=github[GitHub code size in bytes]
+image:https://img.shields.io/github/issues/JuanPabloJimenezEsclusa/ignacio-high-throughput?logo=github[GitHub Issues]
+image:https://img.shields.io/github/issues-closed/JuanPabloJimenezEsclusa/ignacio-high-throughput?logo=github[GitHub Closed Issues]
+image:https://img.shields.io/github/contributors/JuanPabloJimenezEsclusa/ignacio-high-throughput?logo=github[GitHub Contributors]
+image:https://img.shields.io/github/stars/JuanPabloJimenezEsclusa/ignacio-high-throughput?logo=github[GitHub Stars]
+image:https://img.shields.io/github/forks/JuanPabloJimenezEsclusa/ignacio-high-throughput?logo=github[GitHub Forks]
 
 image:https://img.shields.io/sonar/tests/JuanPabloJimenezEsclusa_ignacio-high-throughput/develop?logo=sonar&server=https://sonarcloud.io[Sonar Tests]
 image:https://img.shields.io/sonar/coverage/JuanPabloJimenezEsclusa_ignacio-high-throughput/develop?logo=sonar&server=https://sonarcloud.io[Sonar Coverage]
+image:https://img.shields.io/sonar/bugs/JuanPabloJimenezEsclusa_ignacio-high-throughput/develop?logo=sonar&server=https://sonarcloud.io[Sonar Bugs]
+image:https://img.shields.io/sonar/code_smells/JuanPabloJimenezEsclusa_ignacio-high-throughput/develop?logo=sonar&server=https://sonarcloud.io[Sonar Code Smells]
+image:https://img.shields.io/sonar/vulnerabilities/JuanPabloJimenezEsclusa_ignacio-high-throughput/develop?logo=sonar&server=https://sonarcloud.io[Sonar Vulnerabilities]
+image:https://img.shields.io/sonar/security_rating/JuanPabloJimenezEsclusa_ignacio-high-throughput/develop?logo=sonar&server=https://sonarcloud.io[Sonar Security Rating]
+image:https://img.shields.io/sonar/reliability_rating/JuanPabloJimenezEsclusa_ignacio-high-throughput/develop?logo=sonar&server=https://sonarcloud.io[Sonar Reliability Rating]
+image:https://img.shields.io/sonar/duplicated_lines/JuanPabloJimenezEsclusa_ignacio-high-throughput/develop?logo=sonar&server=https://sonarcloud.io[Sonar Duplicated Lines]
+image:https://img.shields.io/sonar/quality_gate/JuanPabloJimenezEsclusa_ignacio-high-throughput/develop?logo=sonar&server=https://sonarcloud.io[Sonar Quality Gate]
+
 
 IMPORTANT: We're going to compare how Java virtual threads affect simple APIs, contrasting them with both traditional synchronous and reactive methods
 
@@ -46,22 +61,23 @@ image:https://img.shields.io/badge/AWS%20CLI-2.27+-brown.svg["AWS CLI",link="htt
 [#_building_modules]
 == 🔨 Building modules
 
+=== Build all modules
 [source,bash]
 ----
-# Build all modules
-mvn clean verify
+mvn clean install
+# 'verify' no working for jacoco module, 'install' instead
 ----
 
+=== Build all modules with Gradle
 [source,bash]
 ----
-# Build all modules with Gradle
 gradle clean build
 ----
 
+=== Build native artifacts
 [source,bash]
 ----
 export SPRING_PROFILES_ACTIVE="native"
-# Build native artifacts
 mvn -P"${SPRING_PROFILES_ACTIVE}" \
   native:compile \
   -Dmaven.test.skip=true \
@@ -78,10 +94,10 @@ Reports::
 * link:./imperative-throughput/target/imperative-throughput-build-report.html[Build Native Report - imperative-throughput]
 * link:./reactive-throughput/target/reactive-throughput-build-report.html[Build Native Report - reactive-throughput]
 
+=== Build docker images
 [source,bash]
 ----
 export SPRING_PROFILES_ACTIVE="native"
-# Build docker images
 mvn -P"${SPRING_PROFILES_ACTIVE}" \
   spring-boot:build-image \
   -Dmaven.test.skip=true \
@@ -94,17 +110,17 @@ mvn -P"${SPRING_PROFILES_ACTIVE}" \
 gradle bootBuildImage
 ----
 
+=== Analyze docker images with Dive
 [source,bash]
 ----
-# Analyze docker images with Dive
 docker run --rm -it \
   -v /var/run/docker.sock:/var/run/docker.sock \
   docker.io/wagoodman/dive:latest imperative-throughput:1.0.0
 ----
 
+=== Rewrite sources observing the best practices
 [source,bash]
 ----
-# Rewrite sources observing the best practices
 mvn rewrite:runNoFork -Popen-rewrite
 ----
 

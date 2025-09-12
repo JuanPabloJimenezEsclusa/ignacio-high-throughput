@@ -9,7 +9,7 @@
     <version>1.0.0</version>
   </parent>
 
-  <groupId>edu.ignacio.poc.high-throughput</groupId>
+  <groupId>edu.ignacio.poc.ignacio-high-throughput</groupId>
   <artifactId>coverage-jacoco</artifactId>
   <version>1.0.0</version>
   <name>coverage-jacoco</name>
@@ -17,12 +17,12 @@
 
   <dependencies>
     <dependency>
-      <groupId>edu.ignacio.poc.high-throughput</groupId>
+      <groupId>edu.ignacio.poc.ignacio-high-throughput</groupId>
       <artifactId>imperative-throughput</artifactId>
       <version>1.0.0</version>
     </dependency>
     <dependency>
-      <groupId>edu.ignacio.poc.high-throughput</groupId>
+      <groupId>edu.ignacio.poc.ignacio-high-throughput</groupId>
       <artifactId>reactive-throughput</artifactId>
       <version>1.0.0</version>
     </dependency>
@@ -30,6 +30,13 @@
 
   <build>
     <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-enforcer-plugin</artifactId>
+        <configuration>
+          <skip>true</skip>
+        </configuration>
+      </plugin>
       <plugin>
         <groupId>org.jacoco</groupId>
         <artifactId>jacoco-maven-plugin</artifactId>
@@ -41,8 +48,20 @@
             <goals>
               <goal>report-aggregate</goal>
             </goals>
+            <configuration>
+              <excludes>
+                <exclude>**/*SpringCGLIB*</exclude>
+              </excludes>
+            </configuration>
           </execution>
         </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-maven-plugin</artifactId>
+        <configuration>
+          <skip>true</skip>
+        </configuration>
       </plugin>
     </plugins>
   </build>

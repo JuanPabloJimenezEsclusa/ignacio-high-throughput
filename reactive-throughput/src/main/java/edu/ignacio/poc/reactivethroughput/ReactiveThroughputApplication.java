@@ -7,7 +7,12 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
  * The type Reactive throughput application.
  */
 @SpringBootApplication
+@SuppressWarnings("PMD.ClassWithOnlyPrivateConstructorsShouldBeFinal")
 public class ReactiveThroughputApplication {
+
+  private ReactiveThroughputApplication() {
+  }
+
   /**
    * The entry point of application.
    *
