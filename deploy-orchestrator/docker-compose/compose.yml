@@ -186,7 +186,7 @@ services:
     networks:
       high_throughput_network:
   kibana:
-    image: kibana:9.1.3
+    image: kibana:9.1.4
     container_name: kibana
     hostname: kibana
     restart: "no"
