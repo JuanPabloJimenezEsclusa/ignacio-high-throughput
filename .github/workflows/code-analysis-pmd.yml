@@ -44,7 +44,7 @@ jobs:
       - name: Rename SARIF file
         run: mv pmd-report.sarif pmd-report-${{ matrix.module }}.sarif
       - name: Upload SARIF file
-        uses: github/codeql-action/upload-sarif@v3
+        uses: github/codeql-action/upload-sarif@v4
         with:
           sarif_file: pmd-report-${{ matrix.module }}.sarif
           category: ${{ matrix.module }}
