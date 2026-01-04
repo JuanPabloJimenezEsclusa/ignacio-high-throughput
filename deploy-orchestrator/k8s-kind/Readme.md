@@ -11,8 +11,8 @@ Based on [Kind](https://kind.sigs.k8s.io/) (Kubernetes IN Docker)
 
 ---
 
-* [Docker ~28](https://docs.docker.com/engine/release-notes/28/)
-* [Kind ~0.30](https://kind.sigs.k8s.io/docs/user/quick-start/#installation)
+* [Docker ~29](https://docs.docker.com/engine/release-notes/29/)
+* [Kind ~0.31](https://kind.sigs.k8s.io/docs/user/quick-start/#installation)
 
 ## 🏗️ Architecture
 
@@ -69,4 +69,4 @@ Use the combined script to set up everything at once:
 * **Prometheus (Monitoring):**
   * [Prometheus monitoring dashboard](http://localhost:30000)
 * **Grafana (Monitoring Visualization):**
-  * [Grafana dashboard](http://localhost:31000) (Login: admin/prom-operator)
+  * [Grafana dashboard](http://localhost:31000) (Login: admin/<looking in secrets>)

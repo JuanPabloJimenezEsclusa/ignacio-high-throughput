@@ -29,10 +29,10 @@ subprojects {
 
   java {
     toolchain {
-      languageVersion = JavaLanguageVersion.of(24)
+      languageVersion = JavaLanguageVersion.of(25)
     }
-    sourceCompatibility = JavaVersion.VERSION_24
-    targetCompatibility = JavaVersion.VERSION_24
+    sourceCompatibility = JavaVersion.VERSION_25
+    targetCompatibility = JavaVersion.VERSION_25
   }
 
   tasks.withType(JavaCompile) {
@@ -45,7 +45,7 @@ subprojects {
   }
 
   jacoco {
-    toolVersion = '0.8.13'
+    toolVersion = '0.8.14'
   }
 
   jacocoTestReport {

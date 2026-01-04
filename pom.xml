@@ -65,7 +65,7 @@
   </distributionManagement>
 
   <properties>
-    <java.version>24</java.version>
+    <java.version>25</java.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
@@ -73,6 +73,8 @@
     <jacoco-maven-plugin.version>0.8.14</jacoco-maven-plugin.version>
     <git-changelog-maven-plugin.version>2.2.11</git-changelog-maven-plugin.version>
     <rewrite-maven-plugin.version>6.26.0</rewrite-maven-plugin.version>
+    <build-helper-maven-plugin.version>3.6.1</build-helper-maven-plugin.version>
+    <sonar-maven-plugin.version>5.5.0.6356</sonar-maven-plugin.version>
 
     <!-- Sonar -->
     <sonar.organization>juanpablojimenezesclusa</sonar.organization>
@@ -172,7 +174,7 @@
                   <version>[3.9.4,4.0.0)</version>
                 </requireMavenVersion>
                 <requireJavaVersion>
-                  <version>[24,25)</version>
+                  <version>[25,30)</version>
                 </requireJavaVersion>
               </rules>
             </configuration>
@@ -213,6 +215,11 @@
       <plugin>
         <groupId>org.openrewrite.maven</groupId>
         <artifactId>rewrite-maven-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <groupId>org.sonarsource.scanner.maven</groupId>
+        <artifactId>sonar-maven-plugin</artifactId>
+        <version>${sonar-maven-plugin.version}</version>
       </plugin>
     </plugins>
   </build>

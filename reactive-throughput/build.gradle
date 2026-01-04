@@ -19,7 +19,7 @@ dependencies {
   runtimeOnly 'io.micrometer:micrometer-registry-prometheus'
   annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
 
-  testImplementation 'org.springframework.boot:spring-boot-starter-test'
+  testImplementation 'org.springframework.boot:spring-boot-starter-webflux-test'
   testImplementation 'io.projectreactor:reactor-test'
 }
 
@@ -34,7 +34,7 @@ tasks.named('bootBuildImage') {
 
   builder = "paketobuildpacks/builder-noble-java-tiny:latest"
   environment = [
-    "BP_JVM_VERSION": "24",
+    "BP_JVM_VERSION": "25",
     "BP_JVM_TYPE": "JDK",
     "BPL_JVM_THREAD_COUNT": "2000",
     "BP_JVM_JMXREMOTE": "true",
@@ -75,7 +75,7 @@ tasks.named('bootRun') {
 
 java {
   toolchain {
-    languageVersion = JavaLanguageVersion.of(24)
+    languageVersion = JavaLanguageVersion.of(25)
   }
 }
 

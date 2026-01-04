@@ -11,7 +11,7 @@ This module contains performance tests for the Spring Boot application using the
 ---
 
 * [K6 ~0.57](https://grafana.com/docs/k6/next/release-notes/)
-* [Docker ~28](https://docs.docker.com/engine/release-notes/28/)
+* [Docker ~29](https://docs.docker.com/engine/release-notes/29/)
 
 ## 🏗️ Architecture
 
@@ -33,6 +33,7 @@ This module contains performance tests for the Spring Boot application using the
 ```
 ```bash
 # Run the test using the provided shell script
+# During execution, dashboard metrics will be displayed in http://localhost:5665/ui/
 ./run.sh
 ```
 ```bash

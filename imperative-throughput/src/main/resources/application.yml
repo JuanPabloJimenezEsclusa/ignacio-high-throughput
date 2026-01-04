@@ -1,15 +1,8 @@
 server:
   port: 8888
-  error:
-    include-message: never
-    include-path: never
-    include-exception: false
   servlet:
     application-display-name: application
     context-path: /imperative-throughput
-    encoding:
-      charset: UTF-8
-      force: true
 
 spring:
   application:
@@ -22,6 +15,15 @@ spring:
   banner:
     location: banner.txt
     charset: UTF-8
+  servlet:
+    encoding:
+      charset: UTF-8
+      force: true
+  web:
+    error:
+      include-message: never
+      include-path: never
+      include-exception: false
 
 management:
   endpoints:

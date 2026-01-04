@@ -11,7 +11,6 @@
 
   <groupId>edu.ignacio.poc.ignacio-high-throughput</groupId>
   <artifactId>imperative-throughput</artifactId>
-  <version>1.0.0</version>
   <name>imperative-throughput</name>
   <description>imperative-throughput</description>
 
@@ -61,7 +60,7 @@
     </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-starter-test</artifactId>
+      <artifactId>spring-boot-starter-webmvc-test</artifactId>
       <scope>test</scope>
     </dependency>
   </dependencies>
@@ -71,20 +70,21 @@
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>build-helper-maven-plugin</artifactId>
-        <version>3.6.1</version> <executions>
-        <execution>
-          <id>timestamp-property</id>
-          <goals>
-            <goal>timestamp-property</goal>
-          </goals>
-          <configuration>
-            <name>build.timestamp</name>
-            <pattern>yyyy-MM-dd'T'HH:mm:ssZ</pattern>
-            <locale>es</locale>
-            <timeZone>Europe/Madrid</timeZone>
-          </configuration>
-        </execution>
-      </executions>
+        <version>${build-helper-maven-plugin.version}</version>
+        <executions>
+          <execution>
+            <id>timestamp-property</id>
+            <goals>
+              <goal>timestamp-property</goal>
+            </goals>
+            <configuration>
+              <name>build.timestamp</name>
+              <pattern>yyyy-MM-dd'T'HH:mm:ssZ</pattern>
+              <locale>es</locale>
+              <timeZone>Europe/Madrid</timeZone>
+            </configuration>
+          </execution>
+        </executions>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -160,7 +160,7 @@
             <builder>paketobuildpacks/builder-noble-java-tiny:latest</builder>
             <env>
               <!-- https://github.com/paketo-buildpacks/bellsoft-liberica -->
-              <BP_JVM_VERSION>24</BP_JVM_VERSION>
+              <BP_JVM_VERSION>25</BP_JVM_VERSION>
               <BP_JVM_TYPE>JDK</BP_JVM_TYPE>
               <BP_JVM_JMXREMOTE>true</BP_JVM_JMXREMOTE>
               <BP_JVM_HEAD_ROOM>5</BP_JVM_HEAD_ROOM>
@@ -169,7 +169,7 @@
               <BP_MAVEN_BUILD_ARGUMENTS>package -DskipTests=true -Dfile.encoding=UTF-8</BP_MAVEN_BUILD_ARGUMENTS>
               <BP_OCI_SOURCE>true</BP_OCI_SOURCE>
               <BP_OCI_AUTHORS>Juan Pablo Jimenez Esclusa</BP_OCI_AUTHORS>
-              <BP_OCI_CREATED>${build.timestamp}</BP_OCI_CREATED>
+              <BP_OCI_CREATED>${project.build.timestamp}</BP_OCI_CREATED>
               <BP_NATIVE_IMAGE_BUILD_ARGUMENTS>-R:MaxHeapSize=4g -Ob -J-Xmx8g</BP_NATIVE_IMAGE_BUILD_ARGUMENTS>
               <BP_SPRING_AOT_ENABLED>true</BP_SPRING_AOT_ENABLED>
               <BP_SPRING_CLOUD_BINDINGS_DISABLED>true</BP_SPRING_CLOUD_BINDINGS_DISABLED>

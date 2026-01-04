@@ -1,11 +1,13 @@
 package edu.ignacio.poc.reactivethroughput.controller;
 
 import java.util.Map;
+import java.util.Objects;
 
+import org.jspecify.annotations.NonNull;
 import org.springframework.boot.autoconfigure.web.WebProperties;
-import org.springframework.boot.autoconfigure.web.reactive.error.AbstractErrorWebExceptionHandler;
 import org.springframework.boot.web.error.ErrorAttributeOptions;
-import org.springframework.boot.web.reactive.error.ErrorAttributes;
+import org.springframework.boot.webflux.autoconfigure.error.AbstractErrorWebExceptionHandler;
+import org.springframework.boot.webflux.error.ErrorAttributes;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
@@ -42,8 +44,9 @@ public class GlobalExceptionHandler extends AbstractErrorWebExceptionHandler {
     super.setMessageReaders(serverCodecConfigurer.getReaders());
   }
 
+  @NonNull
   @Override
-  protected RouterFunction<ServerResponse> getRoutingFunction(final ErrorAttributes errorAttributes) {
+  protected RouterFunction<ServerResponse> getRoutingFunction(final @NonNull ErrorAttributes errorAttributes) {
     return RouterFunctions.route(RequestPredicates.all(), this::formatErrorResponse);
   }
 
@@ -53,9 +56,9 @@ public class GlobalExceptionHandler extends AbstractErrorWebExceptionHandler {
     return ServerResponse.status(HttpStatus.INTERNAL_SERVER_ERROR)
       .contentType(MediaType.APPLICATION_JSON)
       .body(BodyInserters.fromValue(Map.of(
-        "status", errorAttributes.get("status"),
-        "error", errorAttributes.get("error"),
-        "path", errorAttributes.get("path")
+        "status", Objects.requireNonNull(errorAttributes.get("status")),
+        "error", Objects.requireNonNull(errorAttributes.get("error")),
+        "path", Objects.requireNonNull(errorAttributes.get("path"))
       )));
   }
 }

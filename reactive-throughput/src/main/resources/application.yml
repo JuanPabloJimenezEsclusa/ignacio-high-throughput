@@ -1,9 +1,5 @@
 server:
   port: 9999
-  error:
-    include-message: never
-    include-path: never
-    include-exception: false
 
 spring:
   application:
@@ -18,6 +14,11 @@ spring:
   banner:
     location: banner.txt
     charset: UTF-8
+  web:
+    error:
+      include-message: never
+      include-path: never
+      include-exception: false
 
 management:
   endpoints:

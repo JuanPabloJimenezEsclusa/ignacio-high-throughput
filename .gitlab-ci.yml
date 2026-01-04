@@ -4,7 +4,7 @@ stages:
 # --- Maven Build Job ---
 build_with_maven:
   stage: build
-  image: maven:3.9.9-eclipse-temurin-24-alpine
+  image: maven:3.9-eclipse-temurin-25-alpine
   script:
     - echo "Compiling with Maven on Java version:"
     - java -version
@@ -22,7 +22,7 @@ build_with_maven:
 # --- Gradle Build Job ---
 build_with_gradle:
   stage: build
-  image: gradle:8.14.2-jdk24-alpine
+  image: gradle:9.2-jdk25-alpine
   script:
     - echo "Compiling with Gradle on Java version:"
     - java -version
