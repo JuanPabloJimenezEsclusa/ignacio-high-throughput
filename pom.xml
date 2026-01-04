@@ -70,7 +70,7 @@
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
     <!-- Plugins -->
-    <jacoco-maven-plugin.version>0.8.13</jacoco-maven-plugin.version>
+    <jacoco-maven-plugin.version>0.8.14</jacoco-maven-plugin.version>
     <git-changelog-maven-plugin.version>2.2.11</git-changelog-maven-plugin.version>
     <rewrite-maven-plugin.version>6.26.0</rewrite-maven-plugin.version>
 
