@@ -1,13 +1,11 @@
 package edu.ignacio.poc.imperativethroughput.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.util.concurrent.CountDownLatch;
@@ -20,14 +18,16 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
+import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.assertj.MockMvcTester;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
+@AutoConfigureMockMvc
 @WebMvcTest({SmokeController.class, SmokeExceptionHandler.class})
 @ContextConfiguration(classes = ImperativeThroughputApplication.class)
 @DisplayName("Smoke Controller Test")
@@ -37,7 +37,7 @@ class SmokeControllerTest {
   private static final String EXPECTED_BODY = "OK:Imperative:";
 
   @Autowired
-  private MockMvc mockMvc;
+  private MockMvcTester mockMvcTester;
 
   @Autowired
   private SmokeController controller;
@@ -47,27 +47,27 @@ class SmokeControllerTest {
 
   @Test
   @DisplayName("Should return OK with correct cache control headers")
-  void shouldReturnOkWithCorrectCacheControlHeaders() throws Exception {
+  void shouldReturnOkWithCorrectCacheControlHeaders() {
     // When, Then
-    mockMvc.perform(get(SMOKES_URL))
-      .andExpectAll(
-        status().isOk(),
-        content().string(containsString(EXPECTED_BODY)),
-        header().string(HttpHeaders.CACHE_CONTROL, containsString("no-cache")));
+    assertThat(mockMvcTester.get().uri(SMOKES_URL))
+      .isNotNull()
+      .hasStatusOk()
+      .hasHeader(HttpHeaders.CACHE_CONTROL, "no-cache")
+      .bodyText().contains(EXPECTED_BODY);
   }
 
   @Test
   @DisplayName("Should take at least 300ms to respond")
-  void shouldTakeAtLeast300msToRespond() throws Exception {
+  void shouldTakeAtLeast300msToRespond() {
     // Given
     final long startTime = System.currentTimeMillis();
 
     // When, Then
-    mockMvc.perform(get(SMOKES_URL))
-      .andExpectAll(
-        status().isOk(),
-        content().string(containsString(EXPECTED_BODY)),
-        header().string(HttpHeaders.CACHE_CONTROL, containsString("no-cache")));
+    assertThat(mockMvcTester.get().uri(SMOKES_URL))
+      .isNotNull()
+      .hasStatusOk()
+      .hasHeader(HttpHeaders.CACHE_CONTROL, "no-cache")
+      .bodyText().contains(EXPECTED_BODY);
 
     final long executionTime = System.currentTimeMillis() - startTime;
     assertTrue(executionTime >= 300,
@@ -92,13 +92,13 @@ class SmokeControllerTest {
     "/smokes/"
   })
   @DisplayName("Should handle requests with context path variations")
-  void shouldHandleRequestsWithContextPathVariations(final String endpoint) throws Exception {
+  void shouldHandleRequestsWithContextPathVariations(final String endpoint) {
     // When, Then
-    mockMvc.perform(get(endpoint))
-      .andExpectAll(
-        status().isOk(),
-        content().string(containsString(EXPECTED_BODY)),
-        header().string(HttpHeaders.CACHE_CONTROL, containsString("no-cache")));
+    assertThat(mockMvcTester.get().uri(endpoint))
+      .isNotNull()
+      .hasStatusOk()
+      .hasHeader(HttpHeaders.CACHE_CONTROL, "no-cache")
+      .bodyText().contains(EXPECTED_BODY);
   }
 
   @Test

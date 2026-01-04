@@ -11,8 +11,8 @@ Based on `docker-compose`
 
 ---
 
-* [Docker ~28](https://docs.docker.com/engine/release-notes/28/)
-* [Docker-compose ~2.39](https://docs.docker.com/compose/install/standalone/)
+* [Docker ~29](https://docs.docker.com/engine/release-notes/29/)
+* [Docker-compose ~2.40](https://docs.docker.com/compose/install/standalone/)
 
 ## 🏗️ Architecture
 
