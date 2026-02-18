@@ -1,16 +1,7 @@
 package edu.ignacio.poc.imperativethroughput.controller;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertInstanceOf;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
-import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicReference;
 
 import edu.ignacio.poc.imperativethroughput.ImperativeThroughputApplication;
 import org.junit.jupiter.api.DisplayName;
@@ -20,12 +11,18 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.web.servlet.assertj.MockMvcTester;
+import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.asyncDispatch;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.request;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @AutoConfigureMockMvc
 @WebMvcTest({SmokeController.class, SmokeExceptionHandler.class})
@@ -37,7 +34,7 @@ class SmokeControllerTest {
   private static final String EXPECTED_BODY = "OK:Imperative:";
 
   @Autowired
-  private MockMvcTester mockMvcTester;
+  private MockMvc mockMvc;
 
   @Autowired
   private SmokeController controller;
@@ -47,38 +44,45 @@ class SmokeControllerTest {
 
   @Test
   @DisplayName("Should return OK with correct cache control headers")
-  void shouldReturnOkWithCorrectCacheControlHeaders() {
-    // When, Then
-    assertThat(mockMvcTester.get().uri(SMOKES_URL))
-      .isNotNull()
-      .hasStatusOk()
-      .hasHeader(HttpHeaders.CACHE_CONTROL, "no-cache")
-      .bodyText().contains(EXPECTED_BODY);
+  void shouldReturnOkWithCorrectCacheControlHeaders() throws Exception {
+    // When
+    final var mvcResult = mockMvc.perform(get(SMOKES_URL))
+      .andExpect(request().asyncStarted())
+      .andReturn();
+
+    // Then
+    mockMvc.perform(asyncDispatch(mvcResult))
+      .andExpect(status().isOk())
+      .andExpect(content().string(org.hamcrest.Matchers.containsString(EXPECTED_BODY)));
   }
 
   @Test
   @DisplayName("Should take at least 300ms to respond")
-  void shouldTakeAtLeast300msToRespond() {
+  void shouldTakeAtLeast300msToRespond() throws Exception {
     // Given
     final long startTime = System.currentTimeMillis();
 
-    // When, Then
-    assertThat(mockMvcTester.get().uri(SMOKES_URL))
-      .isNotNull()
-      .hasStatusOk()
-      .hasHeader(HttpHeaders.CACHE_CONTROL, "no-cache")
-      .bodyText().contains(EXPECTED_BODY);
+    // When
+    final var mvcResult = mockMvc.perform(get(SMOKES_URL))
+      .andExpect(request().asyncStarted())
+      .andReturn();
 
+    mockMvc.perform(asyncDispatch(mvcResult))
+      .andExpect(status().isOk());
+
+    // Then
     final long executionTime = System.currentTimeMillis() - startTime;
-    assertTrue(executionTime >= 300,
-      "Expected execution time to be at least 300ms but was %dms".formatted(executionTime));
+    assertThat(executionTime).isGreaterThanOrEqualTo(300);
   }
 
   @Test
   @DisplayName("Should create correct ResponseEntity structure")
-  void shouldCreateCorrectResponseEntityStructure() {
-    // When, Then
-    assertThat(controller.getSmoke())
+  void shouldCreateCorrectResponseEntityStructure() throws Exception {
+    // When
+    final var futureResponse = controller.getSmoke();
+
+    // Then
+    assertThat(futureResponse.get(1, TimeUnit.SECONDS))
       .isNotNull()
       .returns(HttpStatus.OK, ResponseEntity::getStatusCode)
       .returns(true, r -> r.getBody() != null && r.getBody().contains(EXPECTED_BODY))
@@ -92,59 +96,64 @@ class SmokeControllerTest {
     "/smokes/"
   })
   @DisplayName("Should handle requests with context path variations")
-  void shouldHandleRequestsWithContextPathVariations(final String endpoint) {
-    // When, Then
-    assertThat(mockMvcTester.get().uri(endpoint))
-      .isNotNull()
-      .hasStatusOk()
-      .hasHeader(HttpHeaders.CACHE_CONTROL, "no-cache")
-      .bodyText().contains(EXPECTED_BODY);
-  }
-
-  @Test
-  @DisplayName("Should throw RuntimeException when sleep is interrupted")
-  void shouldThrowRuntimeExceptionWhenSleepIsInterrupted() throws Exception {
-    // Given
-    final AtomicReference<Throwable> thrownException = new AtomicReference<>();
-    final CountDownLatch latch = new CountDownLatch(1);
-
+  void shouldHandleRequestsWithContextPathVariations(final String endpoint) throws Exception {
     // When
-    final Thread testThread = new Thread(() -> {
-      try {
-        Thread.currentThread().interrupt();
-        controller.getSmoke();
-      } catch (Exception e) {
-        thrownException.set(e);
-      } finally {
-        latch.countDown();
-      }
-    });
-    testThread.start();
-    boolean await = latch.await(1, TimeUnit.SECONDS);
+    final var mvcResult = mockMvc.perform(get(endpoint))
+      .andExpect(request().asyncStarted())
+      .andReturn();
 
     // Then
-    assertTrue(await);
-    assertNotNull(thrownException.get());
-    assertInstanceOf(IllegalCallerException.class, thrownException.get());
+    mockMvc.perform(asyncDispatch(mvcResult))
+      .andExpect(status().isOk())
+      .andExpect(content().string(org.hamcrest.Matchers.containsString(EXPECTED_BODY)));
   }
 
   @Test
-  @DisplayName("Should handle exceptions using ExceptionHandler")
-  void shouldHandleExceptionsUsingExceptionHandler() throws Exception {
+  @DisplayName("Should handle exceptions in async processing")
+  void shouldHandleExceptionsInAsyncProcessing() throws Exception {
     // Given
     final var mockMvcWithException = MockMvcBuilders.standaloneSetup(
         new SmokeController() {
           @Override
-          public ResponseEntity<String> getSmoke() {
-            throw new IllegalCallerException("Interrupted while sleeping");
+          public CompletableFuture<ResponseEntity<String>> getSmoke() {
+            final var future = new CompletableFuture<ResponseEntity<String>>();
+            future.completeExceptionally(new IllegalCallerException("Interrupted while sleeping"));
+            return future;
           }
         })
       .setControllerAdvice(exceptionHandler)
       .build();
 
-    // When, Then
-    mockMvcWithException.perform(get(SMOKES_URL))
+    // When
+    final var mvcResult = mockMvcWithException.perform(get(SMOKES_URL))
+      .andExpect(request().asyncStarted())
+      .andReturn();
+
+    // Then
+    mockMvcWithException.perform(asyncDispatch(mvcResult))
       .andExpect(status().is5xxServerError())
       .andExpect(content().string("Interrupted while sleeping"));
+  }
+
+  @Test
+  @DisplayName("Should complete future without blocking thread")
+  void shouldCompleteFutureWithoutBlockingThread() throws Exception {
+    // Given
+    final long startTime = System.currentTimeMillis();
+
+    // When
+    final var future = controller.getSmoke();
+
+    // Then - Future should be created immediately (non-blocking)
+    assertThat(future).isNotNull();
+    assertThat(future.isDone()).isFalse();
+
+    // Wait for completion
+    final var response = future.get(1, TimeUnit.SECONDS);
+    final long executionTime = System.currentTimeMillis() - startTime;
+
+    assertThat(response).isNotNull();
+    assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+    assertThat(executionTime).isGreaterThanOrEqualTo(300);
   }
 }

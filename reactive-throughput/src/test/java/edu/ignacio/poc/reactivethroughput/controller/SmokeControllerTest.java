@@ -1,12 +1,5 @@
 package edu.ignacio.poc.reactivethroughput.controller;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.springframework.web.reactive.function.server.RequestPredicates.GET;
-import static org.springframework.web.reactive.function.server.RouterFunctions.route;
-
 import java.time.Duration;
 
 import org.junit.jupiter.api.DisplayName;
@@ -25,6 +18,11 @@ import org.springframework.web.reactive.function.server.RouterFunction;
 import org.springframework.web.reactive.function.server.ServerResponse;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.containsString;
+import static org.springframework.web.reactive.function.server.RequestPredicates.GET;
+import static org.springframework.web.reactive.function.server.RouterFunctions.route;
 
 @AutoConfigureWebTestClient
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -89,8 +87,7 @@ class SmokeControllerTest {
 
     // Then
     final long executionTime = System.currentTimeMillis() - startTime;
-    assertTrue(executionTime >= 300,
-      "Expected execution time to be at least 300ms but was %dms".formatted(executionTime));
+    assertThat(executionTime).isGreaterThanOrEqualTo(300);
   }
 
   @Test
@@ -100,7 +97,7 @@ class SmokeControllerTest {
     final var routerFunction = controller.smokesRoutes();
 
     // When
-    assertNotNull(routerFunction);
+    assertThat(routerFunction).isNotNull();
 
     // Then
     WebTestClient.bindToRouterFunction(routerFunction).build()
@@ -145,8 +142,7 @@ class SmokeControllerTest {
       .getResponseHeaders()
       .getFirst(HttpHeaders.CACHE_CONTROL);
 
-    assertNotNull(cacheControlHeader);
-    assertThat(cacheControlHeader).contains("no-cache");
+    assertThat(cacheControlHeader).isNotNull().contains("no-cache");
   }
 
   @Test

@@ -1,6 +1,10 @@
 package edu.ignacio.poc.imperativethroughput.controller;
 
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,6 +21,8 @@ import org.springframework.web.bind.annotation.RestController;
 class SmokeController {
 
   private static final Logger log = LoggerFactory.getLogger(SmokeController.class);
+  private static final ScheduledExecutorService scheduler = Executors
+    .newSingleThreadScheduledExecutor(Thread.ofVirtual().factory());
 
   /**
    * Gets smoke.
@@ -24,21 +30,24 @@ class SmokeController {
    * @return the smoke
    */
   @GetMapping({"/smokes", "/smokes/"})
-  public ResponseEntity<String> getSmoke() {
-    try {
-      Thread.sleep(300);
-    } catch (InterruptedException _) {
-      Thread.currentThread().interrupt();
-      throw new IllegalCallerException("Interrupted while sleeping");
-    }
+  public CompletableFuture<ResponseEntity<String>> getSmoke() {
+    final var future = new CompletableFuture<ResponseEntity<String>>();
 
-    final var response = ResponseEntity.ok()
-      .cacheControl(CacheControl.noCache())
-      .contentType(MediaType.APPLICATION_JSON)
-      .headers(httpHeaders -> httpHeaders.setAccept(List.of(MediaType.APPLICATION_JSON)))
-      .body("OK:Imperative:%s".formatted(Thread.currentThread().toString()));
+    scheduler.schedule(() -> {
+      try {
+        final var response = ResponseEntity.ok()
+          .cacheControl(CacheControl.noCache())
+          .contentType(MediaType.APPLICATION_JSON)
+          .headers(httpHeaders -> httpHeaders.setAccept(List.of(MediaType.APPLICATION_JSON)))
+          .body("OK:Imperative:%s".formatted(Thread.currentThread().toString()));
 
-    log.info("Smoke imperative endpoint - status: {} - thread: {}", response.getStatusCode(), Thread.currentThread()); // NOPMD
-    return response;
+        log.info("Smoke imperative endpoint - status: {} - thread: {}", response.getStatusCode(), Thread.currentThread()); // NOPMD
+        future.complete(response);
+      } catch (Exception e) {
+        future.completeExceptionally(e);
+      }
+    }, 300, TimeUnit.MILLISECONDS);
+
+    return future;
   }
 }
