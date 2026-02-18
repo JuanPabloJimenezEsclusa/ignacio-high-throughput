@@ -319,10 +319,12 @@
     <module name="OverloadMethodsDeclarationOrder"/>
     <module name="ConstructorsDeclarationGrouping"/>
     <module name="VariableDeclarationUsageDistance"/>
+
+    <!-- https://openjdk.org/jeps/511 -->
     <module name="CustomImportOrder">
       <property name="sortImportsInGroupAlphabetically" value="true"/>
       <property name="separateLineBetweenGroups" value="true"/>
-      <property name="customImportOrderRules" value="STATIC,STANDARD_JAVA_PACKAGE,THIRD_PARTY_PACKAGE"/>
+      <property name="customImportOrderRules" value="STANDARD_JAVA_PACKAGE,THIRD_PARTY_PACKAGE,STATIC"/>
       <property name="tokens" value="IMPORT, STATIC_IMPORT, PACKAGE_DEF"/>
     </module>
     <module name="MethodParamPad">
