@@ -42,7 +42,7 @@ public class SmokeController {
         .contentType(MediaType.APPLICATION_JSON)
         .headers(httpHeaders -> httpHeaders.setAccept(List.of(MediaType.APPLICATION_JSON)))
         .body(fromPublisher(Mono.just("OK:Reactive:%s".formatted(Thread.currentThread().toString()))
-          .delayElement(Duration.ofMillis(300)), String.class))
+          .delayElement(Duration.ofMillis(300L)), String.class))
           .doOnNext(result -> log.info("Smoke reactive endpoint - status: {} - thread: {}",
             result.statusCode(), Thread.currentThread()))
           .doOnError(throwable -> log.error("Error in smoke endpoint: {}",

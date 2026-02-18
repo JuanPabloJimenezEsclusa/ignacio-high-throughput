@@ -46,7 +46,7 @@ class SmokeController {
       } catch (Exception e) {
         future.completeExceptionally(e);
       }
-    }, 300, TimeUnit.MILLISECONDS);
+    }, 300L, TimeUnit.MILLISECONDS);
 
     return future;
   }
