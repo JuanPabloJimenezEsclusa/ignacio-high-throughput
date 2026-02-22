@@ -35,15 +35,17 @@ class SmokeController {
 
     scheduler.schedule(() -> {
       try {
+        final Thread currentThread = Thread.currentThread();
         final var response = ResponseEntity.ok()
           .cacheControl(CacheControl.noCache())
           .contentType(MediaType.APPLICATION_JSON)
           .headers(httpHeaders -> httpHeaders.setAccept(List.of(MediaType.APPLICATION_JSON)))
-          .body("OK:Imperative:%s".formatted(Thread.currentThread().toString()));
+          .body("OK:Imperative:%s".formatted(currentThread.toString()));
+        final var statusCode = response.getStatusCode();
 
-        log.info("Smoke imperative endpoint - status: {} - thread: {}", response.getStatusCode(), Thread.currentThread()); // NOPMD
+        log.info("Smoke imperative endpoint - status: {} - thread: {}", statusCode, currentThread);
         future.complete(response);
-      } catch (Exception e) {
+      } catch (final Exception e) {
         future.completeExceptionally(e);
       }
     }, 300L, TimeUnit.MILLISECONDS);

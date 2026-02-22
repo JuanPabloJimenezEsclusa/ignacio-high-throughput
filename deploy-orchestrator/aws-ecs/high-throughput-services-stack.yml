@@ -408,6 +408,8 @@ Resources:
               Value: "--enable-native-access=ALL-UNNAMED"
             - Name: BPL_JVM_THREAD_COUNT
               Value: "600"
+            - Name: DOWNSTREAM_SERVICE_URL
+              Value: !Sub "https://wiremock.${AWS::StackName}.internal:8080"
 
   ReactiveTaskDefinition:
     Type: "AWS::ECS::TaskDefinition"
@@ -461,6 +463,8 @@ Resources:
               Value: "--enable-native-access=ALL-UNNAMED"
             - Name: BPL_JVM_THREAD_COUNT
               Value: "600"
+            - Name: DOWNSTREAM_SERVICE_URL
+              Value: !Sub "http://wiremock.${AWS::StackName}.internal:8080"
 
   # Create an ECS Service
   # https://aws.amazon.com/es/fargate/pricing/
@@ -628,6 +632,138 @@ Resources:
       Tags:
         - Key: "Name"
           Value: "high-throughput-admin-sg"
+        - Key: "ENTORN"
+          Value: "PRO"
+
+  ################################################################################################
+  ######################################## WireMock (downstream stub) ############################
+
+  WireMockLogGroup:
+    Type: "AWS::Logs::LogGroup"
+    Description: "CloudWatch Logs group for WireMock"
+    Properties:
+      LogGroupName: "/ecs/wiremock"
+      RetentionInDays: 1
+      Tags:
+        - Key: "ENTORN"
+          Value: "PRO"
+
+  WireMockECSServiceSecurityGroup:
+    Type: "AWS::EC2::SecurityGroup"
+    Description: "Security group for the WireMock ECS task"
+    Properties:
+      GroupDescription: "Allow traffic to WireMock from app tasks"
+      VpcId: !Ref VPC
+      GroupName: "wiremock-ecs-sg"
+      SecurityGroupIngress:
+        - IpProtocol: "tcp"
+          FromPort: 8080
+          ToPort: 8080
+          SourceSecurityGroupId: !Ref ImperativeECSServiceSecurityGroup
+          Description: "Allow http from imperative service"
+        - IpProtocol: "tcp"
+          FromPort: 8080
+          ToPort: 8080
+          SourceSecurityGroupId: !Ref ReactiveECSServiceSecurityGroup
+          Description: "Allow http from reactive service"
+      SecurityGroupEgress:
+        - IpProtocol: "-1"
+          FromPort: -1
+          ToPort: -1
+          CidrIp: "0.0.0.0/0"
+          Description: "Allow all outbound traffic"
+      Tags:
+        - Key: "Name"
+          Value: "wiremock-ecs-sg"
+        - Key: "ENTORN"
+          Value: "PRO"
+
+  # Private DNS namespace so apps can reach WireMock via wiremock.<StackName>.internal
+  ServiceDiscoveryNamespace:
+    Type: "AWS::ServiceDiscovery::PrivateDnsNamespace"
+    Properties:
+      Name: !Sub "${AWS::StackName}.internal"
+      Vpc: !Ref VPC
+      Description: "Private DNS namespace for internal service discovery"
+
+  WireMockServiceDiscovery:
+    Type: "AWS::ServiceDiscovery::Service"
+    Properties:
+      Name: "wiremock"
+      NamespaceId: !Ref ServiceDiscoveryNamespace
+      DnsConfig:
+        DnsRecords:
+          - Type: "A"
+            TTL: 10
+      HealthCheckCustomConfig:
+        FailureThreshold: 1
+
+  WireMockTaskDefinition:
+    Type: "AWS::ECS::TaskDefinition"
+    Description: "WireMock downstream stub task definition"
+    DeletionPolicy: Delete
+    Properties:
+      Family: "wiremock-definition"
+      NetworkMode: "awsvpc"
+      RequiresCompatibilities: ["FARGATE"]
+      Cpu: "256"
+      Memory: "512"
+      ExecutionRoleArn: !Ref TaskExecutionRole
+      TaskRoleArn: !GetAtt TaskExecutionRole.Arn
+      Tags:
+        - Key: "ENTORN"
+          Value: "PRO"
+      ContainerDefinitions:
+        - Name: "wiremock"
+          Image: "wiremock/wiremock:3.13.2"
+          Cpu: "256"
+          Memory: "512"
+          Command:
+            - "--port=8080"
+            - "--global-response-templating"
+          PortMappings:
+            - Name: "http-8080"
+              ContainerPort: 8080
+              HostPort: 8080
+              Protocol: "tcp"
+              AppProtocol: "http"
+          Essential: true
+          LinuxParameters:
+            InitProcessEnabled: true
+          HealthCheck:
+            Command: ["CMD-SHELL", "wget --quiet --spider http://localhost:8080/__admin/health || exit 1"]
+            Interval: 10
+            Timeout: 5
+            Retries: 3
+            StartPeriod: 10
+          LogConfiguration:
+            LogDriver: "awslogs"
+            Options:
+              awslogs-group: !Ref WireMockLogGroup
+              awslogs-region: !Ref "AWS::Region"
+              awslogs-stream-prefix: "ecs"
+
+  WireMockECSService:
+    Type: "AWS::ECS::Service"
+    Description: "WireMock downstream stub ECS service"
+    Properties:
+      ServiceName: "wiremock-service"
+      Cluster: !Ref ECSCluster
+      DesiredCount: 1
+      LaunchType: "FARGATE"
+      TaskDefinition: !Ref WireMockTaskDefinition
+      HealthCheckGracePeriodSeconds: 15
+      NetworkConfiguration:
+        AwsvpcConfiguration:
+          AssignPublicIp: "ENABLED"
+          Subnets:
+            - !Ref PrivateSubnetA
+            - !Ref PrivateSubnetB
+          SecurityGroups:
+            - !Ref WireMockECSServiceSecurityGroup
+      ServiceRegistries:
+        - RegistryArn: !GetAtt WireMockServiceDiscovery.Arn
+      Tags:
         - Key: "ENTORN"
           Value: "PRO"
 
@@ -1131,6 +1267,12 @@ Outputs:
   ImperativeLogGroupName:
     Description: The name of the CloudWatch Imperative Log Group
     Value: !Ref ImperativeLogGroup
+  WireMockECSServiceName:
+    Description: The name of the WireMock ECS service
+    Value: !Ref WireMockECSService
+  WireMockLogGroupName:
+    Description: The name of the CloudWatch WireMock Log Group
+    Value: !Ref WireMockLogGroup
   ReactiveLogGroupName:
     Description: The name of the CloudWatch Reactive Log Group
     Value: !Ref ReactiveLogGroup

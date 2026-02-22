@@ -7,6 +7,17 @@ export const options = {
   thresholds: {
     'http_req_duration{group:imperative}': [],
     'http_req_duration{group:reactive}': [],
+    'http_req_duration{group:imperative-smoke}': [],
+    'http_req_duration{group:reactive-smoke}': [],
+    'http_req_duration{group:imperative-io}': [],
+    'http_req_duration{group:reactive-io}': [],
+    'http_req_duration{group:imperative-cpu}': [],
+    'http_req_duration{group:reactive-cpu}': [],
+    'http_req_duration{group:imperative-aggregate}': [],
+    'http_req_duration{group:reactive-aggregate}': [],
+    'http_req_duration{group:imperative-resilience}': [],
+    'http_req_duration{group:reactive-resilience}': [],
+    'http_req_duration{group:reactive-stream}': [],
     'http_reqs{group:imperative}': [],
     'http_reqs{group:reactive}': [],
     'http_req_waiting{group:imperative}': [],
@@ -15,13 +26,13 @@ export const options = {
   scenarios: {
     high_throughput_test: {
       executor: 'ramping-arrival-rate',
-      preAllocatedVUs: 7000,
+      preAllocatedVUs: 3000,
       startRate: 1000,
       timeUnit: '5s',
       stages: [
-        { target: 1000, duration: '1m' },
-        { target: 4000, duration: '1m' },
-        { target: 7000, duration: '1m' }
+        { target: 1000, duration: '30s' },
+        { target: 2000, duration: '30s' },
+        { target: 3000, duration: '30s' }
       ],
     }
   }
@@ -39,46 +50,121 @@ export function handleSummary(data) {
 }
 
 export function checkByImperativeGroup() {
-  group('imperative', function() {
-    const imperativeThroughput = __ENV.IMPERATIVE_THROUGHPUT_URL || 'http://imperative-throughput:8888/imperative-throughput/smokes';
-    const params = {
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-        'Cache-Control': 'no-cache'
-      },
-      responseType: 'text',
-      tags: { group: 'imperative' }
-    };
+  const baseUrl = __ENV.IMPERATIVE_THROUGHPUT_URL || 'http://imperative-throughput:8888/imperative-throughput';
+  const params = {
+    headers: {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+      'Cache-Control': 'no-cache'
+    },
+    responseType: 'text',
+  };
 
-    const imperativeResult = http.get(imperativeThroughput, params);
-    check(imperativeResult,
-      { 'status was 200': (r) => r.status === 200,
-        'body size < 100 bytes': (r) => r.body.length < 100,
-        'body contains "OK"': (r) => r.body.includes('OK') });
+  group('imperative-smoke', function() {
+    const result = http.get(`${baseUrl}/smokes`, { ...params, tags: { group: 'imperative-smoke' } });
+    check(result, {
+      'status was 200': (r) => r.status === 200,
+      'body size < 100 bytes': (r) => r.body.length < 100,
+      'body contains "OK"': (r) => r.body.includes('OK'),
+    });
+  });
+
+  group('imperative-io', function() {
+    const result = http.get(`${baseUrl}/io`, { ...params, tags: { group: 'imperative-io' } });
+    check(result, {
+      'status was 200': (r) => r.status === 200,
+      'body contains "OK:Imperative:IO"': (r) => r.body.includes('OK:Imperative:IO'),
+    });
+  });
+
+  group('imperative-cpu', function() {
+    const result = http.get(`${baseUrl}/cpu`, { ...params, tags: { group: 'imperative-cpu' } });
+    check(result, {
+      'status was 200': (r) => r.status === 200,
+      'body contains "OK:Imperative:CPU"': (r) => r.body.includes('OK:Imperative:CPU'),
+    });
+  });
+
+  group('imperative-aggregate', function() {
+    const result = http.get(`${baseUrl}/aggregate`, { ...params, tags: { group: 'imperative-aggregate' } });
+    check(result, {
+      'status was 200': (r) => r.status === 200,
+      'body contains "OK:Imperative:Aggregate"': (r) => r.body.includes('OK:Imperative:Aggregate'),
+    });
+  });
+
+  group('imperative-resilience', function() {
+    const result = http.get(`${baseUrl}/resilience`, { ...params, tags: { group: 'imperative-resilience' } });
+    check(result, {
+      'status was 200': (r) => r.status === 200,
+      'body is not empty': (r) => r.body.length > 0,
+    });
   });
 }
 
 export function checkByReactiveGroup() {
-  group('reactive', function() {
-    const reactiveThroughput = __ENV.REACTIVE_THROUGHPUT_URL || 'http://reactive-throughput:9999/reactive-throughput/smokes';
-    const params = {
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-        'Cache-Control': 'no-cache'
-      },
-      responseType: 'text',
-      tags: { group: 'reactive' }
-    };
+  const baseUrl = __ENV.REACTIVE_THROUGHPUT_URL || 'http://reactive-throughput:9999/reactive-throughput';
+  const params = {
+    headers: {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+      'Cache-Control': 'no-cache'
+    },
+    responseType: 'text',
+  };
 
-    const reactiveResult = http.get(reactiveThroughput, params);
-    check(reactiveResult,
-      { 'status was 200': (r) => r.status === 200,
-        'body size < 100 bytes': (r) => r.body.length < 100,
-        'body contains "OK"': (r) => r.body.includes('OK') });
+  group('reactive-smoke', function() {
+    const result = http.get(`${baseUrl}/smokes`, { ...params, tags: { group: 'reactive-smoke' } });
+    check(result, {
+      'status was 200': (r) => r.status === 200,
+      'body size < 100 bytes': (r) => r.body.length < 100,
+      'body contains "OK"': (r) => r.body.includes('OK'),
+    });
   });
 
+  group('reactive-io', function() {
+    const result = http.get(`${baseUrl}/io`, { ...params, tags: { group: 'reactive-io' } });
+    check(result, {
+      'status was 200': (r) => r.status === 200,
+      'body contains "OK:Reactive:IO"': (r) => r.body.includes('OK:Reactive:IO'),
+    });
+  });
+
+  group('reactive-cpu', function() {
+    const result = http.get(`${baseUrl}/cpu`, { ...params, tags: { group: 'reactive-cpu' } });
+    check(result, {
+      'status was 200': (r) => r.status === 200,
+      'body contains "OK:Reactive:CPU"': (r) => r.body.includes('OK:Reactive:CPU'),
+    });
+  });
+
+  group('reactive-aggregate', function() {
+    const result = http.get(`${baseUrl}/aggregate`, { ...params, tags: { group: 'reactive-aggregate' } });
+    check(result, {
+      'status was 200': (r) => r.status === 200,
+      'body contains "OK:Reactive:Aggregate"': (r) => r.body.includes('OK:Reactive:Aggregate'),
+    });
+  });
+
+  group('reactive-resilience', function() {
+    const result = http.get(`${baseUrl}/resilience`, { ...params, tags: { group: 'reactive-resilience' } });
+    check(result, {
+      'status was 200': (r) => r.status === 200,
+      'body is not empty': (r) => r.body.length > 0,
+    });
+  });
+
+  group('reactive-stream', function() {
+    const result = http.get(`${baseUrl}/stream`, {
+      ...params,
+      headers: { ...params.headers, 'Accept': 'text/event-stream' },
+      tags: { group: 'reactive-stream' }
+    });
+    check(result, {
+      'status was 200': (r) => r.status === 200,
+      'body contains "event:"': (r) => r.body.includes('event:'),
+    });
+  });
 }
 
 export function highThroughputTest() {

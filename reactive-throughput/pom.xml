@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
+
   <parent>
     <groupId>edu.ignacio.poc</groupId>
     <artifactId>ignacio-high-throughput</artifactId>
@@ -41,7 +42,6 @@
       <groupId>ch.qos.logback</groupId>
       <artifactId>logback-classic</artifactId>
     </dependency>
-
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-devtools</artifactId>
@@ -66,6 +66,12 @@
     <dependency>
       <groupId>io.projectreactor</groupId>
       <artifactId>reactor-test</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.wiremock</groupId>
+      <artifactId>wiremock-standalone</artifactId>
+      <version>${wiremock-standalone.version}</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
@@ -117,11 +123,11 @@
             <buildArg>--enable-monitoring=jcmd,jvmstat,jfr</buildArg>
             <!--
             (compile) Recommendations:
-             G1GC: Use the G1 GC ('-gc=G1') for improved latency and throughput.
-             PGO:  Use Profile-Guided Optimizations ('-pgo') for improved throughput.
-             HEAP: Set max heap for improved and more predictable memory usage.
-             CPU:  Enable more CPU features with '-march=native' for improved performance.
-             QBM:  Use the quick build mode ('-Ob') to speed up builds during development.
+            G1GC: Use the G1 GC ('-gc=G1') for improved latency and throughput.
+            PGO:  Use Profile-Guided Optimizations ('-pgo') for improved throughput.
+            HEAP: Set max heap for improved and more predictable memory usage.
+            CPU:  Enable more CPU features with '-march=native' for improved performance.
+            QBM:  Use the quick build mode ('-Ob') to speed up builds during development.
             -->
             <buildArg>--emit build-report</buildArg>
             <buildArg>--gc=G1</buildArg>
@@ -176,7 +182,6 @@
               <BP_NATIVE_IMAGE_BUILD_ARGUMENTS>-R:MaxHeapSize=4g -Ob -J-Xmx8g</BP_NATIVE_IMAGE_BUILD_ARGUMENTS>
               <BP_SPRING_AOT_ENABLED>true</BP_SPRING_AOT_ENABLED>
               <BP_SPRING_CLOUD_BINDINGS_DISABLED>true</BP_SPRING_CLOUD_BINDINGS_DISABLED>
-
               <BPL_FILE_ENCODING>UTF-8</BPL_FILE_ENCODING>
               <BPL_JFR_ENABLED>true</BPL_JFR_ENABLED>
               <BPL_JFR_ARGS>filename=/tmp/profiling/reactive-recording.jfr,settings=/tmp/profiling/custom.jfc,dumponexit=true,duration=10m</BPL_JFR_ARGS>
@@ -193,10 +198,10 @@
               <BPL_SPRING_AOT_ENABLED>true</BPL_SPRING_AOT_ENABLED>
             </env>
           </image>
+          <jvmArguments>--enable-native-access=ALL-UNNAMED</jvmArguments>
           <arguments>
             <argument>-Dspring.aot.enabled=true</argument>
             <argument>-Dfile.encoding=UTF-8</argument>
-            <argument>--enable-native-access=ALL-UNNAMED</argument>
           </arguments>
         </configuration>
       </plugin>

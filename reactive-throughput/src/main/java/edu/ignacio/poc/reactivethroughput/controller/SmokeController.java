@@ -13,6 +13,7 @@ import org.springframework.http.MediaType;
 import org.springframework.web.reactive.function.server.RouterFunction;
 import org.springframework.web.reactive.function.server.ServerResponse;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Scheduler;
 import reactor.core.scheduler.Schedulers;
 
 import static org.springframework.web.reactive.function.BodyInserters.fromPublisher;
@@ -29,12 +30,25 @@ public class SmokeController {
   private static final Logger log = LoggerFactory.getLogger(SmokeController.class);
 
   /**
+   * Shared virtual-thread-backed scheduler — created once, reused across all requests.
+   *
+   * @return the scheduler
+   */
+  @Bean
+  public Scheduler virtualThreadScheduler() {
+    return Schedulers.fromExecutorService(
+      Executors.newVirtualThreadPerTaskExecutor(),
+      "virtual-thread"
+    );
+  }
+
+  /**
    * Smokes routes router function.
    *
    * @return the router function
    */
   @Bean
-  public RouterFunction<ServerResponse> smokesRoutes() {
+  public RouterFunction<ServerResponse> smokesRoutes(final Scheduler virtualThreadScheduler) {
     return route(
       GET("/smokes").or(GET("/smokes/")),
       request -> ok()
@@ -47,6 +61,6 @@ public class SmokeController {
             result.statusCode(), Thread.currentThread()))
           .doOnError(throwable -> log.error("Error in smoke endpoint: {}",
             request.uri().getUserInfo(), throwable))
-        .subscribeOn(Schedulers.fromExecutor(Executors.newVirtualThreadPerTaskExecutor())));
+        .subscribeOn(virtualThreadScheduler));
   }
 }

@@ -20,6 +20,10 @@ spring:
       include-path: never
       include-exception: false
 
+downstream:
+  service:
+    url: ${DOWNSTREAM_SERVICE_URL:http://localhost:8080}
+
 management:
   endpoints:
     web:

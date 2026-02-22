@@ -1,5 +1,12 @@
 package edu.ignacio.poc.imperativethroughput.controller;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.asyncDispatch;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.request;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
@@ -16,13 +23,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.asyncDispatch;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.request;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @AutoConfigureMockMvc
 @WebMvcTest({SmokeController.class, SmokeExceptionHandler.class})
@@ -46,12 +46,12 @@ class SmokeControllerTest {
   @DisplayName("Should return OK with correct cache control headers")
   void shouldReturnOkWithCorrectCacheControlHeaders() throws Exception {
     // When
-    final var mvcResult = mockMvc.perform(get(SMOKES_URL))
+    final var mvcResult = this.mockMvc.perform(get(SMOKES_URL))
       .andExpect(request().asyncStarted())
       .andReturn();
 
     // Then
-    mockMvc.perform(asyncDispatch(mvcResult))
+    this.mockMvc.perform(asyncDispatch(mvcResult))
       .andExpect(status().isOk())
       .andExpect(content().string(org.hamcrest.Matchers.containsString(EXPECTED_BODY)));
   }
@@ -63,11 +63,11 @@ class SmokeControllerTest {
     final long startTime = System.currentTimeMillis();
 
     // When
-    final var mvcResult = mockMvc.perform(get(SMOKES_URL))
+    final var mvcResult = this.mockMvc.perform(get(SMOKES_URL))
       .andExpect(request().asyncStarted())
       .andReturn();
 
-    mockMvc.perform(asyncDispatch(mvcResult))
+    this.mockMvc.perform(asyncDispatch(mvcResult))
       .andExpect(status().isOk());
 
     // Then
@@ -79,7 +79,7 @@ class SmokeControllerTest {
   @DisplayName("Should create correct ResponseEntity structure")
   void shouldCreateCorrectResponseEntityStructure() throws Exception {
     // When
-    final var futureResponse = controller.getSmoke();
+    final var futureResponse = this.controller.getSmoke();
 
     // Then
     assertThat(futureResponse.get(1, TimeUnit.SECONDS))
@@ -98,12 +98,12 @@ class SmokeControllerTest {
   @DisplayName("Should handle requests with context path variations")
   void shouldHandleRequestsWithContextPathVariations(final String endpoint) throws Exception {
     // When
-    final var mvcResult = mockMvc.perform(get(endpoint))
+    final var mvcResult = this.mockMvc.perform(get(endpoint))
       .andExpect(request().asyncStarted())
       .andReturn();
 
     // Then
-    mockMvc.perform(asyncDispatch(mvcResult))
+    this.mockMvc.perform(asyncDispatch(mvcResult))
       .andExpect(status().isOk())
       .andExpect(content().string(org.hamcrest.Matchers.containsString(EXPECTED_BODY)));
   }
@@ -121,7 +121,7 @@ class SmokeControllerTest {
             return future;
           }
         })
-      .setControllerAdvice(exceptionHandler)
+      .setControllerAdvice(this.exceptionHandler)
       .build();
 
     // When
@@ -129,10 +129,12 @@ class SmokeControllerTest {
       .andExpect(request().asyncStarted())
       .andReturn();
 
-    // Then
+    // Then - unified JSON error contract: {"status":500,"error":"Internal Server Error","path":...}
     mockMvcWithException.perform(asyncDispatch(mvcResult))
       .andExpect(status().is5xxServerError())
-      .andExpect(content().string("Interrupted while sleeping"));
+      .andExpect(content().string(org.hamcrest.Matchers.containsString("\"status\":500")))
+      .andExpect(content().string(org.hamcrest.Matchers.containsString("\"error\":\"Internal Server Error\"")))
+      .andExpect(content().string(org.hamcrest.Matchers.containsString("Interrupted while sleeping")));
   }
 
   @Test
@@ -142,9 +144,9 @@ class SmokeControllerTest {
     final long startTime = System.currentTimeMillis();
 
     // When
-    final var future = controller.getSmoke();
+    final var future = this.controller.getSmoke();
 
-    // Then - Future should be created immediately (non-blocking)
+    // Then
     assertThat(future).isNotNull();
     assertThat(future.isDone()).isFalse();
 
