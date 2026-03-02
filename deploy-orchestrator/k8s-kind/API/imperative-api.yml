@@ -35,6 +35,7 @@ data:
   JVM_OPTIONS: "-Xms512m -Xmx900m"
   JAVA_TOOL_OPTIONS: "--enable-native-access=ALL-UNNAMED"
   BPL_JVM_THREAD_COUNT: "600"
+  DOWNSTREAM_SERVICE_URL: "http://wiremock-svc.wiremock-ns.svc.cluster.local:8080"
 
 ---
 apiVersion: apps/v1

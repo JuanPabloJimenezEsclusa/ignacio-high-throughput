@@ -64,30 +64,31 @@ image:https://img.shields.io/badge/AWS%20CLI-2.32+-brown.svg["AWS CLI",link="htt
 === Build all modules
 [source,bash]
 ----
-mvn clean install
+mvn -B clean install | tee .tmp/mvn-clean-install-$(date +%Y%m%d%H).log
 # 'verify' no working for jacoco module, 'install' instead
 ----
 
 === Build all modules with Gradle
 [source,bash]
 ----
-gradle clean build
+gradle clean build | tee .tmp/gradle-clean-build-$(date +%Y%m%d%H).log
 ----
 
 === Build native artifacts
 [source,bash]
 ----
 export SPRING_PROFILES_ACTIVE="native"
-mvn -P"${SPRING_PROFILES_ACTIVE}" \
+mvn -B -P"${SPRING_PROFILES_ACTIVE}" \
   native:compile \
   -Dmaven.test.skip=true \
   -Dmaven.build.cache.enabled=false \
-  --projects imperative-throughput,reactive-throughput
+  --projects imperative-throughput,reactive-throughput \
+  | tee .tmp/mvn-native-compile-$(date +%Y%m%d%H).log
 ----
 
 [source,bash]
 ----
-gradle nativeBuild
+gradle nativeBuild | tee .tmp/gradle-native-build-$(date +%Y%m%d%H).log
 ----
 
 Reports::
@@ -98,7 +99,7 @@ Reports::
 [source,bash]
 ----
 export SPRING_PROFILES_ACTIVE="native"
-mvn -P"${SPRING_PROFILES_ACTIVE}" \
+mvn -B -P"${SPRING_PROFILES_ACTIVE}" \
   spring-boot:build-image \
   -Dmaven.test.skip=true \
   -Dmaven.build.cache.enabled=false \
@@ -132,7 +133,7 @@ mvn rewrite:runNoFork -Popen-rewrite
 [source,bash]
 ----
 # Run with Maven
-mvn spring-boot:run -f imperative-throughput/pom.xml
+mvn -B spring-boot:run -f imperative-throughput/pom.xml
 ----
 
 [source,bash]
@@ -189,7 +190,7 @@ The application will be available at: `http://localhost:8888/imperative-throughp
 [source,bash]
 ----
 # Run with Maven
-mvn spring-boot:run -f reactive-throughput/pom.xml
+mvn -B spring-boot:run -f reactive-throughput/pom.xml
 ----
 
 [source,bash]
@@ -288,6 +289,93 @@ curl -sv http://localhost:9999/reactive-throughput/actuator/health | jq
 curl -sv http://localhost:9999/reactive-throughput/actuator/prometheus
 curl -sv http://localhost:9999/reactive-throughput/actuator/metrics | jq
 ----
+
+[#_comparison]
+== ⚖️ Paradigm Comparison
+
+[cols="2,3,3", options="header", width=100%, frame=all, grid=rows, title="Imperative vs Reactive — Design & Behaviour"]
+|===
+| Dimension | Imperative + Virtual Threads | Reactive (WebFlux + Reactor)
+
+| *Concurrency model*
+| One virtual thread per request. The JVM multiplexes millions of virtual threads onto a small carrier-thread pool. Blocking a virtual thread parks it without consuming a carrier thread.
+| One or few Netty event-loop threads handle all I/O via non-blocking callbacks and operator pipelines. No thread is ever blocked.
+
+| *Blocking I/O*
+| Safe — blocking unmounts the virtual thread from its carrier and remounts it when I/O completes. `RestClient`, `JDBC`, `Files` work unchanged.
+| Forbidden on event-loop threads. All I/O must go through non-blocking drivers (`WebClient`, R2DBC, reactive file I/O).
+
+| *Programming model*
+| Standard sequential Java — `try/catch`, `for` loops, debuggable stack traces. Existing blocking libraries require no changes.
+| Functional pipeline — `Mono`, `Flux`, operators. Requires learning Project Reactor; traces need the Reactor debug agent to be readable.
+
+| *Parallel fan-out*
+| `StructuredTaskScope` (JEP 505, Java 25 preview) — fork N tasks, join with structured lifecycle and automatic failure propagation.
+| `Flux.merge()` — merge N concurrent `Mono` pipelines; no threads are created.
+
+| *Timeout + fallback*
+| `CompletableFuture.orTimeout(500, MILLISECONDS)` + `.handle()` to substitute a static fallback on `TimeoutException`.
+| `Mono.timeout(Duration.ofMillis(500))` + `.onErrorReturn(fallback)` — inline operator, zero extra threads.
+
+| *Backpressure / SSE*
+| Not natively supported. A thread-per-connection model cannot propagate consumer-side backpressure to the producer without blocking the producer thread.
+| `Flux.generate` + `.delayElements()` — demand-driven emission. The subscriber controls pace. Used for `GET /stream` (reactive only).
+
+| *Error handling*
+| `@ControllerAdvice` + `@ExceptionHandler(RuntimeException.class)`, `HttpServletRequest` for path extraction.
+| `AbstractErrorWebExceptionHandler` (`@Order(-2)`) composing a `ServerResponse`.
+
+| *Error response contract*
+| `{"status":500,"error":"Internal Server Error","path":"..."}`
+| `{"status":500,"error":"Internal Server Error","path":"..."}` (unified)
+
+| *Scheduler / thread pool*
+| `Executors.newVirtualThreadPerTaskExecutor()` (per-request scope); `Thread.ofVirtual().factory()` for the smoke delay scheduler.
+| Reactor `boundedElastic` for CPU work; Netty event loop for I/O; shared `virtualThreadScheduler` bean for reactive smoke delay.
+
+| *Observability*
+| Custom `jvm.threads.virtual.active` Micrometer gauge (sampled from `ThreadMXBean`) — shows virtual-thread count scaling under load.
+| Standard Micrometer timers per endpoint tagged `module=reactive`. Event-loop thread count stays constant regardless of load.
+
+| *Test approach*
+| `@WebMvcTest` + `MockMvc` with `asyncStarted` / `asyncDispatch` for `CompletableFuture` responses.
+| `@SpringBootTest(RANDOM_PORT)` + `WebTestClient` + `StepVerifier` for reactive pipelines.
+
+| *HTTP server*
+| Apache Tomcat 11
+| Reactor Netty
+
+| *Base path*
+| `/imperative-throughput` (servlet `context-path`)
+| `/reactive-throughput` (`spring.webflux.base-path`)
+
+| *Default port*
+| `8888`
+| `9999`
+|===
+
+[cols="2,1,1", options="header", width=75%, frame=all, grid=rows, title="Endpoint Coverage"]
+|===
+| Endpoint | Imperative | Reactive
+
+| `GET /smokes` — 300 ms baseline latency, returns thread identity
+| ✅ | ✅
+
+| `GET /cpu` — Fibonacci(50) CPU-bound workload
+| ✅ | ✅
+
+| `GET /io` — blocking / non-blocking downstream HTTP call
+| ✅ | ✅
+
+| `GET /aggregate` — 3 parallel downstream calls combined
+| ✅ | ✅
+
+| `GET /resilience[?delayMs=N]` — 500 ms timeout + fallback
+| ✅ | ✅
+
+| `GET /stream` — SSE, 10 events × 200 ms, backpressure-aware
+| ❌ | ✅
+|===
 
 [#_deployment]
 == 🛠️ Deployment

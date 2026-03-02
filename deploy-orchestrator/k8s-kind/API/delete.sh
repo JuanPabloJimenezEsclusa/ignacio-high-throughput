@@ -17,7 +17,7 @@ echo "removeImages: ${removeImages:-}"
 
 __deleteNamespaces() {
   echo -e "${SEPARATOR} 🗑️ Delete the namespaces. ${SEPARATOR}"
-  kubectl delete namespaces imperative-api-ns reactive-api-ns --grace-period=0 --force || true
+  kubectl delete namespaces wiremock-ns imperative-api-ns reactive-api-ns --grace-period=0 --force || true
 }
 
 __cleanUp() {

@@ -1,0 +1,59 @@
+{
+  "mappings": [
+    {
+      "name": "GET /api/data",
+      "request": {
+        "method": "GET",
+        "urlPath": "/api/data"
+      },
+      "response": {
+        "status": 200,
+        "body": "{\"id\":\"{{randomValue type='UUID'}}\",\"value\":\"downstream-data-{{randomValue type='ALPHANUMERIC' length=8}}\",\"timestamp\":\"{{now format='yyyy-MM-dd'}}T{{now format='HH:mm:ss.SSS'}}Z\"}",
+        "transformers": ["response-template"],
+        "headers": {
+          "Content-Type": "application/json"
+        }
+      }
+    },
+    {
+      "name": "GET /api/data with delayMs",
+      "request": {
+        "method": "GET",
+        "urlPath": "/api/data",
+        "queryParameters": {
+          "delayMs": {
+            "matches": "[0-9]+"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "body": "{\"id\":\"{{randomValue type='UUID'}}\",\"value\":\"downstream-data-{{randomValue type='ALPHANUMERIC' length=8}}\",\"timestamp\":\"{{now format='yyyy-MM-dd'}}T{{now format='HH:mm:ss.SSS'}}Z\"}",
+        "delayDistribution": {
+          "type": "uniform",
+          "lower": 100,
+          "upper": 2000
+        },
+        "transformers": ["response-template"],
+        "headers": {
+          "Content-Type": "application/json"
+        }
+      }
+    },
+    {
+      "name": "GET /api/data/{id}",
+      "request": {
+        "method": "GET",
+        "urlPathPattern": "/api/data/[0-9]+"
+      },
+      "response": {
+        "status": 200,
+        "body": "{\"id\":\"{{randomValue type='UUID'}}\",\"itemId\":\"{{request.pathSegments.[2]}}\",\"value\":\"downstream-data-{{request.pathSegments.[2]}}\",\"timestamp\":\"{{now format='yyyy-MM-dd'}}T{{now format='HH:mm:ss.SSS'}}Z\"}",
+        "transformers": ["response-template"],
+        "headers": {
+          "Content-Type": "application/json"
+        }
+      }
+    }
+  ]
+}
