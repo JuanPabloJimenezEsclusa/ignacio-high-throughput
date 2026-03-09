@@ -46,6 +46,7 @@ Basic deployment with Docker Compose to prioritize simplicity and local developm
 * **API:**
   * [imperative-throughput](http://localhost:8888/imperative-throughput/smokes)
   * [reactive-throughput](http://localhost:9999/reactive-throughput/smokes)
+  * [WireMock (API Mocking)](http://localhost:8080/__admin/)
 * **Prometheus (Monitoring):**
   * [Prometheus monitoring dashboard](http://localhost:9090)
 * **Grafana (Monitoring Visualization):**
