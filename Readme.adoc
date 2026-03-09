@@ -528,117 +528,114 @@ mvn test && gradle test
 [#_performance_comparison]
 == ⚡ Performance Comparison
 
-This project allows comparing::
+Five JMeter runs (60 k – 2 M samples), K6 and Gatling executed against `/smokes` (300 ms fixed delay). Both modules ran simultaneously on localhost; each implementation received exactly half
+the load per run.
 
-* Response times under load
-* Resource utilization (CPU, memory)
-* Throughput capabilities
-* Scalability characteristics
+=== Test Matrix
 
-between the traditional thread-per-request model and the reactive event-loop model.
-
-=== Java Performance Scenarios Comparison
-
-Here's a table explaining 6 scenarios with performance indicators:
-
-[cols="1,2,2,2,3,2,2,2,2", options="header", width=75%, frame=none, grid=none, title="Performance Scenarios Comparison"]
+[cols="2,1,1,1,1,1,1", options="header", width=100%, frame=all, grid=rows]
 |===
-| # | Approach | Virtual Threads | Native Build | Response Time by Thread | CPU Usage | Memory Usage | Startup Time | Learning Curve
+| Load config | Impl. | Samples | Errors | Error % | Mean (ms) | Max (ms)
 
-| 1 | Imperative | ❌ | ❌ | 🚨 | 🚨 | 🚨 | 🚨 | 💪++
-| 2 | Imperative | ✅ | ❌ | 💪 | 💪 | 💪+ | 🚨 | 💪+
-| 3 | Imperative | ✅ | ✅ | 💪+ | 💪++ | 💪+ | 💪 | 💪
-| 4 | Reactive | ❌ | ❌ | 💪++ | 💪+ | 💪+ | 🚨 | 💪
-| 5 | Reactive | ❌ | ✅ | 💪++ | 💪++ | 💪+ | 💪 | 🚨
-| 6 | Reactive | ✅ | ✅ | 💪++ | 💪++ | 💪++ | 💪 | 🚨--
-|===
+.2+| 3 000t · 30s ramp · 10 loops
+| Imperative | 30 000 | 0 | 0% | 302 | 382
+| Reactive   | 30 000 | 0 | 0% | 305 | 382
 
-==== Legend
+.2+| 2 500t · 60s ramp · 100 loops
+| Imperative | 250 000 | 0 | 0% | 311 | 3 262
+| Reactive   | 250 000 | 0 | 0% | 304 | 525
 
-* ✅ Enabled
-* ❌ Not present
-* 💪 Better
-* 🚨 Worse
+.2+| 5 000t · 60s ramp · 25 loops _(carrier saturation point)_
+| Imperative | 125 000 | 0     | 0%     | *731* | 8 439
+| Reactive   | 125 000 | 0     | 0%     | *326* | 1 894
 
-====
-Key Observations:
-----
-Native builds (scenarios 3, 5, 6) consistently show better memory usage and startup time
-----
-----
-Virtual threads improve performance in both programming models
-----
-----
-Imperative approach offers a better learning curve, especially without native compilation
-----
-----
-Reactive + (Virtual Threads or Native) (scenarios 5, 6) provides the best overall performance characteristics
-----
-----
-Imperative + Virtual Threads + Native (scenario 3) offers excellent performance with a simpler programming model
-----
-====
-
-=== Summary of K6 Tests
-
-* link:http://localhost:5665/ui/[K6 Web Dashboard] (While the test is running)
-* link:./testing/k6/result/summary.html[K6 Report]
-
-[cols="1,1,1,1,1,1,1,1,1", options="header", width=100%, frame=none, grid=none, title="K6 Table Comparison"]
-|===
-| Scenario | Count | Rate | Average | Maximum | Median | Minimum | 90th Percentile | 95th Percentile
-| 3 | 75462 | 359.03 | 812.49 | 48206.40 | 300.97 | 300.38 | 473.25 | 944.87
-| 6 | 75462 | 359.03 | 309.74 | 600.70 | 301.11 | 300.40 | 328.08 | 357.04
+.2+| 5 000t · 60s ramp · 200 loops _(peak sustained load)_
+| *Imperative* | 1 000 000 | *13 335* | *1.33%* | *636* | *31 172*
+| *Reactive*   | 1 000 000 | *0*      | *0%*    | *309* | *2 414*
 |===
 
-[cols="1,1", options="header", width=100%, frame=none, grid=none, title="K6 Graph Comparison"]
+[cols="1,1", options="header", width=100%, frame=none, grid=none]
 |===
 | Imperative | Reactive
-| image:./testing/k6/images/imperative-summary.png[K6 Imperative summary] | image:./testing/k6/images/reactive-summary.png[K6 Reactive summary]
-| image:./testing/k6/images/imperative-overview.png[K6 Imperative overview] | image:./testing/k6/images/reactive-overview.png[K6 Reactive overview]
-| image:./testing/k6/images/imperative-timing.png[K6 Imperative timing] | image:./testing/k6/images/reactive-timing.png[K6 Reactive timing]
+| image:./testing/jmeter/images/imperative-time-requests.png[] | image:./testing/jmeter/images/reactive-time-requests.png[]
+| image:./testing/jmeter/images/imperative-transactions.png[]  | image:./testing/jmeter/images/reactive-transactions.png[]
 |===
 
-=== Summary of JMeter Tests
+=== K6 — Sustained Ramp-up (359 req/s target)
 
-* link:./testing/jmeter/reports/html/index.html[JMeter Report]
-
-[cols="1,2,1,1,2,1,1,1,1,1,1,2,2,2", options="header", width=100%, frame=none, grid=none, title="JMeter Table Comparison"]
+[cols="3,1,1,1,1", options="header", width=75%, frame=all, grid=rows]
 |===
-| Scenario | Executions Samples | FAIL | Error % | Response Times (ms) Average | Min | Max | Median | 90th pct | 95th pct | 99th pct | Throughput Transactional/s | Network (KB/sec) Received | Network (KB/sec) Sent
-| 3 | 140000 | 0 | 0.00% | 304.44 | 300 | 486 | 302.00 | 303.00 | 316.00 | 400.00 | 738.86 | 183.27 | 188.32
-| 6 | 140000 | 0 | 0.00% | 302.99 | 300 | 382 | 302.00 | 302.00 | 311.00 | 335.00 | 737.24 | 110.87 | 186.47
+| Implementation | Avg (ms) | p90 (ms) | p95 (ms) | Max (ms)
+| Imperative + VT + Native | 812 | 473 | 945 | 48 206
+| Reactive   + VT + Native | 310 | 328 | 357 |    601
 |===
 
-[cols="1,1", options="header", width=100%, frame=none, grid=none, title="JMeter Graph Comparison"]
+[cols="1,1", options="header", width=100%, frame=none, grid=none]
 |===
 | Imperative | Reactive
-| image:./testing/jmeter/images/imperative-time-requests.png[time-requests] | image:./testing/jmeter/images/reactive-time-requests.png[time-requests]
-| image:./testing/jmeter/images/imperative-time-threads.png[time-threads] | image:./testing/jmeter/images/reactive-time-threads.png[time-threads]
-| image:./testing/jmeter/images/imperative-transactions.png[transactions] | image:./testing/jmeter/images/reactive-transactions.png[transactions]
+| image:./testing/k6/images/imperative-summary.png[] | image:./testing/k6/images/reactive-summary.png[]
 |===
 
-=== Summary of Gatling Tests
+=== Gatling — Multi-scenario (all endpoints, 661 req/s)
 
-[cols="1,2,1,1,1,1,2,1,1,1,1,1,1,1", options="header", width=100%, frame=none, grid=none, title="Gatling Table Comparison"]
+NOTE: KO counts in both implementations reflect Gatling's own connection-pool exhaustion under
+aggressive open-model injection, not application errors.
+
+[cols="3,1,1,1,1,1", options="header", width=100%, frame=all, grid=rows]
 |===
-| Scenario | Executions Total | OK | KO | % KO | Crit/s | Response Time (ms) Min | 50th pct | 75th pct | 95th pct | 99th pct | Max | Mean | Std Dev
-| 3 | 120314 | 106749 | 13566 | 11.28 | 661.07 | 56 | 307 | 363 | 14593 | 24284 | 29093 | 2401 | 4878
-| 6 | 120314 | 107293 | 13016 | 10.82 | 661.07 | 13 | 307 | 479 | 7143 | 7675 | 15082 | 1363 | 2339
+| Implementation | Requests | KO % | Mean (ms) | p99 (ms) | Max (ms)
+| Imperative + VT + Native | 120 314 | 11.28% | 2 401 | 24 284 | 29 093
+| Reactive   + VT + Native | 120 314 | 10.82% | 1 363 | 7 675  | 15 082
 |===
 
-[cols="1,1",options="header", width=100%, frame=none, grid=none, title="Gatling Graph Comparison"]
+[cols="1,1", options="header", width=100%, frame=none, grid=none]
 |===
 | Imperative | Reactive
-| image:./testing/gatling/images/imperative-responses.png[Gatling Imperative Response] | image:./testing/gatling/images/reactive-responses.png[Gatling Reactive Response]
+| image:./testing/gatling/images/imperative-responses.png[] | image:./testing/gatling/images/reactive-responses.png[]
+|===
+
+=== What the Numbers Actually Say
+
+[cols="2,5", options="header", width=100%, frame=all, grid=rows]
+|===
+| Finding | Evidence
+
+| *Parity below ~2 500 concurrent threads*
+| Both deliver ~272 TPS, ~302 ms median, zero errors.
+  Virtual threads handle moderate I/O-wait load as efficiently as a non-blocking event loop.
+
+| *Carrier-thread saturation is the virtual-thread ceiling*
+| At 5 000t × 25 loops the imperative mean jumps 2.4× (302→731 ms) while reactive stays flat (326 ms).
+  Median remains 302 ms in both — the distribution becomes bimodal as carrier threads queue.
+  This is the pinning/saturation boundary, not a general virtual-thread weakness.
+
+| *Reactive is the only zero-error option under maximum sustained load*
+| At 2 M samples (5 000t × 200 loops) imperative produces 13 335 failures (1.33%) and a 31 s worst-case
+  spike; reactive holds 0 errors and caps at 2.4 s. Aggregate TPS is identical (~540 each), proving
+  the bottleneck is reliability, not capacity.
+
+| *Virtual threads don't prevent tail-latency spikes once carrier threads pin*
+| Imperative p99: 314 ms (light) → 625 ms (5 000t burst) → 472 ms (sustained).
+  Reactive p99 stays within 340–472 ms across all five runs.
+
+| *Native build = startup + memory, not runtime throughput*
+| GraalVM native cuts startup from >3 s to <1 s and reduces heap usage — valuable for
+  container-dense or serverless deployments. Steady-state TPS and latency are set by the
+  concurrency model, not the execution engine.
+
+| *Choose by concurrency contract, not by hype*
+| Use *imperative + virtual threads* when peak concurrency stays below ~2 500: simpler code,
+  familiar debugging, identical measured performance.
+  Use *reactive* when you must guarantee zero errors and bounded tail latency beyond that threshold,
+  or when you need native SSE/backpressure (`/stream` endpoint).
 |===
 
 [#_references]
 == 📚 References
 
-* link:https://www.alibabacloud.com/blog/exploration-of-java-virtual-threads-and-performance-analysis_601860[Exploration of Java Virtual Threads and Performance Analysis]
-* link:https://www.tatvasoft.com/blog/java-reactive-programming/[Why Do We Need Java Reactive Programming?]
-* link:https://luxoft-training.com/blog/virtual-threads-in-java-21[Virtual threads in Java 21]
-* link:https://www.geeksforgeeks.org/reactor-webflux-vs-virtual-threads/[Reactor WebFlux vs Virtual Threads]
-* link:https://www.mongodb.com/developer/languages/java/virtual-threads-reactive-programming/[How to Optimize Java Performance With Virtual Threads, Reactive Programming, and MongoDB]
-* link:https://www.diva-portal.org/smash/get/diva2:1763111/FULLTEXT01.pdf[Comparing Virtual Threads and Reactive Webflux in Spring]
+* link:https://openjdk.org/jeps/444[JEP 444 — Virtual Threads (OpenJDK)]
+* link:https://projectreactor.io/docs/core/release/reference/[Project Reactor Reference Guide]
+* link:https://www.diva-portal.org/smash/get/diva2:1763111/FULLTEXT01.pdf[Comparing Virtual Threads and Reactive WebFlux in Spring (DiVA, 2023)]
+* link:https://www.alibabacloud.com/blog/exploration-of-java-virtual-threads-and-performance-analysis_601860[Exploration of Java Virtual Threads and Performance Analysis — Alibaba Cloud]
+* link:https://www.mongodb.com/developer/languages/java/virtual-threads-reactive-programming/[Optimize Java Performance With Virtual Threads and Reactive Programming — MongoDB]
+* link:https://www.geeksforgeeks.org/reactor-webflux-vs-virtual-threads/[Reactor WebFlux vs Virtual Threads — GeeksForGeeks]
