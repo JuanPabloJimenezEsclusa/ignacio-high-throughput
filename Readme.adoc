@@ -43,7 +43,7 @@ This is a multi-module project consisting of::
 image:https://img.shields.io/badge/OpenJDK-25+-005571.svg["OpenJDK",link="https://adoptium.net/es/temurin/releases/?os=any&arch=any&version=25"]
 image:https://img.shields.io/badge/GraalVM-25+-005571.svg["GraalVM",link="https://www.graalvm.org/jdk25/getting-started/linux/#script-friendly-urls"]
 image:https://img.shields.io/badge/Maven-3.9+-005571.svg["Maven",link="https://maven.apache.org/ref/3.9.10/"]
-image:https://img.shields.io/badge/Gradle-9.1+-005571.svg["Gradle",link="https://docs.gradle.org/9.1.0/userguide/userguide.html"]
+image:https://img.shields.io/badge/Gradle-9.4+-005571.svg["Gradle",link="https://docs.gradle.org/9.4.1/userguide/userguide.html"]
 
 image:https://img.shields.io/badge/Spring%20Boot-4.0+-brightgreen.svg["Spring Boot",link="https://spring.io/projects/spring-boot"]
 image:https://img.shields.io/badge/Spring%20MVC%20(imperative%20module)-7.0+-brightgreen.svg["Spring MVC",link="https://docs.spring.io/spring-framework/reference/web.html"]

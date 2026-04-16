@@ -5,7 +5,7 @@
 .qodo
 
 testing/k6/result/**
-testing/jmeter/reports/**
+testing/jmeter/reports**
 **.hprof.json
 **.jfr
 

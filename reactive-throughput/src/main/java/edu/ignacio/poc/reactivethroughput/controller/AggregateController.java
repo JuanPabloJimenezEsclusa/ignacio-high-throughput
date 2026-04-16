@@ -2,7 +2,6 @@ package edu.ignacio.poc.reactivethroughput.controller;
 
 import static org.springframework.web.reactive.function.server.RequestPredicates.GET;
 import static org.springframework.web.reactive.function.server.RouterFunctions.route;
-import static org.springframework.web.reactive.function.server.ServerResponse.ok;
 
 import java.util.Map;
 import java.util.stream.IntStream;
@@ -15,9 +14,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.CacheControl;
-import org.springframework.http.MediaType;
-import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.server.RouterFunction;
 import org.springframework.web.reactive.function.server.ServerResponse;
 import reactor.core.publisher.Flux;
@@ -34,27 +30,17 @@ import reactor.core.publisher.Mono;
  * {@code CompletableFuture.allOf()}.
  */
 @Configuration
-public class AggregateController {
+public class AggregateController extends AbstractReactiveController {
 
   private static final Logger log = LoggerFactory.getLogger(AggregateController.class);
-  private static final String DOWNSTREAM_PATH = "/api/data/{id}";
+  private static final String API_DATA_ID = "/api/data/{id}";
   private static final int FAN_OUT = 3;
-
-  private final WebClient webClient;
-  private final Timer aggregateTimer;
 
   AggregateController(
     @Value("${downstream.service.url}") @NonNull final String downstreamUrl,
     @NonNull final MeterRegistry meterRegistry
   ) {
-    this.webClient = WebClient.builder()
-      .baseUrl(downstreamUrl)
-      .build();
-    this.aggregateTimer = Timer.builder("http.request.duration")
-      .description("Aggregate endpoint request duration")
-      .tag("module", "reactive")
-      .tag("endpoint", "aggregate")
-      .register(meterRegistry);
+    super(downstreamUrl, meterRegistry, "aggregate");
   }
 
   /**
@@ -78,10 +64,8 @@ public class AggregateController {
             final var combined = String.join(",", results);
             final var currentThread = Thread.currentThread();
             log.info("Aggregate reactive endpoint - results: {} - thread: {}", combined, currentThread);
-            sample.stop(this.aggregateTimer);
-            return ok()
-              .cacheControl(CacheControl.noCache())
-              .contentType(MediaType.APPLICATION_JSON)
+            sample.stop(this.timer);
+            return this.okResponse()
               .bodyValue("OK:Reactive:Aggregate:[%s]:%s".formatted(combined, currentThread));
           })
           .doOnError(throwable -> log.error("Error in Aggregate reactive endpoint", throwable));
@@ -91,7 +75,7 @@ public class AggregateController {
   @SuppressWarnings("unchecked")
   private Mono<Map<String, Object>> fetchData(final int index) {
     return this.webClient.get()
-      .uri(DOWNSTREAM_PATH, index)
+      .uri(API_DATA_ID, index)
       .retrieve()
       .bodyToMono(Map.class)
       .map(m -> (Map<String, Object>) m);

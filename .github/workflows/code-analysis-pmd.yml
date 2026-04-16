@@ -1,4 +1,4 @@
-name: Code Analysis PMD
+name: Code Static Analysis PMD (Programming Mistake Detector)
 
 on:
   pull_request:

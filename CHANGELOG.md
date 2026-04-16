@@ -5,76 +5,272 @@ Changelog of camila-services.
 ## Unreleased
 ### No issue
 
-**[GH-7] improve tests scenarios**
+**build(deps): bump the maven-dependencies group across 1 directory with 2 updates (#146)**
 
-
-[85ad949c74b7f7d](https://github.com/JuanPabloJimenezEsclusa/ignacio-high-throughput/commit/85ad949c74b7f7d) juan.pablo.jimenez.esclusa *2026-02-27 18:00:44*
-
-**build(deps): bump the gradle-dependencies group with 2 updates**
-
- * Bumps the gradle-dependencies group with 2 updates: [org.springframework.boot](https://github.com/spring-projects/spring-boot) and org.openrewrite.rewrite.
- * Updates &#x60;org.springframework.boot&#x60; from 4.0.2 to 4.0.3
+ * Bumps the maven-dependencies group with 2 updates in the / directory: [org.springframework.boot:spring-boot-starter-parent](https://github.com/spring-projects/spring-boot) and [org.openrewrite.maven:rewrite-maven-plugin](https://github.com/openrewrite/rewrite-maven-plugin).
+ * Updates &#x60;org.springframework.boot:spring-boot-starter-parent&#x60; from 4.0.3 to 4.0.4
  * - [Release notes](https://github.com/spring-projects/spring-boot/releases)
- * - [Commits](https://github.com/spring-projects/spring-boot/compare/v4.0.2...v4.0.3)
- * Updates &#x60;org.openrewrite.rewrite&#x60; from 7.25.0 to 7.26.0
- * ---
- * updated-dependencies:
- * - dependency-name: org.springframework.boot
- * dependency-version: 4.0.3
- * dependency-type: direct:production
- * update-type: version-update:semver-patch
- * dependency-group: gradle-dependencies
- * - dependency-name: org.openrewrite.rewrite
- * dependency-version: 7.26.0
- * dependency-type: direct:production
- * update-type: version-update:semver-minor
- * dependency-group: gradle-dependencies
- * ...
- * Signed-off-by: dependabot[bot] &lt;support@github.com&gt;
-
-[1d64ad06795ef44](https://github.com/JuanPabloJimenezEsclusa/ignacio-high-throughput/commit/1d64ad06795ef44) dependabot[bot] *2026-02-27 18:00:43*
-
-**build(deps): bump the maven-dependencies group with 2 updates**
-
- * Bumps the maven-dependencies group with 2 updates: [org.springframework.boot:spring-boot-starter-parent](https://github.com/spring-projects/spring-boot) and [org.openrewrite.maven:rewrite-maven-plugin](https://github.com/openrewrite/rewrite-maven-plugin).
- * Updates &#x60;org.springframework.boot:spring-boot-starter-parent&#x60; from 4.0.2 to 4.0.3
- * - [Release notes](https://github.com/spring-projects/spring-boot/releases)
- * - [Commits](https://github.com/spring-projects/spring-boot/compare/v4.0.2...v4.0.3)
- * Updates &#x60;org.openrewrite.maven:rewrite-maven-plugin&#x60; from 6.28.0 to 6.29.0
+ * - [Commits](https://github.com/spring-projects/spring-boot/compare/v4.0.3...v4.0.4)
+ * Updates &#x60;org.openrewrite.maven:rewrite-maven-plugin&#x60; from 6.32.0 to 6.34.0
  * - [Release notes](https://github.com/openrewrite/rewrite-maven-plugin/releases)
- * - [Commits](https://github.com/openrewrite/rewrite-maven-plugin/compare/v6.28.0...v6.29.0)
+ * - [Commits](https://github.com/openrewrite/rewrite-maven-plugin/compare/v6.32.0...v6.34.0)
  * ---
  * updated-dependencies:
  * - dependency-name: org.springframework.boot:spring-boot-starter-parent
- * dependency-version: 4.0.3
+ * dependency-version: 4.0.4
  * dependency-type: direct:production
  * update-type: version-update:semver-patch
  * dependency-group: maven-dependencies
  * - dependency-name: org.openrewrite.maven:rewrite-maven-plugin
- * dependency-version: 6.29.0
+ * dependency-version: 6.34.0
  * dependency-type: direct:production
  * update-type: version-update:semver-minor
  * dependency-group: maven-dependencies
  * ...
  * Signed-off-by: dependabot[bot] &lt;support@github.com&gt;
+ * Co-authored-by: dependabot[bot] &lt;49699333+dependabot[bot]@users.noreply.github.com&gt;
 
-[9c05ea22af9f4dd](https://github.com/JuanPabloJimenezEsclusa/ignacio-high-throughput/commit/9c05ea22af9f4dd) dependabot[bot] *2026-02-27 18:00:42*
+[d227b44a499c824](https://github.com/JuanPabloJimenezEsclusa/ignacio-high-throughput/commit/d227b44a499c824) dependabot[bot] *2026-04-14 21:33:23*
 
-**build(deps): bump grafana/grafana**
+**build(deps): bump the gradle-dependencies group across 1 directory with 3 updates (#147)**
 
- * Bumps the infrastructure-dependencies group in /deploy-orchestrator/docker-compose with 1 update: grafana/grafana.
- * Updates &#x60;grafana/grafana&#x60; from 12.3.2 to 12.3.3
+ * Bumps the gradle-dependencies group with 3 updates in the / directory: [org.springframework.boot](https://github.com/spring-projects/spring-boot), [org.graalvm.buildtools.native](https://github.com/graalvm/native-build-tools) and org.openrewrite.rewrite.
+ * Updates &#x60;org.springframework.boot&#x60; from 4.0.3 to 4.0.5
+ * - [Release notes](https://github.com/spring-projects/spring-boot/releases)
+ * - [Commits](https://github.com/spring-projects/spring-boot/compare/v4.0.3...v4.0.5)
+ * Updates &#x60;org.graalvm.buildtools.native&#x60; from 0.11.5 to 1.0.0
+ * - [Release notes](https://github.com/graalvm/native-build-tools/releases)
+ * - [Commits](https://github.com/graalvm/native-build-tools/compare/0.11.5...1.0)
+ * Updates &#x60;org.openrewrite.rewrite&#x60; from 7.28.0 to 7.29.0
  * ---
  * updated-dependencies:
+ * - dependency-name: org.springframework.boot
+ * dependency-version: 4.0.5
+ * dependency-type: direct:production
+ * update-type: version-update:semver-patch
+ * dependency-group: gradle-dependencies
+ * - dependency-name: org.graalvm.buildtools.native
+ * dependency-version: 1.0.0
+ * dependency-type: direct:production
+ * update-type: version-update:semver-major
+ * dependency-group: gradle-dependencies
+ * - dependency-name: org.openrewrite.rewrite
+ * dependency-version: 7.29.0
+ * dependency-type: direct:production
+ * update-type: version-update:semver-minor
+ * dependency-group: gradle-dependencies
+ * ...
+ * Signed-off-by: dependabot[bot] &lt;support@github.com&gt;
+ * Co-authored-by: dependabot[bot] &lt;49699333+dependabot[bot]@users.noreply.github.com&gt;
+
+[8d67037c9277d0b](https://github.com/JuanPabloJimenezEsclusa/ignacio-high-throughput/commit/8d67037c9277d0b) dependabot[bot] *2026-04-14 21:30:09*
+
+**build(deps): bump docker/login-action (#148)**
+
+ * Bumps the github-actions-dependencies group with 1 update: [docker/login-action](https://github.com/docker/login-action).
+ * Updates &#x60;docker/login-action&#x60; from 4.0.0 to 4.1.0
+ * - [Release notes](https://github.com/docker/login-action/releases)
+ * - [Commits](https://github.com/docker/login-action/compare/b45d80f862d83dbcd57f89517bcf500b2ab88fb2...4907a6ddec9925e35a0a9e82d7399ccc52663121)
+ * ---
+ * updated-dependencies:
+ * - dependency-name: docker/login-action
+ * dependency-version: 4.1.0
+ * dependency-type: direct:production
+ * update-type: version-update:semver-minor
+ * dependency-group: github-actions-dependencies
+ * ...
+ * Signed-off-by: dependabot[bot] &lt;support@github.com&gt;
+ * Co-authored-by: dependabot[bot] &lt;49699333+dependabot[bot]@users.noreply.github.com&gt;
+
+[918d0c4c27dedfe](https://github.com/JuanPabloJimenezEsclusa/ignacio-high-throughput/commit/918d0c4c27dedfe) dependabot[bot] *2026-04-14 21:29:14*
+
+**build(deps): bump the infrastructure-dependencies group across 1 directory with 4 updates (#149)**
+
+ * Bumps the infrastructure-dependencies group with 4 updates in the /deploy-orchestrator/docker-compose directory: prom/prometheus, grafana/grafana, elasticsearch and kibana.
+ * Updates &#x60;prom/prometheus&#x60; from v3.10.0 to v3.11.0
+ * Updates &#x60;grafana/grafana&#x60; from 12.4.0 to 12.4.2
+ * Updates &#x60;elasticsearch&#x60; from 9.3.1 to 9.3.2
+ * Updates &#x60;kibana&#x60; from 9.3.1 to 9.3.2
+ * ---
+ * updated-dependencies:
+ * - dependency-name: prom/prometheus
+ * dependency-version: v3.11.0
+ * dependency-type: direct:production
+ * dependency-group: infrastructure-dependencies
  * - dependency-name: grafana/grafana
- * dependency-version: 12.3.3
+ * dependency-version: 12.4.2
+ * dependency-type: direct:production
+ * update-type: version-update:semver-patch
+ * dependency-group: infrastructure-dependencies
+ * - dependency-name: elasticsearch
+ * dependency-version: 9.3.2
+ * dependency-type: direct:production
+ * update-type: version-update:semver-patch
+ * dependency-group: infrastructure-dependencies
+ * - dependency-name: kibana
+ * dependency-version: 9.3.2
  * dependency-type: direct:production
  * update-type: version-update:semver-patch
  * dependency-group: infrastructure-dependencies
  * ...
  * Signed-off-by: dependabot[bot] &lt;support@github.com&gt;
+ * Co-authored-by: dependabot[bot] &lt;49699333+dependabot[bot]@users.noreply.github.com&gt;
 
-[3bfbb1a377ffe1a](https://github.com/JuanPabloJimenezEsclusa/ignacio-high-throughput/commit/3bfbb1a377ffe1a) dependabot[bot] *2026-02-21 01:42:33*
+[010d942215cca97](https://github.com/JuanPabloJimenezEsclusa/ignacio-high-throughput/commit/010d942215cca97) dependabot[bot] *2026-04-14 21:28:29*
+
+**[GH-7] doc: update readme sections (#140)**
+
+
+[1f4c29afc0fac57](https://github.com/JuanPabloJimenezEsclusa/ignacio-high-throughput/commit/1f4c29afc0fac57) Juan Pablo Jimenez Esclusa *2026-03-09 07:20:32*
+
+**build(deps): bump the maven-dependencies group with 2 updates (#139)**
+
+ * Bumps the maven-dependencies group with 2 updates: [org.openrewrite.maven:rewrite-maven-plugin](https://github.com/openrewrite/rewrite-maven-plugin) and [org.wiremock:wiremock-standalone](https://github.com/wiremock/wiremock).
+ * Updates &#x60;org.openrewrite.maven:rewrite-maven-plugin&#x60; from 6.29.0 to 6.32.0
+ * - [Release notes](https://github.com/openrewrite/rewrite-maven-plugin/releases)
+ * - [Commits](https://github.com/openrewrite/rewrite-maven-plugin/compare/v6.29.0...v6.32.0)
+ * Updates &#x60;org.wiremock:wiremock-standalone&#x60; from 3.3.1 to 3.13.2
+ * - [Release notes](https://github.com/wiremock/wiremock/releases)
+ * - [Commits](https://github.com/wiremock/wiremock/compare/3.3.1...3.13.2)
+ * ---
+ * updated-dependencies:
+ * - dependency-name: org.openrewrite.maven:rewrite-maven-plugin
+ * dependency-version: 6.32.0
+ * dependency-type: direct:production
+ * update-type: version-update:semver-minor
+ * dependency-group: maven-dependencies
+ * - dependency-name: org.wiremock:wiremock-standalone
+ * dependency-version: 3.13.2
+ * dependency-type: direct:production
+ * update-type: version-update:semver-minor
+ * dependency-group: maven-dependencies
+ * ...
+ * Signed-off-by: dependabot[bot] &lt;support@github.com&gt;
+ * Co-authored-by: dependabot[bot] &lt;49699333+dependabot[bot]@users.noreply.github.com&gt;
+
+[2062bb545e78638](https://github.com/JuanPabloJimenezEsclusa/ignacio-high-throughput/commit/2062bb545e78638) dependabot[bot] *2026-03-08 12:43:35*
+
+**build(deps): bump the gradle-dependencies group with 3 updates (#138)**
+
+ * Bumps the gradle-dependencies group with 3 updates: [org.graalvm.buildtools.native](https://github.com/graalvm/native-build-tools), org.sonarqube and org.openrewrite.rewrite.
+ * Updates &#x60;org.graalvm.buildtools.native&#x60; from 0.11.4 to 0.11.5
+ * - [Release notes](https://github.com/graalvm/native-build-tools/releases)
+ * - [Commits](https://github.com/graalvm/native-build-tools/compare/0.11.4...0.11.5)
+ * Updates &#x60;org.sonarqube&#x60; from 7.2.2.6593 to 7.2.3.7755
+ * Updates &#x60;org.openrewrite.rewrite&#x60; from 7.27.0 to 7.28.0
+ * ---
+ * updated-dependencies:
+ * - dependency-name: org.graalvm.buildtools.native
+ * dependency-version: 0.11.5
+ * dependency-type: direct:production
+ * update-type: version-update:semver-patch
+ * dependency-group: gradle-dependencies
+ * - dependency-name: org.sonarqube
+ * dependency-version: 7.2.3.7755
+ * dependency-type: direct:production
+ * update-type: version-update:semver-patch
+ * dependency-group: gradle-dependencies
+ * - dependency-name: org.openrewrite.rewrite
+ * dependency-version: 7.28.0
+ * dependency-type: direct:production
+ * update-type: version-update:semver-minor
+ * dependency-group: gradle-dependencies
+ * ...
+ * Signed-off-by: dependabot[bot] &lt;support@github.com&gt;
+ * Co-authored-by: dependabot[bot] &lt;49699333+dependabot[bot]@users.noreply.github.com&gt;
+
+[5ed8039ae054cb4](https://github.com/JuanPabloJimenezEsclusa/ignacio-high-throughput/commit/5ed8039ae054cb4) dependabot[bot] *2026-03-08 12:42:56*
+
+**build(deps): bump the github-actions-dependencies group across 1 directory with 2 updates (#137)**
+
+ * Bumps the github-actions-dependencies group with 2 updates in the / directory: [docker/setup-buildx-action](https://github.com/docker/setup-buildx-action) and [docker/login-action](https://github.com/docker/login-action).
+ * Updates &#x60;docker/setup-buildx-action&#x60; from 3.12.0 to 4.0.0
+ * - [Release notes](https://github.com/docker/setup-buildx-action/releases)
+ * - [Commits](https://github.com/docker/setup-buildx-action/compare/8d2750c68a42422c14e847fe6c8ac0403b4cbd6f...4d04d5d9486b7bd6fa91e7baf45bbb4f8b9deedd)
+ * Updates &#x60;docker/login-action&#x60; from 3.7.0 to 4.0.0
+ * - [Release notes](https://github.com/docker/login-action/releases)
+ * - [Commits](https://github.com/docker/login-action/compare/c94ce9fb468520275223c153574b00df6fe4bcc9...b45d80f862d83dbcd57f89517bcf500b2ab88fb2)
+ * ---
+ * updated-dependencies:
+ * - dependency-name: docker/setup-buildx-action
+ * dependency-version: 4.0.0
+ * dependency-type: direct:production
+ * update-type: version-update:semver-major
+ * dependency-group: github-actions-dependencies
+ * - dependency-name: docker/login-action
+ * dependency-version: 4.0.0
+ * dependency-type: direct:production
+ * update-type: version-update:semver-major
+ * dependency-group: github-actions-dependencies
+ * ...
+ * Signed-off-by: dependabot[bot] &lt;support@github.com&gt;
+ * Co-authored-by: dependabot[bot] &lt;49699333+dependabot[bot]@users.noreply.github.com&gt;
+
+[77eb8fb85c6f3ef](https://github.com/JuanPabloJimenezEsclusa/ignacio-high-throughput/commit/77eb8fb85c6f3ef) dependabot[bot] *2026-03-08 12:42:18*
+
+**build(deps): bump the gradle-dependencies group across 1 directory with 2 updates (#135)**
+
+ * Bumps the gradle-dependencies group with 2 updates in the / directory: org.openrewrite.rewrite and [org.wiremock:wiremock-standalone](https://github.com/wiremock/wiremock).
+ * Updates &#x60;org.openrewrite.rewrite&#x60; from 7.26.0 to 7.27.0
+ * Updates &#x60;org.wiremock:wiremock-standalone&#x60; from 3.1.0 to 3.13.2
+ * - [Release notes](https://github.com/wiremock/wiremock/releases)
+ * - [Commits](https://github.com/wiremock/wiremock/compare/3.1.0...3.13.2)
+ * ---
+ * updated-dependencies:
+ * - dependency-name: org.openrewrite.rewrite
+ * dependency-version: 7.27.0
+ * dependency-type: direct:production
+ * update-type: version-update:semver-minor
+ * dependency-group: gradle-dependencies
+ * - dependency-name: org.wiremock:wiremock-standalone
+ * dependency-version: 3.13.2
+ * dependency-type: direct:production
+ * update-type: version-update:semver-minor
+ * dependency-group: gradle-dependencies
+ * ...
+ * Signed-off-by: dependabot[bot] &lt;support@github.com&gt;
+ * Co-authored-by: dependabot[bot] &lt;49699333+dependabot[bot]@users.noreply.github.com&gt;
+
+[cb0aac6bd466f97](https://github.com/JuanPabloJimenezEsclusa/ignacio-high-throughput/commit/cb0aac6bd466f97) dependabot[bot] *2026-03-02 01:10:25*
+
+**build(deps): bump the infrastructure-dependencies group across 1 directory with 4 updates (#134)**
+
+ * Bumps the infrastructure-dependencies group with 4 updates in the /deploy-orchestrator/docker-compose directory: prom/prometheus, grafana/grafana, elasticsearch and kibana.
+ * Updates &#x60;prom/prometheus&#x60; from v3.9.1 to v3.10.0
+ * Updates &#x60;grafana/grafana&#x60; from 12.3.2 to 12.4.0
+ * Updates &#x60;elasticsearch&#x60; from 9.3.0 to 9.3.1
+ * Updates &#x60;kibana&#x60; from 9.3.0 to 9.3.1
+ * ---
+ * updated-dependencies:
+ * - dependency-name: prom/prometheus
+ * dependency-version: v3.10.0
+ * dependency-type: direct:production
+ * dependency-group: infrastructure-dependencies
+ * - dependency-name: grafana/grafana
+ * dependency-version: 12.4.0
+ * dependency-type: direct:production
+ * update-type: version-update:semver-minor
+ * dependency-group: infrastructure-dependencies
+ * - dependency-name: elasticsearch
+ * dependency-version: 9.3.1
+ * dependency-type: direct:production
+ * update-type: version-update:semver-patch
+ * dependency-group: infrastructure-dependencies
+ * - dependency-name: kibana
+ * dependency-version: 9.3.1
+ * dependency-type: direct:production
+ * update-type: version-update:semver-patch
+ * dependency-group: infrastructure-dependencies
+ * ...
+ * Signed-off-by: dependabot[bot] &lt;support@github.com&gt;
+ * Co-authored-by: dependabot[bot] &lt;49699333+dependabot[bot]@users.noreply.github.com&gt;
+
+[245d1d1ab5dc2f5](https://github.com/JuanPabloJimenezEsclusa/ignacio-high-throughput/commit/245d1d1ab5dc2f5) dependabot[bot] *2026-03-02 01:00:42*
+
+**[GH-7] feat: redisign test scenarios (#133)**
+
+
+[f8bc58d08f47ac1](https://github.com/JuanPabloJimenezEsclusa/ignacio-high-throughput/commit/f8bc58d08f47ac1) Juan Pablo Jimenez Esclusa *2026-03-02 00:51:22*
 
 **build(deps): bump the maven-dependencies group with 2 updates (#126)**
 

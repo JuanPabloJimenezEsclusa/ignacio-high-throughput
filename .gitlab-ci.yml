@@ -22,7 +22,7 @@ build_with_maven:
 # --- Gradle Build Job ---
 build_with_gradle:
   stage: build
-  image: gradle:9.2-jdk25-alpine
+  image: gradle:9.4-jdk25-alpine
   script:
     - echo "Compiling with Gradle on Java version:"
     - java -version

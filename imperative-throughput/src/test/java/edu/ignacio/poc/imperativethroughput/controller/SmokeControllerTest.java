@@ -11,6 +11,8 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
 import edu.ignacio.poc.imperativethroughput.ImperativeThroughputApplication;
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -18,6 +20,8 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ContextConfiguration;
@@ -26,9 +30,17 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 @AutoConfigureMockMvc
 @WebMvcTest({SmokeController.class, SmokeExceptionHandler.class})
-@ContextConfiguration(classes = ImperativeThroughputApplication.class)
+@ContextConfiguration(classes = {ImperativeThroughputApplication.class, SmokeControllerTest.TestConfig.class})
 @DisplayName("Smoke Controller Test")
 class SmokeControllerTest {
+
+  @Configuration
+  static class TestConfig {
+    @Bean
+    public MeterRegistry meterRegistry() {
+      return new SimpleMeterRegistry();
+    }
+  }
 
   private static final String SMOKES_URL = "/smokes";
   private static final String EXPECTED_BODY = "OK:Imperative:";
@@ -41,6 +53,9 @@ class SmokeControllerTest {
 
   @Autowired
   private SmokeExceptionHandler exceptionHandler;
+
+  @Autowired
+  private MeterRegistry meterRegistry;
 
   @Test
   @DisplayName("Should return OK with correct cache control headers")
@@ -113,7 +128,7 @@ class SmokeControllerTest {
   void shouldHandleExceptionsInAsyncProcessing() throws Exception {
     // Given
     final var mockMvcWithException = MockMvcBuilders.standaloneSetup(
-        new SmokeController() {
+        new SmokeController(this.meterRegistry) {
           @Override
           public CompletableFuture<ResponseEntity<String>> getSmoke() {
             final var future = new CompletableFuture<ResponseEntity<String>>();
@@ -129,7 +144,7 @@ class SmokeControllerTest {
       .andExpect(request().asyncStarted())
       .andReturn();
 
-    // Then - unified JSON error contract: {"status":500,"error":"Internal Server Error","path":...}
+    // Then
     mockMvcWithException.perform(asyncDispatch(mvcResult))
       .andExpect(status().is5xxServerError())
       .andExpect(content().string(org.hamcrest.Matchers.containsString("\"status\":500")))

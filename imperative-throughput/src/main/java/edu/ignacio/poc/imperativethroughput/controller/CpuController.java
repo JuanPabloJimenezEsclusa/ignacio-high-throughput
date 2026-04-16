@@ -8,8 +8,6 @@ import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Timer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.CacheControl;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -23,19 +21,13 @@ import org.springframework.web.bind.annotation.RestController;
  * counterpart that uses {@code Mono.fromCallable} + {@code boundedElastic()}.
  */
 @RestController
-class CpuController {
+class CpuController extends AbstractImperativeController {
 
   private static final Logger log = LoggerFactory.getLogger(CpuController.class);
   private static final int FIBONACCI_N = 50;
 
-  private final Timer cpuTimer;
-
   CpuController(final MeterRegistry meterRegistry) {
-    this.cpuTimer = Timer.builder("http.request.duration")
-      .description("CPU endpoint request duration")
-      .tag("module", "imperative")
-      .tag("endpoint", "cpu")
-      .register(meterRegistry);
+    super(meterRegistry, "cpu");
   }
 
   /**
@@ -52,13 +44,11 @@ class CpuController {
         try {
           final var result = this.fibonacci();
           final var currentThread = Thread.currentThread();
-          final var response = ResponseEntity.ok()
-            .cacheControl(CacheControl.noCache())
-            .contentType(MediaType.APPLICATION_JSON)
+          final var response = this.okResponse()
             .body("OK:Imperative:CPU:fib(%d)=%d:%s".formatted(FIBONACCI_N, result, currentThread));
 
           log.info("CPU imperative endpoint - fib({})={} - thread: {}", FIBONACCI_N, result, currentThread);
-          sample.stop(this.cpuTimer);
+          sample.stop(this.timer);
           future.complete(response);
         } catch (final Exception e) {
           log.error("Error in CPU imperative endpoint", e);

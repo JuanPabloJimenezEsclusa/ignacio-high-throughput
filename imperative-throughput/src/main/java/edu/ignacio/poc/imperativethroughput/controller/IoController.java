@@ -8,8 +8,6 @@ import io.micrometer.core.instrument.Timer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.CacheControl;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -25,26 +23,16 @@ import org.springframework.web.client.RestClient;
  * that uses a non-blocking {@code WebClient}.
  */
 @RestController
-class IoController {
+class IoController extends AbstractImperativeController {
 
   private static final Logger log = LoggerFactory.getLogger(IoController.class);
   private static final String DOWNSTREAM_PATH = "/api/data";
-
-  private final RestClient restClient;
-  private final Timer ioTimer;
 
   IoController(
     @Value("${downstream.service.url}") final String downstreamUrl,
     final MeterRegistry meterRegistry
   ) {
-    this.restClient = RestClient.builder()
-      .baseUrl(downstreamUrl)
-      .build();
-    this.ioTimer = Timer.builder("http.request.duration")
-      .description("IO endpoint request duration")
-      .tag("module", "imperative")
-      .tag("endpoint", "io")
-      .register(meterRegistry);
+    super(downstreamUrl, meterRegistry, "io");
   }
 
   /**
@@ -66,13 +54,11 @@ class IoController {
             .retrieve()
             .body(String.class);
 
-          final var response = ResponseEntity.ok()
-            .cacheControl(CacheControl.noCache())
-            .contentType(MediaType.APPLICATION_JSON)
+          final var response = this.okResponse()
             .body("OK:Imperative:IO:%s:%s".formatted(body, currentThread));
 
           log.info("IO imperative endpoint - downstream: {} - thread: {}", body, currentThread);
-          sample.stop(this.ioTimer);
+          sample.stop(this.timer);
           future.complete(response);
         } catch (final Exception e) {
           log.error("Error in IO imperative endpoint", e);
