@@ -366,7 +366,7 @@ Resources:
       RequiresCompatibilities: ["FARGATE"]
       Cpu: "512"
       Memory: "1024"
-      ExecutionRoleArn: !Ref TaskExecutionRole
+      ExecutionRoleArn: !GetAtt TaskExecutionRole.Arn
       TaskRoleArn: !GetAtt TaskExecutionRole.Arn
       Tags:
         - Key: "ENTORN"
@@ -409,7 +409,7 @@ Resources:
             - Name: BPL_JVM_THREAD_COUNT
               Value: "600"
             - Name: DOWNSTREAM_SERVICE_URL
-              Value: !Sub "https://wiremock.${AWS::StackName}.internal:8080"
+              Value: !Sub "http://wiremock.${AWS::StackName}.internal:8080"
 
   ReactiveTaskDefinition:
     Type: "AWS::ECS::TaskDefinition"
@@ -421,7 +421,7 @@ Resources:
       RequiresCompatibilities: ["FARGATE"]
       Cpu: "512"
       Memory: "1024"
-      ExecutionRoleArn: !Ref TaskExecutionRole
+      ExecutionRoleArn: !GetAtt TaskExecutionRole.Arn
       TaskRoleArn: !GetAtt TaskExecutionRole.Arn
       Tags:
         - Key: "ENTORN"
@@ -473,7 +473,7 @@ Resources:
     Type: "AWS::ECS::Service"
     Description: "Imperative ECS Service"
     DependsOn:
-      - ListenerHTTP
+      - ListenerHTTPS
     Properties:
       ServiceName: "imperative-service"
       Cluster: !Ref ECSCluster
@@ -505,7 +505,7 @@ Resources:
     Type: "AWS::ECS::Service"
     Description: "Reactive ECS Service"
     DependsOn:
-      - ListenerHTTP
+      - ListenerHTTPS
     Properties:
       ServiceName: "reactive-service"
       Cluster: !Ref ECSCluster
@@ -552,6 +552,11 @@ Resources:
           ToPort: 443
           CidrIp: "0.0.0.0/0"
           Description: "Allow 443 HTTPS traffic"
+        - IpProtocol: "tcp"
+          FromPort: 8080
+          ToPort: 8080
+          CidrIp: "0.0.0.0/0"
+          Description: "Allow 8080 WireMock traffic for testing"
       Tags:
         - Key: "Name"
           Value: "high-throughput-lb-sg"
@@ -666,6 +671,11 @@ Resources:
           ToPort: 8080
           SourceSecurityGroupId: !Ref ReactiveECSServiceSecurityGroup
           Description: "Allow http from reactive service"
+        - IpProtocol: "tcp"
+          FromPort: 8080
+          ToPort: 8080
+          SourceSecurityGroupId: !Ref LoadBalancerSecurityGroup
+          Description: "Allow http from load balancer for testing"
       SecurityGroupEgress:
         - IpProtocol: "-1"
           FromPort: -1
@@ -708,12 +718,50 @@ Resources:
       RequiresCompatibilities: ["FARGATE"]
       Cpu: "256"
       Memory: "512"
-      ExecutionRoleArn: !Ref TaskExecutionRole
+      ExecutionRoleArn: !GetAtt TaskExecutionRole.Arn
       TaskRoleArn: !GetAtt TaskExecutionRole.Arn
       Tags:
         - Key: "ENTORN"
           Value: "PRO"
+      EphemeralStorage:
+        SizeInGiB: 21
+      Volumes:
+        - Name: "wiremock-mappings"
       ContainerDefinitions:
+        - Name: "wiremock-init"
+          Image: "busybox:1.35"
+          Essential: false
+          MountPoints:
+            - SourceVolume: "wiremock-mappings"
+              ContainerPath: "/home/wiremock/mappings"
+              ReadOnly: false
+          Command:
+            - "sh"
+            - "-c"
+            - |
+              mkdir -p /home/wiremock/mappings
+              cat > /home/wiremock/mappings/api-data.json << 'EOFMAP'
+              {
+                "mappings": [
+                  {
+                    "name": "GET /api/data",
+                    "request": {"method": "GET", "urlPath": "/api/data"},
+                    "response": {"status": 200, "body": "{\"id\":\"{{randomValue type='UUID'}}\",\"value\":\"downstream-data-{{randomValue type='ALPHANUMERIC' length=8}}\",\"timestamp\":\"{{now format='yyyy-MM-dd'}}T{{now format='HH:mm:ss.SSS'}}Z\"}", "transformers": ["response-template"], "headers": {"Content-Type": "application/json"}}
+                  },
+                  {
+                    "name": "GET /api/data with delayMs",
+                    "request": {"method": "GET", "urlPath": "/api/data", "queryParameters": {"delayMs": {"matches": "[0-9]+"}}},
+                    "response": {"status": 200, "body": "{\"id\":\"{{randomValue type='UUID'}}\",\"value\":\"downstream-data-{{randomValue type='ALPHANUMERIC' length=8}}\",\"timestamp\":\"{{now format='yyyy-MM-dd'}}T{{now format='HH:mm:ss.SSS'}}Z\"}", "delayDistribution": {"type": "uniform", "lower": 100, "upper": 2000}, "transformers": ["response-template"], "headers": {"Content-Type": "application/json"}}
+                  },
+                  {
+                    "name": "GET /api/data/{id}",
+                    "request": {"method": "GET", "urlPathPattern": "/api/data/[0-9]+"},
+                    "response": {"status": 200, "body": "{\"id\":\"{{randomValue type='UUID'}}\",\"itemId\":\"{{request.pathSegments.[2]}}\",\"value\":\"downstream-data-{{request.pathSegments.[2]}}\",\"timestamp\":\"{{now format='yyyy-MM-dd'}}T{{now format='HH:mm:ss.SSS'}}Z\"}", "transformers": ["response-template"], "headers": {"Content-Type": "application/json"}}
+                  }
+                ]
+              }
+              EOFMAP
+              chmod 644 /home/wiremock/mappings/api-data.json
         - Name: "wiremock"
           Image: "wiremock/wiremock:3.13.2"
           Cpu: "256"
@@ -730,8 +778,12 @@ Resources:
           Essential: true
           LinuxParameters:
             InitProcessEnabled: true
+          MountPoints:
+            - SourceVolume: "wiremock-mappings"
+              ContainerPath: "/home/wiremock/mappings"
+              ReadOnly: false
           HealthCheck:
-            Command: ["CMD-SHELL", "wget --quiet --spider http://localhost:8080/__admin/health || exit 1"]
+            Command: ["CMD-SHELL", "curl --fail --silent http://127.0.0.1:8080/__admin/health || exit 1"]
             Interval: 10
             Timeout: 5
             Retries: 3
@@ -746,13 +798,16 @@ Resources:
   WireMockECSService:
     Type: "AWS::ECS::Service"
     Description: "WireMock downstream stub ECS service"
+    DependsOn:
+      - ListenerHTTPS
     Properties:
       ServiceName: "wiremock-service"
       Cluster: !Ref ECSCluster
       DesiredCount: 1
       LaunchType: "FARGATE"
       TaskDefinition: !Ref WireMockTaskDefinition
-      HealthCheckGracePeriodSeconds: 15
+      HealthCheckGracePeriodSeconds: 45
+      EnableExecuteCommand: true
       NetworkConfiguration:
         AwsvpcConfiguration:
           AssignPublicIp: "ENABLED"
@@ -761,6 +816,11 @@ Resources:
             - !Ref PrivateSubnetB
           SecurityGroups:
             - !Ref WireMockECSServiceSecurityGroup
+            - !Ref AdminSecurityGroup
+      LoadBalancers:
+        - ContainerName: "wiremock"
+          ContainerPort: 8080
+          TargetGroupArn: !Ref WireMockTargetGroup
       ServiceRegistries:
         - RegistryArn: !GetAtt WireMockServiceDiscovery.Arn
       Tags:
@@ -815,7 +875,7 @@ Resources:
       Port: 8888
       HealthCheckEnabled: true
       HealthCheckProtocol: "HTTP"
-      HealthCheckPort: "8888"
+      HealthCheckPort: 8888
       HealthCheckPath: "/imperative-throughput/actuator/health/ping"
       HealthCheckTimeoutSeconds: 30
       HealthCheckIntervalSeconds: 120
@@ -846,7 +906,7 @@ Resources:
       Port: 9999
       HealthCheckEnabled: true
       HealthCheckProtocol: "HTTP"
-      HealthCheckPort: "9999"
+      HealthCheckPort: 9999
       HealthCheckPath: "/reactive-throughput/actuator/health/ping"
       HealthCheckTimeoutSeconds: 30
       HealthCheckIntervalSeconds: 120
@@ -863,6 +923,27 @@ Resources:
         - Key: stickiness.type
           Value: "lb_cookie"
           # The type of stickiness to use. Required if stickiness.enabled is set.
+      Tags:
+        - Key: "ENTORN"
+          Value: "PRO"
+
+  WireMockTargetGroup:
+    Type: "AWS::ElasticLoadBalancingV2::TargetGroup"
+    Description: "WireMock Target Group for the Load Balancer"
+    Properties:
+      Name: "wiremock-target-group"
+      VpcId: !Ref VPC
+      Protocol: "HTTP"
+      Port: 8080
+      HealthCheckEnabled: true
+      HealthCheckProtocol: "HTTP"
+      HealthCheckPort: 8080
+      HealthCheckPath: "/__admin/health"
+      HealthCheckTimeoutSeconds: 10
+      HealthCheckIntervalSeconds: 30
+      HealthyThresholdCount: 2
+      UnhealthyThresholdCount: 2
+      TargetType: "ip"
       Tags:
         - Key: "ENTORN"
           Value: "PRO"
@@ -892,10 +973,21 @@ Resources:
         - Type: "redirect"
           RedirectConfig:
             Protocol: "HTTPS"
-            Port: "443"
+            Port: 443
             StatusCode: "HTTP_301"
       LoadBalancerArn: !Ref LoadBalancer
       Port: 80
+      Protocol: HTTP
+
+  ListenerWireMock:
+    Type: "AWS::ElasticLoadBalancingV2::Listener"
+    Description: "Listener for WireMock testing"
+    Properties:
+      DefaultActions:
+        - Type: "forward"
+          TargetGroupArn: !Ref WireMockTargetGroup
+      LoadBalancerArn: !Ref LoadBalancer
+      Port: 8080
       Protocol: HTTP
 
   ListenerHTTPS:
@@ -908,10 +1000,9 @@ Resources:
       LoadBalancerArn: !Ref LoadBalancer
       Port: 443
       Protocol: HTTPS
-      SslPolicy:
-        - ELBSecurityPolicy-TLS13-1-2-Res-PQ-2025-09
-        # The security policy determines which protocols and ciphers are supported. This policy supports TLS 1.3 and TLS 1.2 with post-quantum cryptography.
-        # https://docs.aws.amazon.com/elasticloadbalancing/latest/application/describe-ssl-policies.html#:~:text=AWS%20recommends%20implementing%20the%20new,more%20information%2C%20see%20Access%20logs.
+      # The security policy determines which protocols and ciphers are supported. This policy supports TLS 1.3 and TLS 1.2 with post-quantum cryptography.
+      # https://docs.aws.amazon.com/elasticloadbalancing/latest/application/describe-ssl-policies.html#:~:text=AWS%20recommends%20implementing%20the%20new,more%20information%2C%20see%20Access%20logs.
+      SslPolicy: ELBSecurityPolicy-TLS13-1-2-Res-PQ-2025-09
       Certificates:
         - CertificateArn: !Ref Certificate
 
@@ -966,6 +1057,10 @@ Resources:
                 Action:
                   - "ecs:ExecuteCommand"
                   - "ecs:DescribeTasks"
+                  - "ssmmessages:CreateControlChannel"
+                  - "ssmmessages:CreateDataChannel"
+                  - "ssmmessages:OpenControlChannel"
+                  - "ssmmessages:OpenDataChannel"
                   - "ecr:GetDownloadUrlForLayer"
                   - "ecr:BatchGetImage"
                   - "ecr:GetAuthorizationToken"

@@ -5,6 +5,11 @@ Changelog of camila-services.
 ## Unreleased
 ### No issue
 
+**[GH-7] refactor: fix code smells**
+
+
+[20d5886b3313a51](https://github.com/JuanPabloJimenezEsclusa/ignacio-high-throughput/commit/20d5886b3313a51) juan.pablo.jimenez.esclusa *2026-04-16 10:36:37*
+
 **build(deps): bump the maven-dependencies group across 1 directory with 2 updates (#146)**
 
  * Bumps the maven-dependencies group with 2 updates in the / directory: [org.springframework.boot:spring-boot-starter-parent](https://github.com/spring-projects/spring-boot) and [org.openrewrite.maven:rewrite-maven-plugin](https://github.com/openrewrite/rewrite-maven-plugin).

@@ -12,7 +12,7 @@ Based on `AWS Cloud Provider`
 ---
 
 * [Docker ~29](https://docs.docker.com/engine/release-notes/28/)
-* [AWS CLI ~2.32](https://github.com/aws/aws-cli/blob/v2/CHANGELOG.rst)
+* [AWS CLI ~2.34](https://github.com/aws/aws-cli/blob/v2/CHANGELOG.rst)
 
 ## 🏗️ Architecture
 

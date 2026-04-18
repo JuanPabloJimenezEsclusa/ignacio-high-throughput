@@ -1,0 +1,57 @@
+info:
+  name: imperative-throughput-cpu
+  type: http
+  seq: 6
+
+http:
+  method: GET
+  url: "{{imperative_url}}/imperative-throughput/cpu"
+  headers:
+    - name: Accept
+      value: application/json
+    - name: Content-Type
+      value: application/json
+    - name: Cache-Control
+      value: no-cache
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+examples:
+  - name: example
+    request:
+      url: "{{imperative_url}}/imperative-throughput/cpu"
+      method: GET
+      headers:
+        - name: Accept
+          value: application/json
+        - name: Content-Type
+          value: application/json
+        - name: Cache-Control
+          value: no-cache
+    response:
+      status: 200
+      statusText: OK
+      headers:
+        - name: date
+          value: Sat, 18 Apr 2026 15:36:17 GMT
+        - name: content-type
+          value: application/json;charset=UTF-8
+        - name: content-length
+          value: "90"
+        - name: connection
+          value: keep-alive
+        - name: set-cookie
+          value: AWSALB=xxxxxxxx==; Expires=Sat, 25 Apr 2026 15:36:17 GMT; Path=/; SameSite=None; Secure
+        - name: cache-control
+          value: no-cache
+      body:
+        type: json
+        data: |-
+          OK: Imperative: CPU: fib(50)=12586269025: VirtualThread[
+            #102
+          ]/runnable@ForkJoinPool-3-worker-2

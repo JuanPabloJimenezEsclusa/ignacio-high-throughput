@@ -1,0 +1,61 @@
+info:
+  name: imperative-throughput-io
+  type: http
+  seq: 5
+
+http:
+  method: GET
+  url: "{{imperative_url}}/imperative-throughput/io"
+  headers:
+    - name: Accept
+      value: application/json
+    - name: Content-Type
+      value: application/json
+    - name: Cache-Control
+      value: no-cache
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+examples:
+  - name: example
+    request:
+      url: "{{imperative_url}}/imperative-throughput/io"
+      method: GET
+      headers:
+        - name: Accept
+          value: application/json
+        - name: Content-Type
+          value: application/json
+        - name: Cache-Control
+          value: no-cache
+    response:
+      status: 200
+      statusText: OK
+      headers:
+        - name: date
+          value: Sat, 18 Apr 2026 15:36:06 GMT
+        - name: content-type
+          value: application/json;charset=UTF-8
+        - name: content-length
+          value: "188"
+        - name: connection
+          value: keep-alive
+        - name: set-cookie
+          value: AWSALB=xxxxxxxx==; Expires=Sat, 25 Apr 2026 15:36:06 GMT; Path=/; SameSite=None; Secure
+        - name: cache-control
+          value: no-cache
+      body:
+        type: json
+        data: |-
+          OK: Imperative: IO: {
+            "id": "3de331ea-c958-4660-8a9a-3bdbdb65b65a",
+            "value": "downstream-data-squy77to",
+            "timestamp": "2026-04-18T15:36:06.553Z"
+          }: VirtualThread[
+            #97
+          ]/runnable@ForkJoinPool-3-worker-3

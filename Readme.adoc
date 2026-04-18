@@ -55,8 +55,8 @@ image:https://img.shields.io/badge/Gatling-3.14+-orange.svg["Gatling",link="http
 
 image:https://img.shields.io/badge/Docker-29+-brown.svg["Docker",link="https://docs.docker.com/engine/release-notes/29/"]
 image:https://img.shields.io/badge/Docker%20Compose-v2.40+-brown.svg["Docker-compose",link="https://docs.docker.com/compose/install/standalone/"]
-image:https://img.shields.io/badge/Kubernetes-1.34+-brown.svg["Kubernetes",link="https://kubernetes.io/releases/"]
-image:https://img.shields.io/badge/AWS%20CLI-2.32+-brown.svg["AWS CLI",link="https://aws.amazon.com/es/cli/"]
+image:https://img.shields.io/badge/Kubernetes-1.35+-brown.svg["Kubernetes",link="https://kubernetes.io/releases/"]
+image:https://img.shields.io/badge/AWS%20CLI-2.34+-brown.svg["AWS CLI",link="https://aws.amazon.com/es/cli/"]
 
 [#_building_modules]
 == 🔨 Building modules

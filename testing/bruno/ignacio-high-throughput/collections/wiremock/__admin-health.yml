@@ -1,0 +1,59 @@
+info:
+  name: __admin-health
+  type: http
+  seq: 9
+
+http:
+  method: GET
+  url: "{{wiremock_url}}/__admin/health"
+  headers:
+    - name: Accept
+      value: application/json
+    - name: Content-Type
+      value: application/json
+    - name: Cache-Control
+      value: no-cache
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+examples:
+  - name: example
+    request:
+      url: "{{wiremock_url}}/__admin/health"
+      method: GET
+      headers:
+        - name: Accept
+          value: application/json
+        - name: Content-Type
+          value: application/json
+        - name: Cache-Control
+          value: no-cache
+    response:
+      status: 200
+      statusText: OK
+      headers:
+        - name: date
+          value: Sat, 18 Apr 2026 16:02:50 GMT
+        - name: content-type
+          value: application/json
+        - name: transfer-encoding
+          value: chunked
+        - name: connection
+          value: keep-alive
+        - name: vary
+          value: Origin
+      body:
+        type: json
+        data: |-
+          {
+            "status": "healthy",
+            "message": "Wiremock is ok",
+            "version": "3.13.2",
+            "uptimeInSeconds": 2196,
+            "timestamp": "2026-04-18T16:02:50.948788471Z"
+          }
