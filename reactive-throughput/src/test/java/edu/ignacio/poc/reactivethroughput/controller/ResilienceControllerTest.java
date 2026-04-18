@@ -83,8 +83,8 @@ class ResilienceControllerTest {
         @SuppressWarnings("unchecked") final Map<String, Object> body = (Map<String, Object>) raw;
         assertThat(body)
           .containsEntry("status", "OK")
-          .containsEntry("module", "Reactive")
-          .containsEntry("endpoint", "Resilience")
+          .containsEntry("module", "reactive")
+          .containsEntry("endpoint", "resilience")
           .containsKey("downstream")
           .containsKey("thread");
       });
@@ -113,8 +113,8 @@ class ResilienceControllerTest {
         @SuppressWarnings("unchecked") final Map<String, Object> body = (Map<String, Object>) raw;
         assertThat(body)
           .containsEntry("status", "FALLBACK")
-          .containsEntry("module", "Reactive")
-          .containsEntry("endpoint", "Resilience")
+          .containsEntry("module", "reactive")
+          .containsEntry("endpoint", "resilience")
           .containsEntry("reason", "timeout")
           .containsKey("thread");
       });
@@ -143,8 +143,8 @@ class ResilienceControllerTest {
         @SuppressWarnings("unchecked") final Map<String, Object> body = (Map<String, Object>) raw;
         assertThat(body)
           .containsEntry("status", "FALLBACK")
-          .containsEntry("module", "Reactive")
-          .containsEntry("endpoint", "Resilience")
+          .containsEntry("module", "reactive")
+          .containsEntry("endpoint", "resilience")
           .containsEntry("reason", "timeout")
           .containsKey("thread");
       });

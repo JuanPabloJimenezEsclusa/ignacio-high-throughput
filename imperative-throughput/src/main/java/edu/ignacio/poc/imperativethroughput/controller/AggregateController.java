@@ -10,12 +10,9 @@ import io.micrometer.core.instrument.Timer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.CacheControl;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.client.RestClient;
 
 /**
  * The type Aggregate controller.
@@ -27,27 +24,17 @@ import org.springframework.web.client.RestClient;
  * Compare with the reactive counterpart using {@code Flux.merge()} / {@code Mono.zip()}.
  */
 @RestController
-class AggregateController {
+class AggregateController extends AbstractImperativeController {
 
   private static final Logger log = LoggerFactory.getLogger(AggregateController.class);
-  private static final String DOWNSTREAM_PATH = "/api/data/{id}";
+  private static final String API_DATA_ID = "/api/data/{id}";
   private static final int FAN_OUT = 3;
-
-  private final RestClient restClient;
-  private final Timer aggregateTimer;
 
   AggregateController(
     @Value("${downstream.service.url}") final String downstreamUrl,
     final MeterRegistry meterRegistry
   ) {
-    this.restClient = RestClient.builder()
-      .baseUrl(downstreamUrl)
-      .build();
-    this.aggregateTimer = Timer.builder("http.request.duration")
-      .description("Aggregate endpoint request duration")
-      .tag("module", "imperative")
-      .tag("endpoint", "aggregate")
-      .register(meterRegistry);
+    super(downstreamUrl, meterRegistry, "aggregate");
   }
 
   /**
@@ -78,18 +65,16 @@ class AggregateController {
         .orElse("");
 
       log.info("Aggregate imperative endpoint - results: {} - thread: {}", combined, currentThread);
-      sample.stop(this.aggregateTimer);
+      sample.stop(this.timer);
 
-      return ResponseEntity.ok()
-        .cacheControl(CacheControl.noCache())
-        .contentType(MediaType.APPLICATION_JSON)
+      return this.okResponse()
         .body("OK:Imperative:Aggregate:[%s]:%s".formatted(combined, currentThread));
     }
   }
 
   private String fetchData(final int index) {
     return this.restClient.get()
-      .uri(DOWNSTREAM_PATH, index)
+      .uri(API_DATA_ID, index)
       .retrieve()
       .body(String.class);
   }

@@ -2,7 +2,6 @@ package edu.ignacio.poc.reactivethroughput.controller;
 
 import static org.springframework.web.reactive.function.server.RequestPredicates.GET;
 import static org.springframework.web.reactive.function.server.RouterFunctions.route;
-import static org.springframework.web.reactive.function.server.ServerResponse.ok;
 
 import java.math.BigInteger;
 
@@ -13,8 +12,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.CacheControl;
-import org.springframework.http.MediaType;
 import org.springframework.web.reactive.function.server.RouterFunction;
 import org.springframework.web.reactive.function.server.ServerResponse;
 import reactor.core.publisher.Mono;
@@ -30,19 +27,13 @@ import reactor.core.scheduler.Schedulers;
  * that uses a virtual-thread-per-task executor.
  */
 @Configuration
-public class CpuController {
+public class CpuController extends AbstractReactiveController {
 
   private static final Logger log = LoggerFactory.getLogger(CpuController.class);
   private static final int FIBONACCI_N = 50;
 
-  private final Timer cpuTimer;
-
   CpuController(@NonNull final MeterRegistry meterRegistry) {
-    this.cpuTimer = Timer.builder("http.request.duration")
-      .description("CPU endpoint request duration")
-      .tag("module", "reactive")
-      .tag("endpoint", "cpu")
-      .register(meterRegistry);
+    super(meterRegistry, "cpu");
   }
 
   /**
@@ -61,10 +52,8 @@ public class CpuController {
           .flatMap(result -> {
             final var currentThread = Thread.currentThread();
             log.info("CPU reactive endpoint - fib({})={} - thread: {}", FIBONACCI_N, result, currentThread);
-            sample.stop(this.cpuTimer);
-            return ok()
-              .cacheControl(CacheControl.noCache())
-              .contentType(MediaType.APPLICATION_JSON)
+            sample.stop(this.timer);
+            return this.okResponse()
               .bodyValue("OK:Reactive:CPU:fib(%d)=%d:%s".formatted(FIBONACCI_N, result, currentThread));
           })
           .doOnError(throwable -> log.error("Error in CPU reactive endpoint", throwable));

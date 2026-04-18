@@ -42,20 +42,21 @@ public class GatlingHighThroughputSimulation extends Simulation {
 
   private static final String IMPERATIVE_BASE = of(IMPERATIVE, System.getenv("IMPERATIVE_BASE_URL"));
   private static final String REACTIVE_BASE = of(REACTIVE, System.getenv("REACTIVE_BASE_URL"));
+  private static final String APPLICATION_JSON = "application/json";
 
   // ── Imperative HTTP protocol config ──────────────────────────────────────
   private static final HttpProtocolBuilder IMPERATIVE_PROTOCOL = http
     .baseUrl(IMPERATIVE_BASE)
-    .acceptHeader("application/json")
-    .contentTypeHeader("application/json")
+    .acceptHeader(APPLICATION_JSON)
+    .contentTypeHeader(APPLICATION_JSON)
     .userAgentHeader("gatling/performance-testing")
     .header("Cache-Control", "no-cache");
 
   // ── Reactive HTTP protocol config ─────────────────────────────────────────
   private static final HttpProtocolBuilder REACTIVE_PROTOCOL = http
     .baseUrl(REACTIVE_BASE)
-    .acceptHeader("application/json")
-    .contentTypeHeader("application/json")
+    .acceptHeader(APPLICATION_JSON)
+    .contentTypeHeader(APPLICATION_JSON)
     .userAgentHeader("gatling/performance-testing")
     .header("Cache-Control", "no-cache");
 

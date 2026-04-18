@@ -33,20 +33,14 @@ import reactor.core.publisher.Flux;
  * This endpoint exists only in the reactive module.
  */
 @Configuration
-public class StreamController {
+public class StreamController extends AbstractReactiveController {
 
   private static final Logger log = LoggerFactory.getLogger(StreamController.class);
   private static final int STREAM_SIZE = 10;
   private static final long EMIT_INTERVAL_MS = 200L;
 
-  private final Timer streamTimer;
-
   StreamController(@NonNull final MeterRegistry meterRegistry) {
-    this.streamTimer = Timer.builder("http.request.duration")
-      .description("Stream endpoint request duration")
-      .tag("module", "reactive")
-      .tag("endpoint", "stream")
-      .register(meterRegistry);
+    super(meterRegistry, "stream");
   }
 
   /**
@@ -75,7 +69,7 @@ public class StreamController {
           .delayElements(Duration.ofMillis(EMIT_INTERVAL_MS))
           .doOnNext(event -> log.debug("Stream reactive endpoint - emitting: {}", event))
           .doOnComplete(() -> {
-            sample.stop(this.streamTimer);
+            sample.stop(this.timer);
             log.info("Stream reactive endpoint - completed {} events - thread: {}",
               STREAM_SIZE, currentThread);
           })

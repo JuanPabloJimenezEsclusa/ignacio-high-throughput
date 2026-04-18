@@ -1,0 +1,64 @@
+info:
+  name: reactive-throughput-io
+  type: http
+  seq: 5
+
+http:
+  method: GET
+  url: "{{reactive_url}}/reactive-throughput/io"
+  headers:
+    - name: Accept
+      value: application/json
+    - name: Content-Type
+      value: application/json
+    - name: Cache-Control
+      value: no-cache
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+examples:
+  - name: example
+    request:
+      url: "{{reactive_url}}/reactive-throughput/io"
+      method: GET
+      headers:
+        - name: Accept
+          value: application/json
+        - name: Content-Type
+          value: application/json
+        - name: Cache-Control
+          value: no-cache
+    response:
+      status: 200
+      statusText: OK
+      headers:
+        - name: date
+          value: Sat, 18 Apr 2026 15:57:32 GMT
+        - name: content-type
+          value: application/json
+        - name: content-length
+          value: "174"
+        - name: connection
+          value: keep-alive
+        - name: set-cookie
+          value: AWSALB=xxxxxxxx==; Expires=Sat, 25 Apr 2026 15:57:32 GMT; Path=/; SameSite=None; Secure
+        - name: cache-control
+          value: no-cache
+      body:
+        type: json
+        data: |-
+          OK: Reactive: IO: {
+            "id": "f7c3484c-de8b-40a3-b25b-c42223d0fe7c",
+            "value": "downstream-data-szm4vycn",
+            "timestamp": "2026-04-18T15:57:32.220Z"
+          }: Thread[
+            #67,
+            reactor-http-epoll-2,
+            5,
+            main
+          ]

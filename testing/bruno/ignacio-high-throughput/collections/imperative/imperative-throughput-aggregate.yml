@@ -1,0 +1,76 @@
+info:
+  name: imperative-throughput-aggregate
+  type: http
+  seq: 4
+
+http:
+  method: GET
+  url: "{{imperative_url}}/imperative-throughput/aggregate"
+  headers:
+    - name: Accept
+      value: application/json
+    - name: Content-Type
+      value: application/json
+    - name: Cache-Control
+      value: no-cache
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+examples:
+  - name: example
+    request:
+      url: "{{imperative_url}}/imperative-throughput/aggregate"
+      method: GET
+      headers:
+        - name: Accept
+          value: application/json
+        - name: Content-Type
+          value: application/json
+        - name: Cache-Control
+          value: no-cache
+    response:
+      status: 200
+      statusText: OK
+      headers:
+        - name: date
+          value: Sat, 18 Apr 2026 15:35:55 GMT
+        - name: content-type
+          value: application/json;charset=UTF-8
+        - name: content-length
+          value: "455"
+        - name: connection
+          value: keep-alive
+        - name: set-cookie
+          value: AWSALB=xxxxxxxx==; Expires=Sat, 25 Apr 2026 15:35:55 GMT; Path=/; SameSite=None; Secure
+        - name: cache-control
+          value: no-cache
+      body:
+        type: json
+        data: |-
+          OK: Imperative: Aggregate: [
+            {
+              "id": "9edb3d8a-19a7-4bf2-98ba-cc35d284df7d",
+              "itemId": "1",
+              "value": "downstream-data-1",
+              "timestamp": "2026-04-18T15:35:55.518Z"
+            },
+            {
+              "id": "66a6e0cc-6384-4164-a043-34426bd93efb",
+              "itemId": "2",
+              "value": "downstream-data-2",
+              "timestamp": "2026-04-18T15:35:55.530Z"
+            },
+            {
+              "id": "78d85524-449d-476b-a24d-ca5330693415",
+              "itemId": "3",
+              "value": "downstream-data-3",
+              "timestamp": "2026-04-18T15:35:55.526Z"
+            }
+          ]: VirtualThread[
+            #83
+          ]/runnable@ForkJoinPool-3-worker-2
