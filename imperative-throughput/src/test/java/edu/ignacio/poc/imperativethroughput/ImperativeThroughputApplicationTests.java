@@ -13,7 +13,7 @@ class ImperativeThroughputApplicationTests {
 
   @Test
   void contextLoads() {
-    Assertions.assertNotNull(applicationContext);
+    Assertions.assertNotNull(this.applicationContext);
   }
 
   @Test

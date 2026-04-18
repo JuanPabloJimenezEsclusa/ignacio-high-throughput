@@ -1,0 +1,8 @@
+name: DEV
+variables:
+  - name: wiremock_url
+    value: http://localhost:8080
+  - name: imperative_url
+    value: http://localhost:8888
+  - name: reactive_url
+    value: http://localhost:9999

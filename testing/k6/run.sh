@@ -28,8 +28,8 @@ time docker run --rm \
   --env K6_WEB_DASHBOARD_HOST=localhost \
   --env K6_WEB_DASHBOARD_PORT=5665 \
   --env K6_WEB_DASHBOARD_PERIOD=5s \
-  --env IMPERATIVE_THROUGHPUT_URL="${IMPERATIVE_THROUGHPUT_URL}/imperative-throughput/smokes" \
-  --env REACTIVE_THROUGHPUT_URL="${REACTIVE_THROUGHPUT_URL}/reactive-throughput/smokes" \
+  --env IMPERATIVE_THROUGHPUT_URL="${IMPERATIVE_THROUGHPUT_URL}/imperative-throughput" \
+  --env REACTIVE_THROUGHPUT_URL="${REACTIVE_THROUGHPUT_URL}/reactive-throughput" \
   --volume "${workspace}/script":/scripts:rw \
   --volume "${workspace}/result":/result:rw \
   --network host \

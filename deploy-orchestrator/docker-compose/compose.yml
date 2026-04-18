@@ -1,4 +1,24 @@
 services:
+  ## Downstream stub
+  wiremock:
+    image: wiremock/wiremock:3.13.2
+    container_name: wiremock
+    hostname: wiremock
+    restart: "on-failure"
+    command: ["--port=8080", "--global-response-templating"]
+    deploy:
+      resources:
+        limits:
+          memory: "2048m"
+          cpus: "1"
+    ports:
+      - "8080:8080"
+    expose:
+      - 8080
+    volumes:
+      - ./wiremock/mappings:/home/wiremock/mappings:ro
+    networks:
+      high_throughput_network:
   ## Artefacts
   imperative-throughput:
     image: docker.io/library/imperative-throughput:1.0.0
@@ -7,6 +27,11 @@ services:
     restart: "on-failure"
     env_file:
       - .env
+    environment:
+      DOWNSTREAM_SERVICE_URL: "http://wiremock:8080"
+    depends_on:
+      wiremock:
+        condition: service_healthy
     deploy:
       resources:
         limits:
@@ -42,6 +67,11 @@ services:
     restart: "on-failure"
     env_file:
       - .env
+    environment:
+      DOWNSTREAM_SERVICE_URL: "http://wiremock:8080"
+    depends_on:
+      wiremock:
+        condition: service_healthy
     deploy:
       resources:
         limits:
@@ -72,7 +102,7 @@ services:
       high_throughput_network:
   ## Monitorization
   prometheus:
-    image: prom/prometheus:v3.8.1
+    image: prom/prometheus:v3.11.2
     container_name: prometheus
     hostname: prometheus
     restart: "on-failure"
@@ -98,7 +128,7 @@ services:
     networks:
       high_throughput_network:
   grafana:
-    image: grafana/grafana:12.3.1
+    image: grafana/grafana:13.0.1
     container_name: grafana
     hostname: grafana
     restart: "on-failure"
@@ -130,7 +160,7 @@ services:
   ## Observability (EFK)
   # https://docs.fluentd.org/container-deployment/docker-compose
   elasticsearch:
-    image: elasticsearch:9.2.3
+    image: elasticsearch:9.3.3
     container_name: elasticsearch
     hostname: elasticsearch
     restart: on-failure
@@ -145,7 +175,7 @@ services:
       - xpack.security.enabled=false
       - cluster.name=elasticsearch
       - bootstrap.memory_lock=true
-      - "ES_JAVA_OPTS=-Xms512m -Xmx1000m"
+      - "ES_JAVA_OPTS=-Xms512m -Xmx1400m"
     ports:
       - "9200:9200"
       - "9300:9300"
@@ -186,7 +216,7 @@ services:
     networks:
       high_throughput_network:
   kibana:
-    image: kibana:9.2.3
+    image: kibana:9.3.3
     container_name: kibana
     hostname: kibana
     restart: "no"
@@ -244,5 +274,5 @@ networks:
     ipam:
       driver: default
       config:
-        - subnet: 172.18.0.0/24
-          gateway: 172.18.0.1
+        - subnet: 172.38.0.0/24
+          gateway: 172.38.0.1

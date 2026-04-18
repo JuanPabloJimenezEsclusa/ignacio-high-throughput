@@ -43,7 +43,7 @@ This is a multi-module project consisting of::
 image:https://img.shields.io/badge/OpenJDK-25+-005571.svg["OpenJDK",link="https://adoptium.net/es/temurin/releases/?os=any&arch=any&version=25"]
 image:https://img.shields.io/badge/GraalVM-25+-005571.svg["GraalVM",link="https://www.graalvm.org/jdk25/getting-started/linux/#script-friendly-urls"]
 image:https://img.shields.io/badge/Maven-3.9+-005571.svg["Maven",link="https://maven.apache.org/ref/3.9.10/"]
-image:https://img.shields.io/badge/Gradle-9.1+-005571.svg["Gradle",link="https://docs.gradle.org/9.1.0/userguide/userguide.html"]
+image:https://img.shields.io/badge/Gradle-9.4+-005571.svg["Gradle",link="https://docs.gradle.org/9.4.1/userguide/userguide.html"]
 
 image:https://img.shields.io/badge/Spring%20Boot-4.0+-brightgreen.svg["Spring Boot",link="https://spring.io/projects/spring-boot"]
 image:https://img.shields.io/badge/Spring%20MVC%20(imperative%20module)-7.0+-brightgreen.svg["Spring MVC",link="https://docs.spring.io/spring-framework/reference/web.html"]
@@ -55,8 +55,8 @@ image:https://img.shields.io/badge/Gatling-3.14+-orange.svg["Gatling",link="http
 
 image:https://img.shields.io/badge/Docker-29+-brown.svg["Docker",link="https://docs.docker.com/engine/release-notes/29/"]
 image:https://img.shields.io/badge/Docker%20Compose-v2.40+-brown.svg["Docker-compose",link="https://docs.docker.com/compose/install/standalone/"]
-image:https://img.shields.io/badge/Kubernetes-1.34+-brown.svg["Kubernetes",link="https://kubernetes.io/releases/"]
-image:https://img.shields.io/badge/AWS%20CLI-2.32+-brown.svg["AWS CLI",link="https://aws.amazon.com/es/cli/"]
+image:https://img.shields.io/badge/Kubernetes-1.35+-brown.svg["Kubernetes",link="https://kubernetes.io/releases/"]
+image:https://img.shields.io/badge/AWS%20CLI-2.34+-brown.svg["AWS CLI",link="https://aws.amazon.com/es/cli/"]
 
 [#_building_modules]
 == 🔨 Building modules
@@ -64,30 +64,31 @@ image:https://img.shields.io/badge/AWS%20CLI-2.32+-brown.svg["AWS CLI",link="htt
 === Build all modules
 [source,bash]
 ----
-mvn clean install
+mvn -B clean install | tee .tmp/mvn-clean-install-$(date +%Y%m%d%H).log
 # 'verify' no working for jacoco module, 'install' instead
 ----
 
 === Build all modules with Gradle
 [source,bash]
 ----
-gradle clean build
+gradle clean build | tee .tmp/gradle-clean-build-$(date +%Y%m%d%H).log
 ----
 
 === Build native artifacts
 [source,bash]
 ----
 export SPRING_PROFILES_ACTIVE="native"
-mvn -P"${SPRING_PROFILES_ACTIVE}" \
+mvn -B -P"${SPRING_PROFILES_ACTIVE}" \
   native:compile \
   -Dmaven.test.skip=true \
   -Dmaven.build.cache.enabled=false \
-  --projects imperative-throughput,reactive-throughput
+  --projects imperative-throughput,reactive-throughput \
+  | tee .tmp/mvn-native-compile-$(date +%Y%m%d%H).log
 ----
 
 [source,bash]
 ----
-gradle nativeBuild
+gradle nativeBuild | tee .tmp/gradle-native-build-$(date +%Y%m%d%H).log
 ----
 
 Reports::
@@ -98,7 +99,7 @@ Reports::
 [source,bash]
 ----
 export SPRING_PROFILES_ACTIVE="native"
-mvn -P"${SPRING_PROFILES_ACTIVE}" \
+mvn -B -P"${SPRING_PROFILES_ACTIVE}" \
   spring-boot:build-image \
   -Dmaven.test.skip=true \
   -Dmaven.build.cache.enabled=false \
@@ -132,7 +133,7 @@ mvn rewrite:runNoFork -Popen-rewrite
 [source,bash]
 ----
 # Run with Maven
-mvn spring-boot:run -f imperative-throughput/pom.xml
+mvn -B spring-boot:run -f imperative-throughput/pom.xml
 ----
 
 [source,bash]
@@ -189,7 +190,7 @@ The application will be available at: `http://localhost:8888/imperative-throughp
 [source,bash]
 ----
 # Run with Maven
-mvn spring-boot:run -f reactive-throughput/pom.xml
+mvn -B spring-boot:run -f reactive-throughput/pom.xml
 ----
 
 [source,bash]
@@ -288,6 +289,93 @@ curl -sv http://localhost:9999/reactive-throughput/actuator/health | jq
 curl -sv http://localhost:9999/reactive-throughput/actuator/prometheus
 curl -sv http://localhost:9999/reactive-throughput/actuator/metrics | jq
 ----
+
+[#_comparison]
+== ⚖️ Paradigm Comparison
+
+[cols="2,3,3", options="header", width=100%, frame=all, grid=rows, title="Imperative vs Reactive — Design & Behaviour"]
+|===
+| Dimension | Imperative + Virtual Threads | Reactive (WebFlux + Reactor)
+
+| *Concurrency model*
+| One virtual thread per request. The JVM multiplexes millions of virtual threads onto a small carrier-thread pool. Blocking a virtual thread parks it without consuming a carrier thread.
+| One or few Netty event-loop threads handle all I/O via non-blocking callbacks and operator pipelines. No thread is ever blocked.
+
+| *Blocking I/O*
+| Safe — blocking unmounts the virtual thread from its carrier and remounts it when I/O completes. `RestClient`, `JDBC`, `Files` work unchanged.
+| Forbidden on event-loop threads. All I/O must go through non-blocking drivers (`WebClient`, R2DBC, reactive file I/O).
+
+| *Programming model*
+| Standard sequential Java — `try/catch`, `for` loops, debuggable stack traces. Existing blocking libraries require no changes.
+| Functional pipeline — `Mono`, `Flux`, operators. Requires learning Project Reactor; traces need the Reactor debug agent to be readable.
+
+| *Parallel fan-out*
+| `StructuredTaskScope` (JEP 505, Java 25 preview) — fork N tasks, join with structured lifecycle and automatic failure propagation.
+| `Flux.merge()` — merge N concurrent `Mono` pipelines; no threads are created.
+
+| *Timeout + fallback*
+| `CompletableFuture.orTimeout(500, MILLISECONDS)` + `.handle()` to substitute a static fallback on `TimeoutException`.
+| `Mono.timeout(Duration.ofMillis(500))` + `.onErrorReturn(fallback)` — inline operator, zero extra threads.
+
+| *Backpressure / SSE*
+| Not natively supported. A thread-per-connection model cannot propagate consumer-side backpressure to the producer without blocking the producer thread.
+| `Flux.generate` + `.delayElements()` — demand-driven emission. The subscriber controls pace. Used for `GET /stream` (reactive only).
+
+| *Error handling*
+| `@ControllerAdvice` + `@ExceptionHandler(RuntimeException.class)`, `HttpServletRequest` for path extraction.
+| `AbstractErrorWebExceptionHandler` (`@Order(-2)`) composing a `ServerResponse`.
+
+| *Error response contract*
+| `{"status":500,"error":"Internal Server Error","path":"..."}`
+| `{"status":500,"error":"Internal Server Error","path":"..."}` (unified)
+
+| *Scheduler / thread pool*
+| `Executors.newVirtualThreadPerTaskExecutor()` (per-request scope); `Thread.ofVirtual().factory()` for the smoke delay scheduler.
+| Reactor `boundedElastic` for CPU work; Netty event loop for I/O; shared `virtualThreadScheduler` bean for reactive smoke delay.
+
+| *Observability*
+| Custom `jvm.threads.virtual.active` Micrometer gauge (sampled from `ThreadMXBean`) — shows virtual-thread count scaling under load.
+| Standard Micrometer timers per endpoint tagged `module=reactive`. Event-loop thread count stays constant regardless of load.
+
+| *Test approach*
+| `@WebMvcTest` + `MockMvc` with `asyncStarted` / `asyncDispatch` for `CompletableFuture` responses.
+| `@SpringBootTest(RANDOM_PORT)` + `WebTestClient` + `StepVerifier` for reactive pipelines.
+
+| *HTTP server*
+| Apache Tomcat 11
+| Reactor Netty
+
+| *Base path*
+| `/imperative-throughput` (servlet `context-path`)
+| `/reactive-throughput` (`spring.webflux.base-path`)
+
+| *Default port*
+| `8888`
+| `9999`
+|===
+
+[cols="2,1,1", options="header", width=75%, frame=all, grid=rows, title="Endpoint Coverage"]
+|===
+| Endpoint | Imperative | Reactive
+
+| `GET /smokes` — 300 ms baseline latency, returns thread identity
+| ✅ | ✅
+
+| `GET /cpu` — Fibonacci(50) CPU-bound workload
+| ✅ | ✅
+
+| `GET /io` — blocking / non-blocking downstream HTTP call
+| ✅ | ✅
+
+| `GET /aggregate` — 3 parallel downstream calls combined
+| ✅ | ✅
+
+| `GET /resilience[?delayMs=N]` — 500 ms timeout + fallback
+| ✅ | ✅
+
+| `GET /stream` — SSE, 10 events × 200 ms, backpressure-aware
+| ❌ | ✅
+|===
 
 [#_deployment]
 == 🛠️ Deployment
@@ -440,117 +528,114 @@ mvn test && gradle test
 [#_performance_comparison]
 == ⚡ Performance Comparison
 
-This project allows comparing::
+Five JMeter runs (60 k – 2 M samples), K6 and Gatling executed against `/smokes` (300 ms fixed delay). Both modules ran simultaneously on localhost; each implementation received exactly half
+the load per run.
 
-* Response times under load
-* Resource utilization (CPU, memory)
-* Throughput capabilities
-* Scalability characteristics
+=== Test Matrix
 
-between the traditional thread-per-request model and the reactive event-loop model.
-
-=== Java Performance Scenarios Comparison
-
-Here's a table explaining 6 scenarios with performance indicators:
-
-[cols="1,2,2,2,3,2,2,2,2", options="header", width=75%, frame=none, grid=none, title="Performance Scenarios Comparison"]
+[cols="2,1,1,1,1,1,1", options="header", width=100%, frame=all, grid=rows]
 |===
-| # | Approach | Virtual Threads | Native Build | Response Time by Thread | CPU Usage | Memory Usage | Startup Time | Learning Curve
+| Load config | Impl. | Samples | Errors | Error % | Mean (ms) | Max (ms)
 
-| 1 | Imperative | ❌ | ❌ | 🚨 | 🚨 | 🚨 | 🚨 | 💪++
-| 2 | Imperative | ✅ | ❌ | 💪 | 💪 | 💪+ | 🚨 | 💪+
-| 3 | Imperative | ✅ | ✅ | 💪+ | 💪++ | 💪+ | 💪 | 💪
-| 4 | Reactive | ❌ | ❌ | 💪++ | 💪+ | 💪+ | 🚨 | 💪
-| 5 | Reactive | ❌ | ✅ | 💪++ | 💪++ | 💪+ | 💪 | 🚨
-| 6 | Reactive | ✅ | ✅ | 💪++ | 💪++ | 💪++ | 💪 | 🚨--
-|===
+.2+| 3 000t · 30s ramp · 10 loops
+| Imperative | 30 000 | 0 | 0% | 302 | 382
+| Reactive   | 30 000 | 0 | 0% | 305 | 382
 
-==== Legend
+.2+| 2 500t · 60s ramp · 100 loops
+| Imperative | 250 000 | 0 | 0% | 311 | 3 262
+| Reactive   | 250 000 | 0 | 0% | 304 | 525
 
-* ✅ Enabled
-* ❌ Not present
-* 💪 Better
-* 🚨 Worse
+.2+| 5 000t · 60s ramp · 25 loops _(carrier saturation point)_
+| Imperative | 125 000 | 0     | 0%     | *731* | 8 439
+| Reactive   | 125 000 | 0     | 0%     | *326* | 1 894
 
-====
-Key Observations:
-----
-Native builds (scenarios 3, 5, 6) consistently show better memory usage and startup time
-----
-----
-Virtual threads improve performance in both programming models
-----
-----
-Imperative approach offers a better learning curve, especially without native compilation
-----
-----
-Reactive + (Virtual Threads or Native) (scenarios 5, 6) provides the best overall performance characteristics
-----
-----
-Imperative + Virtual Threads + Native (scenario 3) offers excellent performance with a simpler programming model
-----
-====
-
-=== Summary of K6 Tests
-
-* link:http://localhost:5665/ui/[K6 Web Dashboard] (While the test is running)
-* link:./testing/k6/result/summary.html[K6 Report]
-
-[cols="1,1,1,1,1,1,1,1,1", options="header", width=100%, frame=none, grid=none, title="K6 Table Comparison"]
-|===
-| Scenario | Count | Rate | Average | Maximum | Median | Minimum | 90th Percentile | 95th Percentile
-| 3 | 75462 | 359.03 | 812.49 | 48206.40 | 300.97 | 300.38 | 473.25 | 944.87
-| 6 | 75462 | 359.03 | 309.74 | 600.70 | 301.11 | 300.40 | 328.08 | 357.04
+.2+| 5 000t · 60s ramp · 200 loops _(peak sustained load)_
+| *Imperative* | 1 000 000 | *13 335* | *1.33%* | *636* | *31 172*
+| *Reactive*   | 1 000 000 | *0*      | *0%*    | *309* | *2 414*
 |===
 
-[cols="1,1", options="header", width=100%, frame=none, grid=none, title="K6 Graph Comparison"]
+[cols="1,1", options="header", width=100%, frame=none, grid=none]
 |===
 | Imperative | Reactive
-| image:./testing/k6/images/imperative-summary.png[K6 Imperative summary] | image:./testing/k6/images/reactive-summary.png[K6 Reactive summary]
-| image:./testing/k6/images/imperative-overview.png[K6 Imperative overview] | image:./testing/k6/images/reactive-overview.png[K6 Reactive overview]
-| image:./testing/k6/images/imperative-timing.png[K6 Imperative timing] | image:./testing/k6/images/reactive-timing.png[K6 Reactive timing]
+| image:./testing/jmeter/images/imperative-time-requests.png[] | image:./testing/jmeter/images/reactive-time-requests.png[]
+| image:./testing/jmeter/images/imperative-transactions.png[]  | image:./testing/jmeter/images/reactive-transactions.png[]
 |===
 
-=== Summary of JMeter Tests
+=== K6 — Sustained Ramp-up (359 req/s target)
 
-* link:./testing/jmeter/reports/html/index.html[JMeter Report]
-
-[cols="1,2,1,1,2,1,1,1,1,1,1,2,2,2", options="header", width=100%, frame=none, grid=none, title="JMeter Table Comparison"]
+[cols="3,1,1,1,1", options="header", width=75%, frame=all, grid=rows]
 |===
-| Scenario | Executions Samples | FAIL | Error % | Response Times (ms) Average | Min | Max | Median | 90th pct | 95th pct | 99th pct | Throughput Transactional/s | Network (KB/sec) Received | Network (KB/sec) Sent
-| 3 | 140000 | 0 | 0.00% | 304.44 | 300 | 486 | 302.00 | 303.00 | 316.00 | 400.00 | 738.86 | 183.27 | 188.32
-| 6 | 140000 | 0 | 0.00% | 302.99 | 300 | 382 | 302.00 | 302.00 | 311.00 | 335.00 | 737.24 | 110.87 | 186.47
+| Implementation | Avg (ms) | p90 (ms) | p95 (ms) | Max (ms)
+| Imperative + VT + Native | 812 | 473 | 945 | 48 206
+| Reactive   + VT + Native | 310 | 328 | 357 |    601
 |===
 
-[cols="1,1", options="header", width=100%, frame=none, grid=none, title="JMeter Graph Comparison"]
+[cols="1,1", options="header", width=100%, frame=none, grid=none]
 |===
 | Imperative | Reactive
-| image:./testing/jmeter/images/imperative-time-requests.png[time-requests] | image:./testing/jmeter/images/reactive-time-requests.png[time-requests]
-| image:./testing/jmeter/images/imperative-time-threads.png[time-threads] | image:./testing/jmeter/images/reactive-time-threads.png[time-threads]
-| image:./testing/jmeter/images/imperative-transactions.png[transactions] | image:./testing/jmeter/images/reactive-transactions.png[transactions]
+| image:./testing/k6/images/imperative-summary.png[] | image:./testing/k6/images/reactive-summary.png[]
 |===
 
-=== Summary of Gatling Tests
+=== Gatling — Multi-scenario (all endpoints, 661 req/s)
 
-[cols="1,2,1,1,1,1,2,1,1,1,1,1,1,1", options="header", width=100%, frame=none, grid=none, title="Gatling Table Comparison"]
+NOTE: KO counts in both implementations reflect Gatling's own connection-pool exhaustion under
+aggressive open-model injection, not application errors.
+
+[cols="3,1,1,1,1,1", options="header", width=100%, frame=all, grid=rows]
 |===
-| Scenario | Executions Total | OK | KO | % KO | Crit/s | Response Time (ms) Min | 50th pct | 75th pct | 95th pct | 99th pct | Max | Mean | Std Dev
-| 3 | 120314 | 106749 | 13566 | 11.28 | 661.07 | 56 | 307 | 363 | 14593 | 24284 | 29093 | 2401 | 4878
-| 6 | 120314 | 107293 | 13016 | 10.82 | 661.07 | 13 | 307 | 479 | 7143 | 7675 | 15082 | 1363 | 2339
+| Implementation | Requests | KO % | Mean (ms) | p99 (ms) | Max (ms)
+| Imperative + VT + Native | 120 314 | 11.28% | 2 401 | 24 284 | 29 093
+| Reactive   + VT + Native | 120 314 | 10.82% | 1 363 | 7 675  | 15 082
 |===
 
-[cols="1,1",options="header", width=100%, frame=none, grid=none, title="Gatling Graph Comparison"]
+[cols="1,1", options="header", width=100%, frame=none, grid=none]
 |===
 | Imperative | Reactive
-| image:./testing/gatling/images/imperative-responses.png[Gatling Imperative Response] | image:./testing/gatling/images/reactive-responses.png[Gatling Reactive Response]
+| image:./testing/gatling/images/imperative-responses.png[] | image:./testing/gatling/images/reactive-responses.png[]
+|===
+
+=== What the Numbers Actually Say
+
+[cols="2,5", options="header", width=100%, frame=all, grid=rows]
+|===
+| Finding | Evidence
+
+| *Parity below ~2 500 concurrent threads*
+| Both deliver ~272 TPS, ~302 ms median, zero errors.
+  Virtual threads handle moderate I/O-wait load as efficiently as a non-blocking event loop.
+
+| *Carrier-thread saturation is the virtual-thread ceiling*
+| At 5 000t × 25 loops the imperative mean jumps 2.4× (302→731 ms) while reactive stays flat (326 ms).
+  Median remains 302 ms in both — the distribution becomes bimodal as carrier threads queue.
+  This is the pinning/saturation boundary, not a general virtual-thread weakness.
+
+| *Reactive is the only zero-error option under maximum sustained load*
+| At 2 M samples (5 000t × 200 loops) imperative produces 13 335 failures (1.33%) and a 31 s worst-case
+  spike; reactive holds 0 errors and caps at 2.4 s. Aggregate TPS is identical (~540 each), proving
+  the bottleneck is reliability, not capacity.
+
+| *Virtual threads don't prevent tail-latency spikes once carrier threads pin*
+| Imperative p99: 314 ms (light) → 625 ms (5 000t burst) → 472 ms (sustained).
+  Reactive p99 stays within 340–472 ms across all five runs.
+
+| *Native build = startup + memory, not runtime throughput*
+| GraalVM native cuts startup from >3 s to <1 s and reduces heap usage — valuable for
+  container-dense or serverless deployments. Steady-state TPS and latency are set by the
+  concurrency model, not the execution engine.
+
+| *Choose by concurrency contract, not by hype*
+| Use *imperative + virtual threads* when peak concurrency stays below ~2 500: simpler code,
+  familiar debugging, identical measured performance.
+  Use *reactive* when you must guarantee zero errors and bounded tail latency beyond that threshold,
+  or when you need native SSE/backpressure (`/stream` endpoint).
 |===
 
 [#_references]
 == 📚 References
 
-* link:https://www.alibabacloud.com/blog/exploration-of-java-virtual-threads-and-performance-analysis_601860[Exploration of Java Virtual Threads and Performance Analysis]
-* link:https://www.tatvasoft.com/blog/java-reactive-programming/[Why Do We Need Java Reactive Programming?]
-* link:https://luxoft-training.com/blog/virtual-threads-in-java-21[Virtual threads in Java 21]
-* link:https://www.geeksforgeeks.org/reactor-webflux-vs-virtual-threads/[Reactor WebFlux vs Virtual Threads]
-* link:https://www.mongodb.com/developer/languages/java/virtual-threads-reactive-programming/[How to Optimize Java Performance With Virtual Threads, Reactive Programming, and MongoDB]
-* link:https://www.diva-portal.org/smash/get/diva2:1763111/FULLTEXT01.pdf[Comparing Virtual Threads and Reactive Webflux in Spring]
+* link:https://openjdk.org/jeps/444[JEP 444 — Virtual Threads (OpenJDK)]
+* link:https://projectreactor.io/docs/core/release/reference/[Project Reactor Reference Guide]
+* link:https://www.diva-portal.org/smash/get/diva2:1763111/FULLTEXT01.pdf[Comparing Virtual Threads and Reactive WebFlux in Spring (DiVA, 2023)]
+* link:https://www.alibabacloud.com/blog/exploration-of-java-virtual-threads-and-performance-analysis_601860[Exploration of Java Virtual Threads and Performance Analysis — Alibaba Cloud]
+* link:https://www.mongodb.com/developer/languages/java/virtual-threads-reactive-programming/[Optimize Java Performance With Virtual Threads and Reactive Programming — MongoDB]
+* link:https://www.geeksforgeeks.org/reactor-webflux-vs-virtual-threads/[Reactor WebFlux vs Virtual Threads — GeeksForGeeks]

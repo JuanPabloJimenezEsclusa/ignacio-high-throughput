@@ -11,7 +11,7 @@ This module contains performance tests for the Spring Boot application using the
 
 ---
 
-* [Gatling ~3.14](https://docs.gatling.io/tutorials/scripting-intro/)
+* [Gatling ~3.15](https://docs.gatling.io/tutorials/scripting-intro/)
 * [JDK 25](https://openjdk.org/projects/jdk/25/)
 * [Docker ~29](https://docs.docker.com/engine/release-notes/29/)
 

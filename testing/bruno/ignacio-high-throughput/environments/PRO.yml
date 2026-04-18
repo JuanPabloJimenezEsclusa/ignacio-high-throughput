@@ -1,0 +1,8 @@
+name: PRO
+variables:
+  - name: wiremock_url
+    value: http://tech.jpje.xyz:8080
+  - name: imperative_url
+    value: https://tech.jpje.xyz:443
+  - name: reactive_url
+    value: https://tech.jpje.xyz:443

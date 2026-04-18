@@ -51,7 +51,7 @@ public class GlobalExceptionHandler extends AbstractErrorWebExceptionHandler {
   }
 
   private Mono<ServerResponse> formatErrorResponse(final ServerRequest request) {
-    final var errorAttributes = getErrorAttributes(request, ErrorAttributeOptions.defaults());
+    final var errorAttributes = this.getErrorAttributes(request, ErrorAttributeOptions.defaults());
 
     return ServerResponse.status(HttpStatus.INTERNAL_SERVER_ERROR)
       .contentType(MediaType.APPLICATION_JSON)
