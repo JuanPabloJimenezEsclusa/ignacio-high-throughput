@@ -102,7 +102,7 @@ services:
       high_throughput_network:
   ## Monitorization
   prometheus:
-    image: prom/prometheus:v3.11.0
+    image: prom/prometheus:v3.11.2
     container_name: prometheus
     hostname: prometheus
     restart: "on-failure"
@@ -128,7 +128,7 @@ services:
     networks:
       high_throughput_network:
   grafana:
-    image: grafana/grafana:12.4.2
+    image: grafana/grafana:13.0.1
     container_name: grafana
     hostname: grafana
     restart: "on-failure"
@@ -160,7 +160,7 @@ services:
   ## Observability (EFK)
   # https://docs.fluentd.org/container-deployment/docker-compose
   elasticsearch:
-    image: elasticsearch:9.3.2
+    image: elasticsearch:9.3.3
     container_name: elasticsearch
     hostname: elasticsearch
     restart: on-failure
@@ -216,7 +216,7 @@ services:
     networks:
       high_throughput_network:
   kibana:
-    image: kibana:9.3.2
+    image: kibana:9.3.3
     container_name: kibana
     hostname: kibana
     restart: "no"
