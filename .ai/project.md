@@ -9,12 +9,19 @@ Multi-module Spring Boot project comparing imperative vs. reactive approaches fo
 | `imperative-throughput` | Traditional Spring MVC, blocking ops, virtual threads |
 | `reactive-throughput` | Spring WebFlux, non-blocking reactive streams |
 | `coverage-jacoco` | Aggregated test coverage reports |
-| `testing/` | Performance testing tools (K6, JMeter, Gatling) |
+| `deploy-orchestrator` | Deployment configurations (Docker Compose, K8s Kind, AWS ECS) |
+
+## Tools & Resources
+
+| Directory | Contents |
+|---|---|
+| `testing/` | Performance testing tools (K6, JMeter, Gatling, Bruno HTTP client) |
+| `resource-profiling/` | JFR profiling configurations and custom.jfc settings |
 
 ## Tech Stack
 
 - **Java 25**, Spring Boot 4.0+
-- **Build:** Maven 3.9+, Gradle 9.1+
+- **Build:** Maven 3.9+, Gradle 9.4+
 - **Infra:** Docker
 
 ## Notes
