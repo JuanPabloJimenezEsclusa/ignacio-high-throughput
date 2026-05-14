@@ -1,4 +1,9 @@
-# AWS ECS
+---
+layout: default
+title: orchestrator (ECS) (AWS)
+---
+
+# orchestrator (ECS) (AWS)
 
 > • [Dependencies](#-dependencies)
   • [Architecture](#-architecture)

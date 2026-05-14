@@ -1,4 +1,9 @@
-# Kubernetes/Kind
+---
+layout: default
+title: orchestrator (k8s) (Kind)
+---
+
+# orchestrator (k8s) (Kind)
 
 > • [Dependencies](#-dependencies)
   • [Architecture](#-architecture)

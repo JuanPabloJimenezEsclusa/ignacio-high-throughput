@@ -1,4 +1,4 @@
-# Code Style
+# Agents (Code Style)
 
 ## Formatting (`.editorconfig`)
 
