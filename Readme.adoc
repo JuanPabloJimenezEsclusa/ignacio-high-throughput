@@ -1,7 +1,13 @@
-= Ignacio High Throughput Java Project
+= Imperative vs Reactive Throughput Comparison
+:page-permalink: /
+:page-title: Home
+:page-nav_order: 1
+:page-description: "Ignacio High Throughput - Imperative vs. Reactive Throughput Comparison"
 :toc:
 :toclevels: 1
 :icons: font
+
+image:https://img.shields.io/badge/Documentation-Wiki-blue.svg["WIKI", link="https://juanpablojimenezesclusa.github.io/ignacio-high-throughput/"]
 
 image:https://github.com/JuanPabloJimenezEsclusa/ignacio-high-throughput/actions/workflows/build-deploy-maven.yml/badge.svg["Deploy", link="https://github.com/JuanPabloJimenezEsclusa/ignacio-high-throughput/actions/workflows/build-deploy-maven.yml.yml"]
 image:https://github.com/JuanPabloJimenezEsclusa/ignacio-high-throughput/actions/workflows/code-analysis-pmd.yml/badge.svg["Deploy", link="https://github.com/JuanPabloJimenezEsclusa/ignacio-high-throughput/actions/workflows/code-analysis-pmd.yml.yml"]

@@ -1,0 +1,135 @@
+title: Ignacio High Throughput
+tagline: Imperative vs. Reactive Throughput Comparison
+description: >-
+  Ignacio High Throughput is a multi-module Spring Boot project that compares
+  the performance and reliability of traditional imperative programming
+  (using Java 25 virtual threads) against non-blocking reactive streams
+  (Spring WebFlux).
+
+remote_theme: just-the-docs/just-the-docs
+baseurl: "/ignacio-high-throughput"
+logo: "/.docs/logo.svg"
+
+sass:
+  style: compressed
+  quiet_deps: true
+
+color_scheme: dark
+
+nav_enabled: true
+
+aux_links_new_tab: true
+aux_links:
+  "GitHub Repository":
+    - "https://github.com/JuanPabloJimenezEsclusa/ignacio-high-throughput"
+  "Gitlab Repository":
+    - "https://gitlab.com/side-projects9205424/ignacio-high-throughput"
+  "Bitbucket Repository":
+    - "https://bitbucket.org/jpje-side-projects/ignacio-high-throughput/src/develop"
+  "SonarCloud Dashboard":
+    - "https://sonarcloud.io/summary/new_code?id=JuanPabloJimenezEsclusa_ignacio-high-throughput"
+
+search_enabled: true
+search:
+  heading_level: 2
+  previews: 3
+  preview_words_before: 5
+  preview_words_after: 10
+
+heading_anchors: true
+
+back_to_top: true
+back_to_top_text: "Back to top"
+
+breadcrumbs: true
+breadcrumbs_separator: " / "
+
+disable_disk_cache: true
+gh_edit_link: false
+
+footer_content: >-
+  &copy; 2026 <a href="https://github.com/JuanPabloJimenezEsclusa">Juan Pablo Jimenez Esclusa</a>.
+  Licensed under GNU General Public License v3.0.
+
+callouts:
+  note:
+    title: Note
+    color: blue
+  warning:
+    title: Warning
+    color: yellow
+  highlight:
+    title: Important
+    color: green
+  experimental:
+    title: Experimental
+    color: purple
+
+markdown: kramdown
+markdown_ext: md
+
+asciidoc:
+  processor: asciidoctor
+  require_front_matter_header: false
+  ext: adoc
+
+extensions:
+  - md
+  - adoc
+
+kramdown:
+  input: GFM
+  syntax_highlighter: rouge
+  html_to_native: true
+  hard_wrap: true
+  parse_block_html: true
+  parse_span_html: true
+
+asciidoctor:
+  attributes:
+    - icons=font
+    - source-highlighter=rouge
+
+plugins:
+  - jekyll-asciidoc
+  - jekyll-seo-tag
+  - jekyll-github-metadata
+  - jekyll-sitemap
+  - jekyll-remote-theme
+  - jekyll-feed
+  - jekyll-include-cache
+  - jekyll-redirect-from
+  - jekyll-default-layout
+  - jekyll-archives
+  - jekyll-paginate
+  - jekyll-analytics
+
+include:
+  - "**/Readme.md"
+  - AGENTS.md
+  - .ai
+  - .docs
+
+exclude:
+  - .gitignore
+  - .editorconfig
+  - .gitattributes
+  - .project
+  - .settings/
+  - .gradle/
+  - .mvn/
+  - .claude/
+  - node_modules/
+  - vendor/
+  - Gemfile
+  - Gemfile.lock
+  - pom.xml
+  - build.gradle
+  - settings.gradle
+  - gradle.properties
+  - src/
+  - target/
+  - build/
+  - bin/
+  - tmp/
+  - CHANGELOG.md

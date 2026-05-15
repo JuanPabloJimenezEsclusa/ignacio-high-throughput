@@ -1,4 +1,9 @@
-# Docker Compose
+---
+layout: default
+title: orchestrator (compose)
+---
+
+# orchestrator (compose)
 
 > • [Dependencies](#-dependencies)
   • [Architecture](#-architecture)

@@ -1,4 +1,9 @@
-# Gatling tests
+---
+layout: default
+title: testing (gatling)
+---
+
+# testing (gatling)
 
 > • [Dependencies](#-dependencies)
   • [Architecture](#-architecture)
@@ -11,8 +16,8 @@ This module contains performance tests for the Spring Boot application using the
 
 ---
 
+* [JDK ~25](https://openjdk.org/projects/jdk/25/)
 * [Gatling ~3.15](https://docs.gatling.io/tutorials/scripting-intro/)
-* [JDK 25](https://openjdk.org/projects/jdk/25/)
 * [Docker ~29](https://docs.docker.com/engine/release-notes/29/)
 
 ## 🏗️ Architecture

@@ -1,4 +1,9 @@
-# K6 Testing
+---
+layout: default
+title: testing (k6)
+---
+
+# testing (k6)
 
 > • [Dependencies](#-dependencies)
   • [Architecture](#-architecture)

@@ -1,4 +1,4 @@
-# Project Overview
+# Agents (Project Overview)
 
 Multi-module Spring Boot project comparing imperative vs. reactive approaches for high-throughput Java applications.
 

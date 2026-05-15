@@ -1,4 +1,9 @@
-# Jmeter testing
+---
+layout: default
+title: testing (jmeter)
+---
+
+# testing (jmeter)
 
 > • [Dependencies](#-dependencies)
   • [Architecture](#-architecture)
@@ -10,7 +15,7 @@ Performance testing project using JMeter
 
 ---
 
-* [JDK 25](https://openjdk.org/projects/jdk/25/)
+* [JDK ~25](https://openjdk.org/projects/jdk/25/)
 * [JMeter ~5.6](https://jmeter.apache.org/changes.html)
 
 ## 🏗️ Architecture

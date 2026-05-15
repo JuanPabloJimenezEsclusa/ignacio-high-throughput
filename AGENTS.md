@@ -1,30 +1,54 @@
-# Agent Development Guide
+---
+layout: default
+title: agents
+---
 
-Context split into focused files under `.ai/`:
+# agents
 
-| File                                     | Contents                                           |
-|------------------------------------------|----------------------------------------------------|
-| [`.ai/project.md`](.ai/project.md)       | Modules, tech stack, misc notes                    |
-| [`.ai/build.md`](.ai/build.md)           | Build & run commands (Maven + Gradle)              |
-| [`.ai/testing.md`](.ai/testing.md)       | Test commands, coverage, test patterns             |
-| [`.ai/code-style.md`](.ai/code-style.md) | Formatting, naming, types, error handling, logging |
+## Quick Reference
 
-## Key Modules
+| Task | Command |
+|---|---|
+| Build (all, Maven) | `mvn clean install` |
+| Build (all, Gradle) | `gradle clean build` |
+| Build (skip tests) | `mvn clean install -DskipTests` |
+| Run all tests | `mvn test` |
+| Single test class | `mvn test -Dtest=ClassName -f <module>/pom.xml` |
+| Run imperative (port 8888) | `mvn spring-boot:run -f imperative-throughput/pom.xml` |
+| Run reactive (port 9999) | `mvn spring-boot:run -f reactive-throughput/pom.xml` |
+| Format / lint | `mvn rewrite:runNoFork -Popen-rewrite` |
 
-- **`imperative-throughput`** — Spring MVC with virtual threads (port 8888)
-- **`reactive-throughput`** — Spring WebFlux with Reactor (port 9999)
-- **`coverage-jacoco`** — Aggregated JaCoCo test coverage
-- **`deploy-orchestrator`** — Deployment configs for Docker Compose, K8s Kind, AWS ECS
+## Modules
+
+| Module | Port | Description |
+|---|---|---|
+| `imperative-throughput` | 8888 | Spring MVC, virtual threads, blocking I/O |
+| `reactive-throughput` | 9999 | Spring WebFlux, Reactor, non-blocking |
+| `coverage-jacoco` | — | Aggregated JaCoCo coverage reports |
+| `deploy-orchestrator` | — | Docker Compose, K8s Kind, AWS ECS |
+
+## Key Conventions
+
+- **Tech:** Java 25, Spring Boot 4.0+, Maven 3.9+, Gradle 9.4+
+- **Formatting:** 2-space indent, 100-char lines, LF, UTF-8 (`.editorconfig`)
+- **Imports:** 3 sections alphabetically, no wildcards — `java.*`/`javax.*` → third-party → `edu.ignacio.poc.*`
+- **Types:** `final var`, `final` params; `CompletableFuture` (imperative), `Mono`/`Flux` (reactive); avoid `Optional` and Stream API
+- **Tests:** `should` prefix, `@DisplayName`, Given/When/Then, AssertJ assertions
+- **Naming:** PascalCase classes, camelCase methods/vars, UPPER_SNAKE_CASE constants, `log` for logger
+- **Virtual threads:** `Thread.ofVirtual()`, `Executors.newVirtualThreadPerTaskExecutor()`
+- **Error handling:** `@ControllerAdvice` (imperative), `AbstractErrorWebExceptionHandler` (reactive)
+- **Logging:** `LoggerFactory.getLogger(ClassName.class)`, always include throwable in error logs
+- **License:** GPL-3.0-only — include `LICENSE.txt` in `META-INF/`
 
 ## Testing Infrastructure
 
-- **Location:** `testing/` directory
-- **Tools:** K6, JMeter, Gatling, Bruno (HTTP client), HTTP request files
-- **API endpoints:** See [Readme.adoc](./Readme.adoc) sections on API Endpoints and Comparison
+**Location:** `testing/` — performance tests with K6, JMeter, Gatling, Bruno
 
-## Deployment Options
+## Detail Files
 
-- **Docker Compose** — `deploy-orchestrator/docker-compose/`
-- **Kubernetes (Kind)** — `deploy-orchestrator/k8s-kind/`
-- **AWS ECS** — `deploy-orchestrator/aws-ecs/`
-
+| File | Contents |
+|---|---|
+| [`.ai/build.md`](.ai/build.md) | Full build & run commands |
+| [`.ai/testing.md`](.ai/testing.md) | Test commands, coverage, patterns |
+| [`.ai/code-style.md`](.ai/code-style.md) | Formatting, naming, types, errors, logging |
+| [`.ai/project.md`](.ai/project.md) | Modules, tech stack, tools, notes |
