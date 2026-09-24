@@ -106,8 +106,6 @@ plugins:
 
 include:
   - "**/Readme.md"
-  - AGENTS.md
-  - .ai
   - .docs
 
 exclude:

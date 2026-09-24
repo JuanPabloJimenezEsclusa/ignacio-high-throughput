@@ -51,7 +51,7 @@ image:https://img.shields.io/badge/GraalVM-25+-005571.svg["GraalVM",link="https:
 image:https://img.shields.io/badge/Maven-3.9+-005571.svg["Maven",link="https://maven.apache.org/ref/3.9.10/"]
 image:https://img.shields.io/badge/Gradle-9.4+-005571.svg["Gradle",link="https://docs.gradle.org/9.4.1/userguide/userguide.html"]
 
-image:https://img.shields.io/badge/Spring%20Boot-4.0+-brightgreen.svg["Spring Boot",link="https://spring.io/projects/spring-boot"]
+image:https://img.shields.io/badge/Spring%20Boot-4.1+-brightgreen.svg["Spring Boot",link="https://spring.io/projects/spring-boot"]
 image:https://img.shields.io/badge/Spring%20MVC%20(imperative%20module)-7.0+-brightgreen.svg["Spring MVC",link="https://docs.spring.io/spring-framework/reference/web.html"]
 image:https://img.shields.io/badge/Spring%20Webflux%20(reactive%20module)-7.0+-brightgreen.svg["Spring WebFlux",link="https://docs.spring.io/spring-framework/reference/web-reactive.html"]
 
