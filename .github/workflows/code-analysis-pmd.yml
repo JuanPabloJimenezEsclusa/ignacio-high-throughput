@@ -10,8 +10,8 @@ permissions:
   contents: read
 
 concurrency:
-  group: code-analysis-pmd-${{ github.ref }}
-  cancel-in-progress: true
+  group: code-analysis-pmd
+  cancel-in-progress: false
 
 jobs:
   pmd-code-scan:

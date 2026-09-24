@@ -9,8 +9,8 @@ permissions:
   pull-requests: write
 
 concurrency:
-  group: dependencies-review-${{ github.ref }}
-  cancel-in-progress: true
+  group: dependencies-review
+  cancel-in-progress: false
 
 jobs:
   dependency-review:
