@@ -2,7 +2,7 @@ name: Docker Publish
 
 on:
   push:
-    branches: [main]
+    branches: [develop]
   pull_request:
     types: [opened, synchronize, reopened, ready_for_review]
 
@@ -13,11 +13,11 @@ env:
   SPRING_PROFILES_ACTIVE: native
 
 concurrency:
-  group: docker-publish-${{ github.ref }}
-  cancel-in-progress: true
+  group: docker-publish
+  cancel-in-progress: false
 
 jobs:
-  deploy:
+  deploy-images:
     if: github.event.pull_request.draft == false
     runs-on: ubuntu-latest
     permissions:

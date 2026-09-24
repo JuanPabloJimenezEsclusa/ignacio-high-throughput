@@ -2,7 +2,12 @@
 /.theia/**
 .idea/codeStyles/**
 .env
-.qodo
+.atl/
+.opencode/
+.mimocode/
+.codegraph/
+odd/
+openspec/
 
 testing/k6/result/**
 testing/jmeter/reports**
