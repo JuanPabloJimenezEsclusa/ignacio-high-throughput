@@ -5,12 +5,12 @@
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
-    <groupId>edu.ignacio.poc</groupId>
+    <groupId>dev.jpje</groupId>
     <artifactId>ignacio-high-throughput</artifactId>
     <version>1.0.0</version>
   </parent>
 
-  <groupId>edu.ignacio.poc.ignacio-high-throughput</groupId>
+  <groupId>dev.jpje.ignacio-high-throughput</groupId>
   <artifactId>imperative-throughput</artifactId>
   <name>imperative-throughput</name>
   <description>imperative-throughput</description>

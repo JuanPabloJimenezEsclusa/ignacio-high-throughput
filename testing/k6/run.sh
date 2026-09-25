@@ -2,7 +2,7 @@
 
 # Example of usage:
 #   ./run.sh
-#   IMPERATIVE_THROUGHPUT_URL=https://tech.jpje.xyz:443 REACTIVE_THROUGHPUT_URL=https://tech.jpje.xyz:443 ./run.sh
+#   IMPERATIVE_THROUGHPUT_URL=https://tech.jpje.net:443 REACTIVE_THROUGHPUT_URL=https://tech.jpje.net:443 ./run.sh
 
 set -o errexit # Exit on error. Append "|| true" if you expect an error.
 set -o errtrace # Exit on error inside any functions or subshells.

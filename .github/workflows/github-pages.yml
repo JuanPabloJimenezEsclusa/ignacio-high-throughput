@@ -25,6 +25,7 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v7
+        with: { fetch-depth: 0 }
       - name: Setup Ruby environment
         uses: ruby/setup-ruby@e8944e80fb94b20106697132f8c20c665fab29e9
         with:

@@ -56,3 +56,4 @@ Basic deployment prioritizing simplification of the architecture and leveraging 
   6. [AWS VPC](https://eu-west-1.console.aws.amazon.com/vpcconsole/home?region=eu-west-1#vpcs) 💰
   7. [AWS EC2 Load Balancer](https://eu-west-1.console.aws.amazon.com/ec2/home?region=eu-west-1#LoadBalancers) 💰
   8. [AWS Route 53](https://eu-west-1.console.aws.amazon.com/route53/v2/hostedzones?region=eu-west-1) 💰
+  9. [AWS Cloud Map](https://eu-west-1.console.aws.amazon.com/cloudmap/home/namespaces?region=eu-west-1) 💰
