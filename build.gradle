@@ -10,7 +10,7 @@ plugins {
 }
 
 allprojects {
-  group = 'edu.ignacio.poc'
+  group = 'dev.jpje'
   version = '1.0.0'
 
   repositories {

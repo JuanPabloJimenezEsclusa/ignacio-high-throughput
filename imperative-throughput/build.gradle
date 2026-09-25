@@ -100,7 +100,7 @@ graalvmNative {
 springBoot {
   buildInfo() {
     properties {
-      group = 'edu.ignacio.poc.high-throughput'
+      group = 'dev.jpje.high-throughput'
       artifact = 'imperative-throughput'
       version = '1.0.0'
       name = 'imperative-throughput'

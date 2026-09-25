@@ -7,11 +7,11 @@ Parameters:
   HostedZoneId:
     Type: String
     Description: The ID of the Route 53 hosted zone
-    Default: Z05681561G3JHUOXZV5CN
+    Default: Z0854820KZ2JVLZ9E8PO
   DomainName:
     Type: String
     Description: The domain name for the Route 53 record set
-    Default: tech.jpje.xyz
+    Default: tech.jpje.net
     AllowedPattern: (?!-)[a-zA-Z0-9-.]{1,63}(?<!-)
   ImperativeImageName:
     Type: String

@@ -37,15 +37,6 @@ __install_aws_cli() {
   echo "End ${FUNCNAME:-} successfully!"
 }
 
-__install_k9s() {
-  echo -e "${SEPARATOR} 🛠️ Install k9s. (${FUNCNAME:-}) ${SEPARATOR}"
-  wget https://github.com/derailed/k9s/releases/latest/download/k9s_linux_amd64.deb \
-    && sudo apt install ./k9s_linux_amd64.deb \
-    && rm k9s_linux_amd64.deb || true
-  k9s version
-  echo "End ${FUNCNAME:-} successfully!"
-}
-
 __buildProjects() {
   if [[ "${buildProjects:-}" == "true" ]]; then
     echo -e "${SEPARATOR} 🔨 Compile and build the image. ${SEPARATOR}"
@@ -102,7 +93,6 @@ __create_ecs_stack() {
 # Main script
 main() {
   echo "Init ${0##*/} (${FUNCNAME:-})"
-  __install_k9s
   __install_aws_cli
   __buildProjects
   __create_ecr_repository

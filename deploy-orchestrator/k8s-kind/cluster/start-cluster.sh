@@ -51,7 +51,6 @@ __installIngressController() {
 __installMetricsServer() {
   echo -e "${SEPARATOR} 📊 install metric server. ${SEPARATOR}"
   # https://github.com/kubernetes-sigs/metrics-server/
-  # full list of Metrics Server configuration flags: docker run --rm registry.k8s.io/metrics-server/metrics-server:v0.6.0 --help
   kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
   kubectl patch -n kube-system deployment metrics-server --type=json \
     -p '[{"op":"add","path":"/spec/template/spec/containers/0/args/-","value":"--kubelet-insecure-tls"}]'

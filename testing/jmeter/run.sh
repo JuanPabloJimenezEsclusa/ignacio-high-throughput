@@ -2,7 +2,7 @@
 
 # Example of usage:
 #   THREADS=2000 RAMP_UP=10 LOOPS=30 ./run.sh
-#   THREADS=5000 RAMP_UP=20 LOOPS=10 BASE_URL_PROTOCOL=https BASE_URL=tech.jpje.xyz BASE_IMPERATIVE_URL_PORT=443 BASE_REACTIVE_URL_PORT=443 ./run.sh
+#   THREADS=5000 RAMP_UP=20 LOOPS=10 BASE_URL_PROTOCOL=https BASE_URL=tech.jpje.net BASE_IMPERATIVE_URL_PORT=443 BASE_REACTIVE_URL_PORT=443 ./run.sh
 
 set -o errexit # Exit on error. Append "|| true" if you expect an error.
 set -o errtrace # Exit on error inside any functions or subshells.
