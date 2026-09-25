@@ -24,7 +24,7 @@ jobs:
           GITLAB_TOKEN: ${{ secrets.GITLAB_TOKEN }}
         run: |
           git remote add gitlab "https://gitlab.com/side-projects9205424/ignacio-high-throughput.git"
-          git config --local url."https://oauth2:${GITLAB_TOKEN}@://gitlab.com".insteadOf "https://gitlab.com"
+          git config --local url."https://oauth2:${GITLAB_TOKEN}@gitlab.com".insteadOf "https://gitlab.com"
           git push gitlab develop --force --prune
           git push gitlab --tags --force
       - name: Push to Bitbucket
