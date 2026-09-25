@@ -27,7 +27,7 @@ jobs:
         env:
           GITLAB_TOKEN: ${{ secrets.GITLAB_TOKEN }}
         run: |
-          git remote add gitlab "https://gitlab.com"
+          git remote add gitlab "https://gitlab.com/side-projects9205424/ignacio-high-throughput.git"
           git config --local url."https://oauth2:${GITLAB_TOKEN}@://gitlab.com".insteadOf "https://://gitlab.com"
           git push gitlab develop --force --prune
           git push gitlab --tags --force
@@ -36,7 +36,8 @@ jobs:
           BITBUCKET_USER: ${{ secrets.BITBUCKET_USER }}
           BITBUCKET_TOKEN: ${{ secrets.BITBUCKET_TOKEN }}
         run: |
-          git remote add bitbucket "https://bitbucket.org"
-          git config --local url."https://${BITBUCKET_USER}:${BITBUCKET_TOKEN}@bitbucket.org/".insteadOf "https://bitbucket.org"t
+          git remote add bitbucket "git clone https://bitbucket.org/jpje-side-projects/ignacio-high-throughput.git"
+          git config --local url."https://${BITBUCKET_USER}:${BITBUCKET_TOKEN}@bitbucket.org/".insteadOf "https://bitbucket.org"
           git push bitbucket develop --force --prune
           git push bitbucket --tags --force
+  
