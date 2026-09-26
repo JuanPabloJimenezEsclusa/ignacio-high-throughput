@@ -1,11 +1,15 @@
-name: Build Deploy Maven
+name: Build Deploy
 
 on:
   push:
     branches: [develop]
+  pull_request:
+    branches: [develop]
+    types: [opened, synchronize, reopened, ready_for_review]
 
 jobs:
   publish:
+    if: github.event.pull_request.draft == false
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -20,6 +24,10 @@ jobs:
           java-version: '25'
           distribution: 'temurin'
           cache: 'maven'
+      - name: Setup Gradle 9.8.0
+        uses: gradle/actions/setup-gradle@9c971963bec38e04b3d30dcc455b5382be2fdbfb
+        with:
+          gradle-version: '9.8.0'
       - name: Cache local Maven repository
         uses: actions/cache@v6
         with:
@@ -29,6 +37,8 @@ jobs:
             ${{ runner.os }}-maven-
       - name: Build with Maven
         run: mvn -B package -Dmaven.test.skip=true --file pom.xml
+      - name: Build with Gradle
+        run: gradle build -x test --console=plain --no-daemon
       - name: Deploy with Maven if not exists
         if: ${{ github.event_name != 'pull_request' }}
         run: mvn -B deploy -Dmaven.test.skip=true --file pom.xml || true

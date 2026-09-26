@@ -14,8 +14,6 @@ build_with_maven:
     - mvn org.jacoco:jacoco-maven-plugin:prepare-agent test org.jacoco:jacoco-maven-plugin:report org.jacoco:jacoco-maven-plugin:report-aggregate
     - echo "Running code quality:"
     - mvn com.github.spotbugs:spotbugs-maven-plugin:check
-  # This section defines rules for when the job should run.
-  # 'if: $CI_COMMIT_BRANCH' means the job will run for any commit to any branch.
   rules:
     - if: $CI_COMMIT_BRANCH
 
@@ -27,6 +25,6 @@ build_with_gradle:
     - echo "Compiling with Gradle on Java version:"
     - java -version
     - gradle -v
-    - gradle build
+    - gradle build --console=plain
   rules:
     - if: $CI_COMMIT_BRANCH

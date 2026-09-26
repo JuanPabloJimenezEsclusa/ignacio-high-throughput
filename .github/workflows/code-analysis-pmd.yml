@@ -2,6 +2,7 @@ name: Code Static Analysis PMD (Programming Mistake Detector)
 
 on:
   pull_request:
+    branches: [develop]
     types: [opened, synchronize, reopened, ready_for_review]
   schedule:
     - cron: '35 2 * * 0'
