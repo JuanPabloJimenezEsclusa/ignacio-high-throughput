@@ -33,6 +33,7 @@ class SmokeControllerTest {
 
   private static final String THROUGHPUT_SMOKES = "/smokes";
   private static final String EXPECTED_BODY = "OK:Reactive";
+  private static final long SMOKE_MIN_DELAY_MS = 300;
 
   @Autowired
   private WebTestClient webTestClient;
@@ -89,17 +90,17 @@ class SmokeControllerTest {
 
     // Then
     final long executionTime = System.currentTimeMillis() - startTime;
-    assertThat(executionTime).isGreaterThanOrEqualTo(300);
+    assertThat(executionTime).as("smoke endpoint must delay at least %d ms", SMOKE_MIN_DELAY_MS).isGreaterThanOrEqualTo(SMOKE_MIN_DELAY_MS);
   }
 
   @Test
   @DisplayName("Should properly configure router function")
   void shouldProperlyConfigureRouterFunction() {
     // Given
-    final var routerFunction = this.controller.smokesRoutes(this.controller.virtualThreadScheduler());
+    final var routerFunction = this.buildRouterFunction();
 
     // When
-    assertThat(routerFunction).isNotNull();
+    assertThat(routerFunction).as("router function must not be null").isNotNull();
 
     // Then
     WebTestClient.bindToRouterFunction(routerFunction).build()
@@ -131,8 +132,7 @@ class SmokeControllerTest {
   @DisplayName("Should set correct cache control headers in router function")
   void shouldSetCorrectCacheControlHeadersInRouterFunction() {
     // Given
-    final var routerClient = WebTestClient.bindToRouterFunction(this.controller
-      .smokesRoutes(this.controller.virtualThreadScheduler())).build();
+    final var routerClient = WebTestClient.bindToRouterFunction(this.buildRouterFunction()).build();
 
     // When
     final var response = routerClient
@@ -145,7 +145,7 @@ class SmokeControllerTest {
       .getResponseHeaders()
       .getFirst(HttpHeaders.CACHE_CONTROL);
 
-    assertThat(cacheControlHeader).isNotNull().contains("no-cache");
+    assertThat(cacheControlHeader).as("cache-control header must contain no-cache").isNotNull().contains("no-cache");
   }
 
   @Test
@@ -184,6 +184,10 @@ class SmokeControllerTest {
       .exchange()
       .expectStatus().is5xxServerError()
       .expectBody();
+  }
+
+  private RouterFunction<ServerResponse> buildRouterFunction() {
+    return this.controller.smokesRoutes(this.controller.virtualThreadScheduler());
   }
 
   @Configuration

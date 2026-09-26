@@ -44,6 +44,7 @@ class SmokeControllerTest {
 
   private static final String SMOKES_URL = "/smokes";
   private static final String EXPECTED_BODY = "OK:Imperative:";
+  private static final long SMOKE_MIN_DELAY_MS = 300;
 
   @Autowired
   private MockMvc mockMvc;
@@ -87,7 +88,7 @@ class SmokeControllerTest {
 
     // Then
     final long executionTime = System.currentTimeMillis() - startTime;
-    assertThat(executionTime).isGreaterThanOrEqualTo(300);
+    assertThat(executionTime).as("smoke endpoint must delay at least %d ms", SMOKE_MIN_DELAY_MS).isGreaterThanOrEqualTo(SMOKE_MIN_DELAY_MS);
   }
 
   @Test
@@ -162,15 +163,15 @@ class SmokeControllerTest {
     final var future = this.controller.getSmoke();
 
     // Then
-    assertThat(future).isNotNull();
-    assertThat(future.isDone()).isFalse();
+    assertThat(future).as("smoke future must be returned").isNotNull();
+    assertThat(future.isDone()).as("smoke future must not be done immediately").isFalse();
 
     // Wait for completion
     final var response = future.get(1, TimeUnit.SECONDS);
     final long executionTime = System.currentTimeMillis() - startTime;
 
-    assertThat(response).isNotNull();
-    assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
-    assertThat(executionTime).isGreaterThanOrEqualTo(300);
+    assertThat(response).as("smoke response must not be null").isNotNull();
+    assertThat(response.getStatusCode()).as("smoke response status must be OK").isEqualTo(HttpStatus.OK);
+    assertThat(executionTime).as("smoke endpoint must delay at least %d ms", SMOKE_MIN_DELAY_MS).isGreaterThanOrEqualTo(SMOKE_MIN_DELAY_MS);
   }
 }

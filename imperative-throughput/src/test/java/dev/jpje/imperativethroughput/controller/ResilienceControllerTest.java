@@ -155,11 +155,12 @@ class ResilienceControllerTest {
 
     // When
     final var future = this.controller.getResilience(0L);
-    assertThat(future).isNotNull();
+    assertThat(future).as("resilience future must be returned").isNotNull();
 
     // Then
     final var response = future.get(3, TimeUnit.SECONDS);
     assertThat(response)
+      .as("resilience response must be OK with downstream data")
       .isNotNull()
       .returns(HttpStatus.OK, ResponseEntity::getStatusCode)
       .returns(true, r -> r.getBody() != null && r.getBody().contains("downstream-data-"));
