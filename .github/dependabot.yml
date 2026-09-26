@@ -19,6 +19,15 @@ updates:
       gradle-dependencies:
         patterns:
           - "*"
+    # Pin the OpenRewrite Gradle plugin to patch-only updates.
+    # Minor 7.40.0 and 7.41.0 reference rewrite-bom 8.91.0, which does not
+    # exist on Maven Central, and break `gradle build`. Review major/minor
+    # bumps manually before upgrading.
+    ignore:
+      - dependency-name: "org.openrewrite*"
+        update-types:
+          - "version-update:semver-major"
+          - "version-update:semver-minor"
     open-pull-requests-limit: 15
 
   - package-ecosystem: "docker"

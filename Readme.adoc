@@ -9,7 +9,7 @@
 
 image:https://img.shields.io/badge/Documentation-Wiki-blue.svg["WIKI", link="https://juanpablojimenezesclusa.github.io/ignacio-high-throughput/"]
 
-image:https://github.com/JuanPabloJimenezEsclusa/ignacio-high-throughput/actions/workflows/build-deploy-maven.yml/badge.svg["Deploy", link="https://github.com/JuanPabloJimenezEsclusa/ignacio-high-throughput/actions/workflows/build-deploy-maven.yml.yml"]
+image:https://github.com/JuanPabloJimenezEsclusa/ignacio-high-throughput/actions/workflows/build-deploy.yml/badge.svg["Deploy", link="https://github.com/JuanPabloJimenezEsclusa/ignacio-high-throughput/actions/workflows/build-deploy.yml.yml"]
 image:https://github.com/JuanPabloJimenezEsclusa/ignacio-high-throughput/actions/workflows/code-analysis-pmd.yml/badge.svg["Deploy", link="https://github.com/JuanPabloJimenezEsclusa/ignacio-high-throughput/actions/workflows/code-analysis-pmd.yml.yml"]
 image:https://github.com/JuanPabloJimenezEsclusa/ignacio-high-throughput/actions/workflows/dependency-review.yml/badge.svg["Dependencies", link="https://github.com/JuanPabloJimenezEsclusa/ignacio-high-throughput/actions/workflows/docker-publish.yml"]
 image:https://github.com/JuanPabloJimenezEsclusa/ignacio-high-throughput/actions/workflows/docker-publish.yml/badge.svg["Dependencies", link="https://github.com/JuanPabloJimenezEsclusa/ignacio-high-throughput/actions/workflows/dependency-review.yml"]
@@ -76,7 +76,7 @@ mvn -B clean verify -am | tee .tmp/mvn-clean-verify-$(date +%Y%m%d%H).log
 === Build all modules with Gradle
 [source,bash]
 ----
-gradle clean build | tee .tmp/gradle-clean-build-$(date +%Y%m%d%H).log
+gradle clean build --console=plain | tee .tmp/gradle-clean-build-$(date +%Y%m%d%H).log
 ----
 
 === Build native artifacts
@@ -93,7 +93,7 @@ mvn -B -P"${SPRING_PROFILES_ACTIVE}" \
 
 [source,bash]
 ----
-gradle nativeBuild | tee .tmp/gradle-native-build-$(date +%Y%m%d%H).log
+gradle nativeBuild --console=plain | tee .tmp/gradle-native-build-$(date +%Y%m%d%H).log
 ----
 
 Reports::
@@ -113,7 +113,7 @@ mvn -B -P"${SPRING_PROFILES_ACTIVE}" \
 
 [source,bash]
 ----
-gradle bootBuildImage
+gradle bootBuildImage --console=plain
 ----
 
 === Analyze docker images with Dive
@@ -144,7 +144,7 @@ mvn -B spring-boot:run -f imperative-throughput/pom.xml
 [source,bash]
 ----
 # Run with Gradle
-gradle bootRun --project-dir imperative-throughput
+gradle bootRun --project-dir imperative-throughput --console=plain
 ----
 
 [source,bash]
@@ -201,7 +201,7 @@ mvn -B spring-boot:run -f reactive-throughput/pom.xml
 [source,bash]
 ----
 # Run with Gradle
-gradle bootRun --project-dir reactive-throughput
+gradle bootRun --project-dir reactive-throughput --console=plain
 ----
 
 [source,bash]
