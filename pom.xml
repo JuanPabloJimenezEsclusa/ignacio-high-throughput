@@ -71,10 +71,10 @@
 
     <!-- Plugins -->
     <jacoco-maven-plugin.version>0.8.15</jacoco-maven-plugin.version>
-    <git-changelog-maven-plugin.version>2.2.11</git-changelog-maven-plugin.version>
-    <rewrite-maven-plugin.version>6.42.0</rewrite-maven-plugin.version>
-    <build-helper-maven-plugin.version>3.6.1</build-helper-maven-plugin.version>
-    <sonar-maven-plugin.version>5.7.0.6970</sonar-maven-plugin.version>
+    <git-changelog-maven-plugin.version>2.4.0</git-changelog-maven-plugin.version>
+    <rewrite-maven-plugin.version>6.46.1</rewrite-maven-plugin.version>
+    <build-helper-maven-plugin.version>3.6.2</build-helper-maven-plugin.version>
+    <sonar-maven-plugin.version>5.8.0.7211</sonar-maven-plugin.version>
 
     <!-- Testing -->
     <wiremock-standalone.version>3.13.2</wiremock-standalone.version>
