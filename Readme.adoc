@@ -590,9 +590,9 @@ K6 and Gatling figures are native-image runs; JVM-mode figures are not tabulated
 
 === Gatling — Multi-scenario (all endpoints, 661 req/s)
 
-NOTE: Not comparable. The KO counts reflect Gatling's own connection-pool exhaustion under
-aggressive open-model injection, not application errors; with ~11% of requests failing on both
-sides, this run cannot rank the two implementations.
+NOTE: Not conclusive. KO rates differ (11.28% vs 10.82%) and latency is computed over the survivors,
+so the arms did not see identical conditions; one run gives no variance. The direction matches the
+JMeter high-load result but is not established by this run.
 
 [cols="3,1,1,1,1,1", options="header", width=100%, frame=all, grid=rows]
 |===
