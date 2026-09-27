@@ -2,7 +2,7 @@
 
 # Example of usage:
 #   ./run.sh
-#   ENVIRONMENT=aws RUNS=3 IMPERATIVE_BASE_URL=https://tech.jpje.net:443/imperative-throughput REACTIVE_BASE_URL=https://tech.jpje.net:443/reactive-throughput ./run.sh
+#   ENVIRONMENT=aws RUNS=3 ./run.sh
 
 set -o errexit # Exit on error. Append "|| true" if you expect an error.
 set -o errtrace # Exit on error inside any functions or subshells.
