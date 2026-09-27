@@ -53,9 +53,24 @@ examples:
         type: json
         data: |-
           OK: Reactive: Aggregate: [
-            item1: downstream-data-1,
-            item3: downstream-data-3,
-            item2: downstream-data-2
+            {
+              "id": "9edb3d8a-19a7-4bf2-98ba-cc35d284df7d",
+              "itemId": "1",
+              "value": "downstream-data-1",
+              "timestamp": "2026-04-18T15:57:02.518Z"
+            },
+            {
+              "id": "66a6e0cc-6384-4164-a043-34426bd93efb",
+              "itemId": "2",
+              "value": "downstream-data-2",
+              "timestamp": "2026-04-18T15:57:02.530Z"
+            },
+            {
+              "id": "78d85524-449d-476b-a24d-ca5330693415",
+              "itemId": "3",
+              "value": "downstream-data-3",
+              "timestamp": "2026-04-18T15:57:02.526Z"
+            }
           ]: Thread[
             #67,
             reactor-http-epoll-2,

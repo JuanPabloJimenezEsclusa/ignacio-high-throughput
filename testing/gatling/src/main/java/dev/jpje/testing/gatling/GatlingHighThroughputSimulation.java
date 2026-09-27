@@ -27,7 +27,7 @@ import io.gatling.javaapi.http.HttpRequestActionBuilder;
  *   <li>{@code /smokes}    — baseline health / latency measurement</li>
  *   <li>{@code /cpu}       — CPU-bound work (fibonacci)</li>
  *   <li>{@code /io}        — I/O-bound work (blocking vs. non-blocking HTTP client)</li>
- *   <li>{@code /aggregate} — parallel fan-out (CompletableFuture.allOf vs. Flux.merge)</li>
+ *   <li>{@code /aggregate} — parallel fan-out (CompletableFuture.allOf vs. Flux.mergeSequential)</li>
  *   <li>{@code /resilience}— timeout + fallback behavior</li>
  *   <li>{@code /stream}    — SSE backpressure (reactive module only)</li>
  * </ul>

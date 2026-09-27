@@ -1,6 +1,5 @@
 package dev.jpje.imperativethroughput.controller;
 
-import java.time.Duration;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -15,7 +14,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.client.RestClientException;
 
 /**
  * The type Resilience controller.
@@ -75,17 +73,15 @@ class ResilienceController extends AbstractImperativeController {
   }
 
   private String callDownstream(final long delayMs) {
-    try {
-      if (delayMs > 0) {
-        Thread.sleep(Duration.ofMillis(delayMs));
-      }
-      return this.restClient.get()
-        .uri(DOWNSTREAM_PATH)
-        .retrieve()
-        .body(String.class);
-    } catch (final InterruptedException e) {
-      Thread.currentThread().interrupt();
-      throw new RestClientException("Interrupted during delay", e);
-    }
+    return this.restClient.get()
+      .uri(uriBuilder -> {
+        uriBuilder.path(DOWNSTREAM_PATH);
+        if (delayMs > 0) {
+          uriBuilder.queryParam("delayMs", delayMs);
+        }
+        return uriBuilder.build();
+      })
+      .retrieve()
+      .body(String.class);
   }
 }

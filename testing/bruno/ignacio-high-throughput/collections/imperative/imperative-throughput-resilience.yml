@@ -5,7 +5,7 @@ info:
 
 http:
   method: GET
-  url: "{{imperative_url}}/imperative-throughput/resilience?delayMs=150"
+  url: "{{imperative_url}}/imperative-throughput/resilience"
   headers:
     - name: Accept
       value: application/json
@@ -13,10 +13,6 @@ http:
       value: application/json
     - name: Cache-Control
       value: no-cache
-  params:
-    - name: delayMs
-      value: "150"
-      type: query
   auth: inherit
 
 settings:
@@ -28,7 +24,7 @@ settings:
 examples:
   - name: example
     request:
-      url: "{{imperative_url}}/imperative-throughput/resilience?delayMs=150"
+      url: "{{imperative_url}}/imperative-throughput/resilience"
       method: GET
       headers:
         - name: Accept
@@ -37,10 +33,6 @@ examples:
           value: application/json
         - name: Cache-Control
           value: no-cache
-      params:
-        - name: delayMs
-          value: "150"
-          type: query
     response:
       status: 200
       statusText: OK
