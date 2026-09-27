@@ -83,11 +83,12 @@ class AggregateControllerTest {
 
     // When
     final var future = this.controller.getAggregate();
-    assertThat(future).isNotNull();
+    assertThat(future).as("aggregate future must be returned").isNotNull();
 
     // Then
     final var response = future.get(5, TimeUnit.SECONDS);
     assertThat(response)
+      .as("aggregate response must be OK with expected body")
       .isNotNull()
       .returns(HttpStatus.OK, ResponseEntity::getStatusCode)
       .returns(true, r -> r.getBody() != null && r.getBody().contains("OK:Imperative:Aggregate:"));

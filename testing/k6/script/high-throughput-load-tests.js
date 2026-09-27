@@ -5,23 +5,11 @@ import { textSummary } from "https://jslib.k6.io/k6-summary/0.1.0/index.js";
 
 export const options = {
   thresholds: {
-    'http_req_duration{group:imperative}': [],
-    'http_req_duration{group:reactive}': [],
-    'http_req_duration{group:imperative-smoke}': [],
-    'http_req_duration{group:reactive-smoke}': [],
-    'http_req_duration{group:imperative-io}': [],
-    'http_req_duration{group:reactive-io}': [],
-    'http_req_duration{group:imperative-cpu}': [],
-    'http_req_duration{group:reactive-cpu}': [],
-    'http_req_duration{group:imperative-aggregate}': [],
-    'http_req_duration{group:reactive-aggregate}': [],
-    'http_req_duration{group:imperative-resilience}': [],
-    'http_req_duration{group:reactive-resilience}': [],
-    'http_req_duration{group:reactive-stream}': [],
-    'http_reqs{group:imperative}': [],
-    'http_reqs{group:reactive}': [],
-    'http_req_waiting{group:imperative}': [],
-    'http_req_waiting{group:reactive}': [],
+    http_req_failed: ['rate<0.01'],
+    checks: ['rate>0.99'],
+    http_req_duration: ['p(99)<60000'],
+    'http_req_duration{group:imperative-smoke}': ['p(95)<5000'],
+    'http_req_duration{group:reactive-smoke}': ['p(95)<5000'],
   },
   scenarios: {
     high_throughput_test: {

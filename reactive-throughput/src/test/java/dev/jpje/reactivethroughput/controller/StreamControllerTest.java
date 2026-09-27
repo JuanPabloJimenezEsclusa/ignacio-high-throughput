@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.Duration;
 import java.util.List;
+import java.util.stream.IntStream;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -21,6 +22,7 @@ class StreamControllerTest {
 
   private static final String STREAM_URL = "/stream";
   private static final int EXPECTED_EVENT_COUNT = 10;
+  private static final List<Integer> EXPECTED_SEQUENCE = IntStream.rangeClosed(1, EXPECTED_EVENT_COUNT).boxed().toList();
 
   @Autowired
   private WebTestClient webTestClient;
@@ -75,13 +77,14 @@ class StreamControllerTest {
 
     // Then
     assertThat(events)
+      .as("events list must not be null and have expected size")
       .isNotNull()
       .hasSize(EXPECTED_EVENT_COUNT)
-      .allSatisfy(event -> assertThat(event).startsWith("event:"));
+      .allSatisfy(event -> assertThat(event).as("every event must start with 'event:'").startsWith("event:"));
 
     final var numbers = events.stream()
       .map(e -> Integer.parseInt(e.split(":")[1]))
       .toList();
-    assertThat(numbers).isEqualTo(List.of(1, 2, 3, 4, 5, 6, 7, 8, 9, 10));
+    assertThat(numbers).as("event numbers must be sequential 1..%d", EXPECTED_EVENT_COUNT).isEqualTo(EXPECTED_SEQUENCE);
   }
 }

@@ -251,7 +251,7 @@ The application will be available at: `http://localhost:9999/reactive-throughput
 
 === Imperative Module
 
-* `GET /imperative-throughput/smokes` - Returns "OK" after a 300ms delay using blocking Thread#sleep
+* `GET /imperative-throughput/smokes` - Returns "OK" after a 300 ms delay scheduled on a virtual thread (the request thread is not blocked)
 
 [source,bash]
 ----
@@ -315,7 +315,7 @@ curl -sv http://localhost:9999/reactive-throughput/actuator/metrics | jq
 | Functional pipeline — `Mono`, `Flux`, operators. Requires learning Project Reactor; traces need the Reactor debug agent to be readable.
 
 | *Parallel fan-out*
-| `StructuredTaskScope` (JEP 505, Java 25 preview) — fork N tasks, join with structured lifecycle and automatic failure propagation.
+| `CompletableFuture.allOf()` over a shared virtual-thread-per-task executor — fork N tasks, then `join()`; a failed subtask propagates through `join()`.
 | `Flux.merge()` — merge N concurrent `Mono` pipelines; no threads are created.
 
 | *Timeout + fallback*
@@ -327,19 +327,19 @@ curl -sv http://localhost:9999/reactive-throughput/actuator/metrics | jq
 | `Flux.generate` + `.delayElements()` — demand-driven emission. The subscriber controls pace. Used for `GET /stream` (reactive only).
 
 | *Error handling*
-| `@ControllerAdvice` + `@ExceptionHandler(RuntimeException.class)`, `HttpServletRequest` for path extraction.
+| `@ControllerAdvice` + `@ExceptionHandler(RuntimeException.class)`; the exception message is returned as the `details` field.
 | `AbstractErrorWebExceptionHandler` (`@Order(-2)`) composing a `ServerResponse`.
 
 | *Error response contract*
-| `{"status":500,"error":"Internal Server Error","path":"..."}`
-| `{"status":500,"error":"Internal Server Error","path":"..."}` (unified)
+| `{"status":500,"error":"Internal Server Error","details":"..."}`
+| `{"status":<underlying status>,"error":"<reason>","path":"..."}` — the HTTP status is always 500, so a missing path yields `"status":404`/`"error":"Not Found"`.
 
 | *Scheduler / thread pool*
-| `Executors.newVirtualThreadPerTaskExecutor()` (per-request scope); `Thread.ofVirtual().factory()` for the smoke delay scheduler.
+| `Executors.newVirtualThreadPerTaskExecutor()` (per-request in `/io`, `/cpu` and `/resilience`; shared for `/aggregate`); `Thread.ofVirtual().factory()` for the smoke delay scheduler.
 | Reactor `boundedElastic` for CPU work; Netty event loop for I/O; shared `virtualThreadScheduler` bean for reactive smoke delay.
 
 | *Observability*
-| Custom `jvm.threads.virtual.active` Micrometer gauge (sampled from `ThreadMXBean`) — shows virtual-thread count scaling under load.
+| Custom `jvm.threads.platform.live` gauge plus `jvm.threads.virtual.mounted` / `.queued` / `.carriers` gauges from the virtual-thread scheduler MXBean — honest thread signals under load (the JDK cannot enumerate virtual threads).
 | Standard Micrometer timers per endpoint tagged `module=reactive`. Event-loop thread count stays constant regardless of load.
 
 | *Test approach*
@@ -533,8 +533,10 @@ mvn test && gradle test
 [#_performance_comparison]
 == ⚡ Performance Comparison
 
-Five JMeter runs (60 k – 2 M samples), K6 and Gatling executed against `/smokes` (300 ms fixed delay). Both modules ran simultaneously on localhost; each implementation received exactly half
-the load per run.
+Five JMeter runs (60 k – 2 M samples) hit `/smokes` only (300 ms fixed delay);
+K6 and Gatling exercise every comparable endpoint (`/smokes`, `/cpu`, `/io`, `/aggregate`, `/resilience`, and `/stream` for the reactive module).
+The WireMock downstream applies a uniform 100–2000 ms delay to `/api/data?delayMs=N` and no delay to the fan-out call `/api/data/{id}`.
+Both modules ran simultaneously on localhost; each implementation received exactly half the load per run.
 
 === Test Matrix
 
@@ -566,7 +568,7 @@ the load per run.
 | image:./testing/jmeter/images/imperative-transactions.png[]  | image:./testing/jmeter/images/reactive-transactions.png[]
 |===
 
-=== K6 — Sustained Ramp-up (359 req/s target)
+=== K6 — Ramping Arrival Rate (configured 200 → 600 iterations/s, 11 requests per iteration)
 
 [cols="3,1,1,1,1", options="header", width=75%, frame=all, grid=rows]
 |===

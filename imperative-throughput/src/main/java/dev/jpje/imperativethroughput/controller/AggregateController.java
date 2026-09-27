@@ -2,11 +2,13 @@ package dev.jpje.imperativethroughput.controller;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.stream.IntStream;
 
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Timer;
+import jakarta.annotation.PreDestroy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -30,41 +32,48 @@ class AggregateController extends AbstractImperativeController {
   private static final String API_DATA_ID = "/api/data/{id}";
   private static final int FAN_OUT = 3;
 
+  private final ExecutorService fanOutExecutor;
+
   AggregateController(
     @Value("${downstream.service.url}") final String downstreamUrl,
     final MeterRegistry meterRegistry
   ) {
     super(downstreamUrl, meterRegistry, "aggregate");
+    this.fanOutExecutor = Executors.newVirtualThreadPerTaskExecutor();
   }
 
   @GetMapping({"/aggregate", "/aggregate/"})
   public CompletableFuture<ResponseEntity<String>> getAggregate() {
-    final var executor = Executors.newVirtualThreadPerTaskExecutor();
-    return CompletableFuture.supplyAsync(this::aggregate, executor);
+    return CompletableFuture.supplyAsync(this::aggregate, this.fanOutExecutor);
+  }
+
+  @PreDestroy
+  void shutdownFanOutExecutor() {
+    this.fanOutExecutor.shutdown();
   }
 
   private ResponseEntity<String> aggregate() {
     final var sample = Timer.start();
     final var currentThread = Thread.currentThread();
 
-    try (final var executor = Executors.newVirtualThreadPerTaskExecutor()) { // NOPMD
-      final List<CompletableFuture<String>> futures = IntStream.rangeClosed(1, FAN_OUT)
-        .mapToObj(i -> CompletableFuture.supplyAsync(() -> this.fetchData(i), executor))
-        .toList();
+    // The virtual-thread-per-task executor is unbounded and does not use a fixed pool, so
+    // nesting the fan-out tasks on the shared executor cannot deadlock or starve the outer task.
+    final List<CompletableFuture<String>> futures = IntStream.rangeClosed(1, FAN_OUT)
+      .mapToObj(i -> CompletableFuture.supplyAsync(() -> this.fetchData(i), this.fanOutExecutor))
+      .toList();
 
-      CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
+    CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
 
-      final var combined = futures.stream()
-        .map(CompletableFuture::join)
-        .reduce((a, b) -> a + "," + b)
-        .orElse("");
+    final var combined = futures.stream()
+      .map(CompletableFuture::join)
+      .reduce((a, b) -> a + "," + b)
+      .orElse("");
 
-      log.info("Aggregate imperative endpoint - results: {} - thread: {}", combined, currentThread);
-      sample.stop(this.timer);
+    log.info("Aggregate imperative endpoint - results: {} - thread: {}", combined, currentThread);
+    sample.stop(this.timer);
 
-      return this.okResponse()
-        .body("OK:Imperative:Aggregate:[%s]:%s".formatted(combined, currentThread));
-    }
+    return this.okResponse()
+      .body("OK:Imperative:Aggregate:[%s]:%s".formatted(combined, currentThread));
   }
 
   private String fetchData(final int index) {
