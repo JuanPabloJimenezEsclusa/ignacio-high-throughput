@@ -541,6 +541,7 @@ Five JMeter runs (60 k – 2 M samples) hit `/smokes` only (300 ms fixed delay);
 K6 and Gatling exercise every comparable endpoint (`/smokes`, `/cpu`, `/io`, `/aggregate`, `/resilience`, and `/stream` for the reactive module).
 The WireMock downstream applies a uniform 100–2000 ms delay to `/api/data?delayMs=N` and no delay to the fan-out call `/api/data/{id}`.
 Both modules ran simultaneously; each implementation received exactly half the load per run.
+K6 and Gatling figures are native-image runs; JVM-mode figures are not tabulated.
 
 === Test Matrix
 
@@ -577,8 +578,8 @@ Both modules ran simultaneously; each implementation received exactly half the l
 [cols="3,1,1,1,1", options="header", width=75%, frame=all, grid=rows]
 |===
 | Implementation | Avg (ms) | p90 (ms) | p95 (ms) | Max (ms)
-| Imperative + VT + Native | 812 | 473 | 945 | 48 206
-| Reactive   + VT + Native | 310 | 328 | 357 |    601
+| Imperative (native) | 812 | 473 | 945 | 48 206
+| Reactive (native)   | 310 | 328 | 357 |    601
 |===
 
 [cols="1,1", options="header", width=100%, frame=none, grid=none]
@@ -589,14 +590,15 @@ Both modules ran simultaneously; each implementation received exactly half the l
 
 === Gatling — Multi-scenario (all endpoints, 661 req/s)
 
-NOTE: KO counts in both implementations reflect Gatling's own connection-pool exhaustion under
-aggressive open-model injection, not application errors.
+NOTE: Not comparable. The KO counts reflect Gatling's own connection-pool exhaustion under
+aggressive open-model injection, not application errors; with ~11% of requests failing on both
+sides, this run cannot rank the two implementations.
 
 [cols="3,1,1,1,1,1", options="header", width=100%, frame=all, grid=rows]
 |===
 | Implementation | Requests | KO % | Mean (ms) | p99 (ms) | Max (ms)
-| Imperative + VT + Native | 120 314 | 11.28% | 2 401 | 24 284 | 29 093
-| Reactive   + VT + Native | 120 314 | 10.82% | 1 363 | 7 675  | 15 082
+| Imperative (native) | 120 314 | 11.28% | 2 401 | 24 284 | 29 093
+| Reactive (native)   | 120 314 | 10.82% | 1 363 | 7 675  | 15 082
 |===
 
 [cols="1,1", options="header", width=100%, frame=none, grid=none]
