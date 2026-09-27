@@ -74,7 +74,7 @@ add_note() {
   jq -cn --arg n "$1" '$n' >> "${NOTES_TMP}"
 }
 
-# k6 summary-export: metrics are keyed by metric name; custom tags produce submetrics such as
+# k6 summary-export: metrics are keyed by metric name; custom tags produce sub-metrics such as
 # "http_req_duration{impl:imperative}". Trend values expose med/min/max/p(95).
 extract_k6() {
   jq -c '
