@@ -84,6 +84,9 @@
     <sonar.host.url>https://sonarcloud.io</sonar.host.url>
     <sonar.projectKey>JuanPabloJimenezEsclusa_ignacio-high-throughput</sonar.projectKey>
     <sonar.coverage.jacoco.xmlReportPaths>${project.basedir}/coverage-jacoco/target/site/jacoco/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
+    <!-- MetricsConfiguration and CpuController are near-identical across the two modules.
+         Two occurrences do not meet the Rule of Three, so they are excluded from copy-paste
+         detection instead of being factored into a shared module. -->
     <sonar.cpd.exclusions>**/MetricsConfiguration.java, **/CpuController.java</sonar.cpd.exclusions>
     <sonar.branch.name>develop</sonar.branch.name>
   </properties>
