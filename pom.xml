@@ -84,7 +84,7 @@
     <sonar.host.url>https://sonarcloud.io</sonar.host.url>
     <sonar.projectKey>JuanPabloJimenezEsclusa_ignacio-high-throughput</sonar.projectKey>
     <sonar.coverage.jacoco.xmlReportPaths>${project.basedir}/coverage-jacoco/target/site/jacoco/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
-    <sonar.scm.exclusions.disabled>true</sonar.scm.exclusions.disabled>
+    <sonar.cpd.exclusions>**/MetricsConfiguration.java, **/CpuController.java</sonar.cpd.exclusions>
     <sonar.branch.name>develop</sonar.branch.name>
   </properties>
 

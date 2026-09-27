@@ -63,10 +63,11 @@ class CpuControllerTest {
     final var future = this.controller.getCpu();
 
     // Then - future must not be done immediately (work runs on virtual thread)
-    assertThat(future).isNotNull();
+    assertThat(future).as("cpu future must be returned").isNotNull();
 
     final var response = future.get(3, TimeUnit.SECONDS);
     assertThat(response)
+      .as("cpu response must be OK with fibonacci body")
       .isNotNull()
       .returns(HttpStatus.OK, ResponseEntity::getStatusCode)
       .returns(true, r -> r.getBody() != null && r.getBody().contains(EXPECTED_BODY));

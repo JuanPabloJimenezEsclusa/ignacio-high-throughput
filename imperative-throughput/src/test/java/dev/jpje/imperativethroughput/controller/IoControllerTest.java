@@ -92,11 +92,12 @@ class IoControllerTest {
 
     // When
     final var future = this.controller.getIo();
-    assertThat(future).isNotNull();
+    assertThat(future).as("io future must be returned").isNotNull();
 
     // Then
     final var response = future.get(3, TimeUnit.SECONDS);
     assertThat(response)
+      .as("io response must be OK with downstream body")
       .isNotNull()
       .returns(HttpStatus.OK, ResponseEntity::getStatusCode)
       .returns(true, r -> r.getBody() != null && r.getBody().contains(EXPECTED_BODY));

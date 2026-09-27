@@ -849,21 +849,21 @@
         {
           "datasource": { "type": "prometheus", "uid": "PBFA97CFB590B2093" },
           "editorMode": "code",
-          "expr": "jvm_threads_virtual_active{module=\"imperative\"}",
-          "legendFormat": "imperative — virtual threads",
+          "expr": "jvm_threads_platform_live{module=\"imperative\"}",
+          "legendFormat": "imperative — platform threads",
           "range": true,
           "refId": "A"
         },
         {
           "datasource": { "type": "prometheus", "uid": "PBFA97CFB590B2093" },
           "editorMode": "code",
-          "expr": "jvm_threads_virtual_active{module=\"reactive\"}",
-          "legendFormat": "reactive — virtual threads",
+          "expr": "jvm_threads_platform_live{module=\"reactive\"}",
+          "legendFormat": "reactive — platform threads",
           "range": true,
           "refId": "B"
         }
       ],
-      "title": "Custom Virtual Thread Count — Imperative vs Reactive",
+      "title": "Custom Platform Thread Count — Imperative vs Reactive",
       "type": "timeseries"
     },
     {
