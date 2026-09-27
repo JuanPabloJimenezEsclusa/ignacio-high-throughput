@@ -95,7 +95,7 @@ class AggregateControllerTest {
   }
 
   @Test
-  @DisplayName("Should call downstream 3 times in parallel and combine results")
+  @DisplayName("Should call downstream 3 times in parallel and combine results in id order")
   void shouldCallDownstream3TimesAndCombineResults() throws Exception {
     // Given
     wireMock.stubFor(WireMock.get(urlMatching("/api/data/1")).willReturn(aResponse().withStatus(200).withBody("alpha")));
@@ -107,9 +107,7 @@ class AggregateControllerTest {
 
     // Then
     assertThat(response.getBody())
-      .contains("alpha")
-      .contains("beta")
-      .contains("gamma");
+      .contains("OK:Imperative:Aggregate:[alpha,beta,gamma]:");
     wireMock.verify(1, WireMock.getRequestedFor(urlMatching("/api/data/1")));
     wireMock.verify(1, WireMock.getRequestedFor(urlMatching("/api/data/2")));
     wireMock.verify(1, WireMock.getRequestedFor(urlMatching("/api/data/3")));

@@ -14,7 +14,10 @@ export const options = {
   scenarios: {
     high_throughput_test: {
       executor: 'ramping-arrival-rate',
-      preAllocatedVUs: 3000,
+      // Raised from 3000: each iteration now also probes the /resilience fallback, which holds a
+      // VU for the full stub delay (~1.5 s) plus the in-flight task, roughly doubling VU-seconds
+      // per iteration. Without headroom the top stage would drop iterations.
+      preAllocatedVUs: 6000,
       startRate: 1000,
       timeUnit: '5s',
       stages: [
@@ -90,6 +93,14 @@ export function checkByImperativeGroup() {
       'body is not empty': (r) => r.body.length > 0,
     });
   });
+
+  group('imperative-resilience-fallback', function() {
+    const result = http.get(`${baseUrl}/resilience?delayMs=1500`, { ...params, tags: { group: 'imperative-resilience-fallback', impl: 'imperative' } });
+    check(result, {
+      'status was 200': (r) => r.status === 200,
+      'body contains "FALLBACK:Imperative:Resilience"': (r) => r.body.includes('FALLBACK:Imperative:Resilience'),
+    });
+  });
 }
 
 export function checkByReactiveGroup() {
@@ -141,6 +152,14 @@ export function checkByReactiveGroup() {
     check(result, {
       'status was 200': (r) => r.status === 200,
       'body is not empty': (r) => r.body.length > 0,
+    });
+  });
+
+  group('reactive-resilience-fallback', function() {
+    const result = http.get(`${baseUrl}/resilience?delayMs=1500`, { ...params, tags: { group: 'reactive-resilience-fallback', impl: 'reactive' } });
+    check(result, {
+      'status was 200': (r) => r.status === 200,
+      'body contains "FALLBACK:Reactive:Resilience"': (r) => r.body.includes('FALLBACK:Reactive:Resilience'),
     });
   });
 

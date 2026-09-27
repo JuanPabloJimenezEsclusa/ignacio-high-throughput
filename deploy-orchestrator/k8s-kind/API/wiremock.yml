@@ -46,11 +46,7 @@ data:
           "response": {
             "status": 200,
             "body": "{\"id\":\"{{randomValue type='UUID'}}\",\"value\":\"downstream-data-{{randomValue type='ALPHANUMERIC' length=8}}\",\"timestamp\":\"{{now format='yyyy-MM-dd'}}T{{now format='HH:mm:ss.SSS'}}Z\"}",
-            "delayDistribution": {
-              "type": "uniform",
-              "lower": 100,
-              "upper": 2000
-            },
+            "fixedDelayMilliseconds": 1500,
             "transformers": ["response-template"],
             "headers": {
               "Content-Type": "application/json"

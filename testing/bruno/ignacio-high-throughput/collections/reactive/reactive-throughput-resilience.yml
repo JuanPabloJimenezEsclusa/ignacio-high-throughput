@@ -5,7 +5,7 @@ info:
 
 http:
   method: GET
-  url: "{{reactive_url}}/reactive-throughput/resilience?delayMs=90"
+  url: "{{reactive_url}}/reactive-throughput/resilience"
   headers:
     - name: Accept
       value: application/json
@@ -13,10 +13,6 @@ http:
       value: application/json
     - name: Cache-Control
       value: no-cache
-  params:
-    - name: delayMs
-      value: "90"
-      type: query
   auth: inherit
 
 settings:
@@ -28,7 +24,7 @@ settings:
 examples:
   - name: example
     request:
-      url: "{{reactive_url}}/reactive-throughput/resilience?delayMs=90"
+      url: "{{reactive_url}}/reactive-throughput/resilience"
       method: GET
       headers:
         - name: Accept
@@ -37,10 +33,6 @@ examples:
           value: application/json
         - name: Cache-Control
           value: no-cache
-      params:
-        - name: delayMs
-          value: "90"
-          type: query
     response:
       status: 200
       statusText: OK
@@ -60,14 +52,13 @@ examples:
       body:
         type: json
         data: |-
-          {
-            "thread": "Thread[#70,reactor-http-epoll-3,5,main]",
-            "downstream": {
-              "id": "5bb3b46f-70a8-43df-8472-ace7c472c669",
-              "value": "downstream-data-e3h7y3z8",
-              "timestamp": "2026-04-18T15:58:29.242Z"
-            },
-            "status": "OK",
-            "module": "reactive",
-            "endpoint": "resilience"
-          }
+          OK: Reactive: Resilience: {
+            "id": "5bb3b46f-70a8-43df-8472-ace7c472c669",
+            "value": "downstream-data-e3h7y3z8",
+            "timestamp": "2026-04-18T15:58:29.242Z"
+          }: Thread[
+            #70,
+            reactor-http-epoll-3,
+            5,
+            main
+          ]

@@ -4,7 +4,6 @@ import static org.springframework.web.reactive.function.server.RequestPredicates
 import static org.springframework.web.reactive.function.server.RouterFunctions.route;
 
 import java.time.Duration;
-import java.util.Map;
 
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Timer;
@@ -53,31 +52,24 @@ public class ResilienceController extends AbstractReactiveController {
           .orElse(0L);
 
         return this.webClient.get()
-          .uri(uriBuilder -> uriBuilder
-            .path(DOWNSTREAM_PATH)
-            .queryParam("delayMs", delayMs)
-            .build())
+          .uri(uriBuilder -> {
+            uriBuilder.path(DOWNSTREAM_PATH);
+            if (delayMs > 0) {
+              uriBuilder.queryParam("delayMs", delayMs);
+            }
+            return uriBuilder.build();
+          })
           .retrieve()
-          .bodyToMono(Map.class)
+          .bodyToMono(String.class)
           .timeout(Duration.ofMillis(TIMEOUT_MS))
-          .onErrorReturn(Map.of("fallback", FALLBACK_BODY))
+          .onErrorReturn(FALLBACK_BODY)
           .flatMap(body -> {
             sample.stop(this.timer);
-            final var isFallback = body.containsKey("fallback");
-            return this.okResponse()
-              .bodyValue(isFallback
-                ? Map.of(
-                "status", "FALLBACK",
-                "module", "reactive",
-                "endpoint", RESILIENCE,
-                "reason", "timeout",
-                "thread", Thread.currentThread().toString())
-                : Map.of(
-                "status", "OK",
-                "module", "reactive",
-                "endpoint", RESILIENCE,
-                "downstream", body,
-                "thread", Thread.currentThread().toString()));
+            final var currentThread = Thread.currentThread();
+            final var responseBody = FALLBACK_BODY.equals(body)
+              ? FALLBACK_BODY
+              : "OK:Reactive:Resilience:%s:%s".formatted(body, currentThread);
+            return this.okResponse().bodyValue(responseBody);
           });
       });
   }

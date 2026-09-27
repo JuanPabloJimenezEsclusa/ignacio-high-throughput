@@ -1,14 +1,13 @@
 package dev.jpje.reactivethroughput.controller;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
+import static com.github.tomakehurst.wiremock.client.WireMock.equalTo;
+import static com.github.tomakehurst.wiremock.client.WireMock.getRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.Duration;
-import java.time.Instant;
-import java.util.Map;
-import java.util.UUID;
 
 import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.junit5.WireMockExtension;
@@ -31,6 +30,8 @@ import reactor.test.StepVerifier;
 class ResilienceControllerTest {
 
   private static final String RESILIENCE_URL = "/resilience";
+  private static final String OK_PREFIX = "OK:Reactive:Resilience:";
+  private static final String FALLBACK_BODY = "FALLBACK:Reactive:Resilience:timeout";
 
   @RegisterExtension
   private static final WireMockExtension wireMock = WireMockExtension.newInstance()
@@ -50,128 +51,95 @@ class ResilienceControllerTest {
     wireMock.resetAll();
   }
 
-  private static String dynamicDownstreamBody() {
-    return """
-      {
-        "id": "%s",
-        "value": "downstream-data-%s",
-        "timestamp": "%s"
-      }
-      """.formatted(
-      UUID.randomUUID(),
-      UUID.randomUUID().toString().substring(0, 8),
-      Instant.now().toString());
-  }
-
-  @Test
-  @DisplayName("Should return OK with downstream data when upstream responds in time")
-  void shouldReturnOkWhenDownstreamRespondsInTime() {
-    // Given
+  private void stubDownstream(final int fixedDelayMs) {
     wireMock.stubFor(WireMock.get(urlPathEqualTo("/api/data"))
       .willReturn(aResponse()
         .withStatus(200)
-        .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
-        .withBody(dynamicDownstreamBody())));
+        .withFixedDelay(fixedDelayMs)
+        .withHeader("Content-Type", MediaType.TEXT_PLAIN_VALUE)
+        .withBody("downstream-data-1")));
+  }
+
+  @Test
+  @DisplayName("Should return OK with the downstream body when downstream answers inside the deadline")
+  void shouldReturnOkWhenDownstreamAnswersInsideDeadline() {
+    // Given
+    this.stubDownstream(0);
 
     // When, Then
     this.webTestClient.get().uri(RESILIENCE_URL)
       .exchange()
       .expectStatus().isOk()
       .expectHeader().contentType(MediaType.APPLICATION_JSON)
-      .expectBody(Map.class)
-      .value(raw -> {
-        @SuppressWarnings("unchecked") final Map<String, Object> body = (Map<String, Object>) raw;
-        assertThat(body)
-          .containsEntry("status", "OK")
-          .containsEntry("module", "reactive")
-          .containsEntry("endpoint", "resilience")
-          .containsKey("downstream")
-          .containsKey("thread");
-      });
+      .expectBody(String.class)
+      .value(body -> assertThat(body).startsWith(OK_PREFIX).contains("downstream-data-1"));
+
+    // And the downstream call omits delayMs when the caller value is zero
+    wireMock.verify(getRequestedFor(urlPathEqualTo("/api/data"))
+      .withoutQueryParam("delayMs"));
   }
 
   @Test
-  @DisplayName("Should return fallback when downstream exceeds timeout")
-  void shouldReturnFallbackOnTimeout() {
-    // Given - simulate a slow downstream (1000ms > 500ms timeout)
-    wireMock.stubFor(WireMock.get(urlPathEqualTo("/api/data"))
-      .willReturn(aResponse()
-        .withStatus(200)
-        .withFixedDelay(1_000)
-        .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
-        .withBody(dynamicDownstreamBody())));
+  @DisplayName("Should forward the caller delayMs to the downstream")
+  void shouldForwardDelayMsToDownstream() {
+    // Given
+    this.stubDownstream(0);
 
-    // When, Then - should return fallback, not an error
+    // When, Then
+    this.webTestClient.get().uri(RESILIENCE_URL + "?delayMs=250")
+      .exchange()
+      .expectStatus().isOk();
+    wireMock.verify(getRequestedFor(urlPathEqualTo("/api/data"))
+      .withQueryParam("delayMs", equalTo("250")));
+  }
+
+  @Test
+  @DisplayName("Should return the fixed fallback when the downstream exceeds the deadline")
+  void shouldReturnFallbackWhenDownstreamExceedsDeadline() {
+    // Given - a 1000 ms downstream delay is longer than the 500 ms deadline
+    this.stubDownstream(1_000);
+
+    // When, Then
     this.webTestClient.mutate()
       .responseTimeout(Duration.ofSeconds(5))
       .build()
       .get().uri(RESILIENCE_URL)
       .exchange()
       .expectStatus().isOk()
-      .expectBody(Map.class)
-      .value(raw -> {
-        @SuppressWarnings("unchecked") final Map<String, Object> body = (Map<String, Object>) raw;
-        assertThat(body)
-          .containsEntry("status", "FALLBACK")
-          .containsEntry("module", "reactive")
-          .containsEntry("endpoint", "resilience")
-          .containsEntry("reason", "timeout")
-          .containsKey("thread");
-      });
+      .expectBody(String.class)
+      .isEqualTo(FALLBACK_BODY);
   }
 
   @Test
-  @DisplayName("Should return fallback when delayMs query param exceeds timeout")
-  void shouldReturnFallbackWhenDelayMsExceedsTimeout() {
-    // Given - delayMs=1000ms is forwarded to downstream, exceeding the 500ms timeout
+  @DisplayName("Should return the fixed fallback when the downstream fails")
+  void shouldReturnFallbackWhenDownstreamFails() {
+    // Given
     wireMock.stubFor(WireMock.get(urlPathEqualTo("/api/data"))
-      .willReturn(aResponse()
-        .withStatus(200)
-        .withFixedDelay(1_000)
-        .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
-        .withBody(dynamicDownstreamBody())));
+      .willReturn(aResponse().withStatus(500)));
 
     // When, Then
-    this.webTestClient.mutate()
-      .responseTimeout(Duration.ofSeconds(5))
-      .build()
-      .get().uri(RESILIENCE_URL + "?delayMs=1000")
+    this.webTestClient.get().uri(RESILIENCE_URL)
       .exchange()
       .expectStatus().isOk()
-      .expectBody(Map.class)
-      .value(raw -> {
-        @SuppressWarnings("unchecked") final Map<String, Object> body = (Map<String, Object>) raw;
-        assertThat(body)
-          .containsEntry("status", "FALLBACK")
-          .containsEntry("module", "reactive")
-          .containsEntry("endpoint", "resilience")
-          .containsEntry("reason", "timeout")
-          .containsKey("thread");
-      });
+      .expectBody(String.class)
+      .isEqualTo(FALLBACK_BODY);
   }
 
   @Test
   @DisplayName("Should complete via reactive pipeline without blocking event loop")
   void shouldCompleteViaReactivePipeline() {
     // Given
-    wireMock.stubFor(WireMock.get(urlPathEqualTo("/api/data"))
-      .willReturn(aResponse()
-        .withStatus(200)
-        .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
-        .withBody(dynamicDownstreamBody())));
+    this.stubDownstream(0);
 
     // When, Then
     this.webTestClient.get().uri(RESILIENCE_URL)
       .exchange()
       .expectStatus().isOk()
-      .returnResult(Map.class)
+      .returnResult(String.class)
       .getResponseBody()
       .next()
       .as(StepVerifier::create)
-      .expectNextMatches(raw -> {
-        @SuppressWarnings("unchecked") final Map<String, Object> body = (Map<String, Object>) raw;
-        return "OK".equals(body.get("status")) && body.containsKey("downstream");
-      })
+      .expectNextMatches(body -> body.startsWith(OK_PREFIX))
       .expectComplete()
       .verify(Duration.ofSeconds(5));
   }

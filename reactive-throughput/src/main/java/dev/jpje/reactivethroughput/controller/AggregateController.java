@@ -3,7 +3,6 @@ package dev.jpje.reactivethroughput.controller;
 import static org.springframework.web.reactive.function.server.RequestPredicates.GET;
 import static org.springframework.web.reactive.function.server.RouterFunctions.route;
 
-import java.util.Map;
 import java.util.stream.IntStream;
 
 import io.micrometer.core.instrument.MeterRegistry;
@@ -22,10 +21,10 @@ import reactor.core.publisher.Mono;
 /**
  * The type Aggregate controller.
  *
- * <p>Demonstrates parallel fan-out using {@code Flux.merge()} to issue three
- * concurrent downstream calls without blocking any thread. Results are
- * collected into a list and combined reactively. Backpressure is naturally
- * handled by the reactive pipeline — if the downstream slows down, the
+ * <p>Demonstrates parallel fan-out using {@code Flux.mergeSequential()} to issue
+ * three concurrent downstream calls without blocking any thread. Results are
+ * collected into a list in id order and combined reactively. Backpressure is
+ * naturally handled by the reactive pipeline — if the downstream slows down, the
  * subscriber is not flooded. Compare with the imperative counterpart using
  * {@code CompletableFuture.allOf()}.
  */
@@ -50,10 +49,10 @@ public class AggregateController extends AbstractReactiveController {
       _ -> {
         final var sample = Timer.start();
         final var calls = IntStream.rangeClosed(1, FAN_OUT)
-          .mapToObj(i -> this.fetchData(i).map(body -> "item%d:%s".formatted(i, body.get("value"))))
+          .mapToObj(this::fetchData)
           .toList();
 
-        return Flux.merge(calls)
+        return Flux.mergeSequential(calls)
           .collectList()
           .flatMap(results -> {
             final var combined = String.join(",", results);
@@ -67,12 +66,10 @@ public class AggregateController extends AbstractReactiveController {
       });
   }
 
-  @SuppressWarnings("unchecked")
-  private Mono<Map<String, Object>> fetchData(final int index) {
+  private Mono<String> fetchData(final int index) {
     return this.webClient.get()
       .uri(API_DATA_ID, index)
       .retrieve()
-      .bodyToMono(Map.class)
-      .map(m -> (Map<String, Object>) m);
+      .bodyToMono(String.class);
   }
 }

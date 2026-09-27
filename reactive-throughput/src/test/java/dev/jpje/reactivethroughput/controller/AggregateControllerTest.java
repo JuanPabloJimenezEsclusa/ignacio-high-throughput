@@ -6,8 +6,6 @@ import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMoc
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.Duration;
-import java.time.Instant;
-import java.util.UUID;
 
 import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.junit5.WireMockExtension;
@@ -30,6 +28,7 @@ import reactor.test.StepVerifier;
 class AggregateControllerTest {
 
   private static final String AGGREGATE_URL = "/aggregate";
+  private static final String OK_PREFIX = "OK:Reactive:Aggregate:";
 
   @RegisterExtension
   private static final WireMockExtension wireMock = WireMockExtension.newInstance()
@@ -49,17 +48,11 @@ class AggregateControllerTest {
     wireMock.resetAll();
   }
 
-  private static String jsonBody(final int id, final String value) {
-    return """
-      {"id":"%s","itemId":"%d","value":"%s","timestamp":"%s"}
-      """.formatted(UUID.randomUUID(), id, value, Instant.now()).strip();
-  }
-
   @Test
-  @DisplayName("Should return OK aggregating 3 parallel downstream calls via Flux.merge")
+  @DisplayName("Should return OK aggregating 3 parallel downstream calls via Flux.mergeSequential")
   void shouldReturnOkAggregatingParallelCalls() {
     // Given
-    this.stubDownstreamForAllIds("data");
+    this.stubDownstreamForAllIds();
 
     // When, Then
     this.webTestClient.get().uri(AGGREGATE_URL)
@@ -67,25 +60,23 @@ class AggregateControllerTest {
       .expectStatus().isOk()
       .expectHeader().contentType(MediaType.APPLICATION_JSON)
       .expectBody(String.class)
-      .value(body -> assertThat(body).contains("OK:Reactive:Aggregate:"));
+      .value(body -> assertThat(body).startsWith(OK_PREFIX));
+
+    wireMock.verify(1, WireMock.getRequestedFor(urlMatching("/api/data/1")));
+    wireMock.verify(1, WireMock.getRequestedFor(urlMatching("/api/data/2")));
+    wireMock.verify(1, WireMock.getRequestedFor(urlMatching("/api/data/3")));
   }
 
   @Test
-  @DisplayName("Should call downstream 3 times and combine results reactively")
-  void shouldCallDownstream3TimesAndCombineResultsReactively() {
-    // Given
-    wireMock.stubFor(WireMock.get(urlMatching("/api/data/1"))
-      .willReturn(aResponse().withStatus(200)
-        .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
-        .withBody(jsonBody(1, "alpha"))));
-    wireMock.stubFor(WireMock.get(urlMatching("/api/data/2"))
-      .willReturn(aResponse().withStatus(200)
-        .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
-        .withBody(jsonBody(2, "beta"))));
+  @DisplayName("Should concatenate raw downstream bodies in id order regardless of completion order")
+  void shouldConcatenateBodiesInIdOrder() {
+    // Given - id 3 completes first and id 1 completes last, so emission order differs from id order
     wireMock.stubFor(WireMock.get(urlMatching("/api/data/3"))
-      .willReturn(aResponse().withStatus(200)
-        .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
-        .withBody(jsonBody(3, "gamma"))));
+      .willReturn(aResponse().withStatus(200).withFixedDelay(10).withBody("gamma")));
+    wireMock.stubFor(WireMock.get(urlMatching("/api/data/2"))
+      .willReturn(aResponse().withStatus(200).withFixedDelay(30).withBody("beta")));
+    wireMock.stubFor(WireMock.get(urlMatching("/api/data/1"))
+      .willReturn(aResponse().withStatus(200).withFixedDelay(60).withBody("alpha")));
 
     // When
     final var result = this.webTestClient.get().uri(AGGREGATE_URL)
@@ -96,19 +87,14 @@ class AggregateControllerTest {
 
     // Then
     assertThat(result.getResponseBody())
-      .contains("alpha")
-      .contains("beta")
-      .contains("gamma");
-    wireMock.verify(1, WireMock.getRequestedFor(urlMatching("/api/data/1")));
-    wireMock.verify(1, WireMock.getRequestedFor(urlMatching("/api/data/2")));
-    wireMock.verify(1, WireMock.getRequestedFor(urlMatching("/api/data/3")));
+      .contains("OK:Reactive:Aggregate:[alpha,beta,gamma]:");
   }
 
   @Test
   @DisplayName("Should complete via reactive pipeline without blocking event loop")
   void shouldCompleteViaReactivePipeline() {
     // Given
-    this.stubDownstreamForAllIds("item");
+    this.stubDownstreamForAllIds();
 
     // When, Then
     this.webTestClient.get().uri(AGGREGATE_URL)
@@ -118,18 +104,17 @@ class AggregateControllerTest {
       .getResponseBody()
       .next()
       .as(StepVerifier::create)
-      .expectNextMatches(body -> body.contains("OK:Reactive:Aggregate:"))
+      .expectNextMatches(body -> body.startsWith(OK_PREFIX))
       .expectComplete()
       .verify(Duration.ofSeconds(5));
   }
 
-  private void stubDownstreamForAllIds(final String valuePrefix) {
-    for (int i = 1; i <= 3; i++) {
-      wireMock.stubFor(WireMock.get(urlMatching("/api/data/" + i))
-        .willReturn(aResponse()
-          .withStatus(200)
-          .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
-          .withBody(jsonBody(i, valuePrefix + i))));
-    }
+  private void stubDownstreamForAllIds() {
+    wireMock.stubFor(WireMock.get(urlMatching("/api/data/1"))
+      .willReturn(aResponse().withStatus(200).withBody("alpha")));
+    wireMock.stubFor(WireMock.get(urlMatching("/api/data/2"))
+      .willReturn(aResponse().withStatus(200).withBody("beta")));
+    wireMock.stubFor(WireMock.get(urlMatching("/api/data/3"))
+      .willReturn(aResponse().withStatus(200).withBody("gamma")));
   }
 }
