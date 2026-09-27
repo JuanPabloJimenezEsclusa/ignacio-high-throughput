@@ -61,6 +61,8 @@ subprojects {
       property 'sonar.host.url', 'https://sonarcloud.io'
       property 'sonar.projectKey', 'JuanPabloJimenezEsclusa_ignacio-high-throughput'
       property 'sonar.coverage.jacoco.xmlReportPaths', "${rootDir}/coverage-jacoco/build/reports/jacoco/test/jacocoAggregatedReport.xml"
+      // MetricsConfiguration and CpuController are near-identical across the two modules.
+      // Two occurrences do not meet the Rule of Three; excluded from CPD rather than shared.
       property 'sonar.cpd.exclusions', '**/MetricsConfiguration.java, **/CpuController.java'
       property 'sonar.branch.name', 'develop'
     }
