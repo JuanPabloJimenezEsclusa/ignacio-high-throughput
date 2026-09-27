@@ -11,6 +11,7 @@ openspec/
 
 testing/k6/result/**
 testing/jmeter/reports**
+testing/gatling/reports/**
 **.hprof.json
 **.jfr
 

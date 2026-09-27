@@ -31,8 +31,10 @@ export default function () {
 }
 
 export function handleSummary(data) {
+  // Defaults to the legacy flat path so behaviour is unchanged when K6_SUMMARY_HTML is not set.
+  const htmlPath = __ENV.K6_SUMMARY_HTML || "/result/summary.html";
   return {
-    "/result/summary.html": htmlReport(data),
+    [htmlPath]: htmlReport(data),
     stdout: textSummary(data, { indent: "→", enableColors: true }),
   };
 }
@@ -49,7 +51,7 @@ export function checkByImperativeGroup() {
   };
 
   group('imperative-smoke', function() {
-    const result = http.get(`${baseUrl}/smokes`, { ...params, tags: { group: 'imperative-smoke' } });
+    const result = http.get(`${baseUrl}/smokes`, { ...params, tags: { group: 'imperative-smoke', impl: 'imperative' } });
     check(result, {
       'status was 200': (r) => r.status === 200,
       'body size < 100 bytes': (r) => r.body.length < 100,
@@ -58,7 +60,7 @@ export function checkByImperativeGroup() {
   });
 
   group('imperative-io', function() {
-    const result = http.get(`${baseUrl}/io`, { ...params, tags: { group: 'imperative-io' } });
+    const result = http.get(`${baseUrl}/io`, { ...params, tags: { group: 'imperative-io', impl: 'imperative' } });
     check(result, {
       'status was 200': (r) => r.status === 200,
       'body contains "OK:Imperative:IO"': (r) => r.body.includes('OK:Imperative:IO'),
@@ -66,7 +68,7 @@ export function checkByImperativeGroup() {
   });
 
   group('imperative-cpu', function() {
-    const result = http.get(`${baseUrl}/cpu`, { ...params, tags: { group: 'imperative-cpu' } });
+    const result = http.get(`${baseUrl}/cpu`, { ...params, tags: { group: 'imperative-cpu', impl: 'imperative' } });
     check(result, {
       'status was 200': (r) => r.status === 200,
       'body contains "OK:Imperative:CPU"': (r) => r.body.includes('OK:Imperative:CPU'),
@@ -74,7 +76,7 @@ export function checkByImperativeGroup() {
   });
 
   group('imperative-aggregate', function() {
-    const result = http.get(`${baseUrl}/aggregate`, { ...params, tags: { group: 'imperative-aggregate' } });
+    const result = http.get(`${baseUrl}/aggregate`, { ...params, tags: { group: 'imperative-aggregate', impl: 'imperative' } });
     check(result, {
       'status was 200': (r) => r.status === 200,
       'body contains "OK:Imperative:Aggregate"': (r) => r.body.includes('OK:Imperative:Aggregate'),
@@ -82,7 +84,7 @@ export function checkByImperativeGroup() {
   });
 
   group('imperative-resilience', function() {
-    const result = http.get(`${baseUrl}/resilience`, { ...params, tags: { group: 'imperative-resilience' } });
+    const result = http.get(`${baseUrl}/resilience`, { ...params, tags: { group: 'imperative-resilience', impl: 'imperative' } });
     check(result, {
       'status was 200': (r) => r.status === 200,
       'body is not empty': (r) => r.body.length > 0,
@@ -102,7 +104,7 @@ export function checkByReactiveGroup() {
   };
 
   group('reactive-smoke', function() {
-    const result = http.get(`${baseUrl}/smokes`, { ...params, tags: { group: 'reactive-smoke' } });
+    const result = http.get(`${baseUrl}/smokes`, { ...params, tags: { group: 'reactive-smoke', impl: 'reactive' } });
     check(result, {
       'status was 200': (r) => r.status === 200,
       'body size < 100 bytes': (r) => r.body.length < 100,
@@ -111,7 +113,7 @@ export function checkByReactiveGroup() {
   });
 
   group('reactive-io', function() {
-    const result = http.get(`${baseUrl}/io`, { ...params, tags: { group: 'reactive-io' } });
+    const result = http.get(`${baseUrl}/io`, { ...params, tags: { group: 'reactive-io', impl: 'reactive' } });
     check(result, {
       'status was 200': (r) => r.status === 200,
       'body contains "OK:Reactive:IO"': (r) => r.body.includes('OK:Reactive:IO'),
@@ -119,7 +121,7 @@ export function checkByReactiveGroup() {
   });
 
   group('reactive-cpu', function() {
-    const result = http.get(`${baseUrl}/cpu`, { ...params, tags: { group: 'reactive-cpu' } });
+    const result = http.get(`${baseUrl}/cpu`, { ...params, tags: { group: 'reactive-cpu', impl: 'reactive' } });
     check(result, {
       'status was 200': (r) => r.status === 200,
       'body contains "OK:Reactive:CPU"': (r) => r.body.includes('OK:Reactive:CPU'),
@@ -127,7 +129,7 @@ export function checkByReactiveGroup() {
   });
 
   group('reactive-aggregate', function() {
-    const result = http.get(`${baseUrl}/aggregate`, { ...params, tags: { group: 'reactive-aggregate' } });
+    const result = http.get(`${baseUrl}/aggregate`, { ...params, tags: { group: 'reactive-aggregate', impl: 'reactive' } });
     check(result, {
       'status was 200': (r) => r.status === 200,
       'body contains "OK:Reactive:Aggregate"': (r) => r.body.includes('OK:Reactive:Aggregate'),
@@ -135,7 +137,7 @@ export function checkByReactiveGroup() {
   });
 
   group('reactive-resilience', function() {
-    const result = http.get(`${baseUrl}/resilience`, { ...params, tags: { group: 'reactive-resilience' } });
+    const result = http.get(`${baseUrl}/resilience`, { ...params, tags: { group: 'reactive-resilience', impl: 'reactive' } });
     check(result, {
       'status was 200': (r) => r.status === 200,
       'body is not empty': (r) => r.body.length > 0,
@@ -146,7 +148,7 @@ export function checkByReactiveGroup() {
     const result = http.get(`${baseUrl}/stream`, {
       ...params,
       headers: { ...params.headers, 'Accept': 'text/event-stream' },
-      tags: { group: 'reactive-stream' }
+      tags: { group: 'reactive-stream', impl: 'reactive' }
     });
     check(result, {
       'status was 200': (r) => r.status === 200,
