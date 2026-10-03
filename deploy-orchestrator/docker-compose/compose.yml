@@ -102,7 +102,7 @@ services:
       high_throughput_network:
   ## Monitorization
   prometheus:
-    image: prom/prometheus:v3.14.0
+    image: prom/prometheus:v3.15.0
     container_name: prometheus
     hostname: prometheus
     restart: "on-failure"
@@ -128,7 +128,7 @@ services:
     networks:
       high_throughput_network:
   grafana:
-    image: grafana/grafana:13.2.2
+    image: grafana/grafana:13.2.3
     container_name: grafana
     hostname: grafana
     restart: "on-failure"
