@@ -79,7 +79,8 @@ add_note() {
 extract_k6() {
   jq -c '
     def impl($k):
-      (.metrics[$k].values) as $v
+      # Recent k6 exports the summary flat (p(95)/med at the metric root); older versions nest them under .values.
+      ((.metrics[$k].values) // (.metrics[$k])) as $v
       | if $v == null then null
         else {med: $v.med, p95: $v["p(95)"], min: $v.min, max: $v.max} end;
     {imperative: impl("http_req_duration{impl:imperative}"),

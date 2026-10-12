@@ -10,6 +10,9 @@ export const options = {
     http_req_duration: ['p(99)<60000'],
     'http_req_duration{group:imperative-smoke}': ['p(95)<5000'],
     'http_req_duration{group:reactive-smoke}': ['p(95)<5000'],
+    // Not pass/fail gates: k6 only exports submetrics that a threshold references, and aggregate.sh reads these.
+    'http_req_duration{impl:imperative}': ['p(95)<60000'],
+    'http_req_duration{impl:reactive}': ['p(95)<60000'],
   },
   scenarios: {
     high_throughput_test: {
