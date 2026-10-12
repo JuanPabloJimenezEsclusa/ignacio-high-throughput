@@ -5,42 +5,38 @@ title: testing (jmeter)
 
 # testing (jmeter)
 
-> • [Dependencies](#-dependencies)
-  • [Architecture](#-architecture)
-  • [Running the Tests](#-running-the-tests)
+> • [Dependencies](#dependencies)
+  • [Architecture](#architecture)
+  • [Running the tests](#running-the-tests)
 
-Performance testing project using JMeter
+This module holds the performance tests for the Spring Boot application, using [JMeter](https://jmeter.apache.org/).
 
-## ⚙️ Dependencies
-
----
+## Dependencies
 
 * [JDK ~25](https://openjdk.org/projects/jdk/25/)
 * [JMeter ~5.6](https://jmeter.apache.org/changes.html)
 
-## 🏗️ Architecture
+## Architecture
 
----
+| File | Description |
+|------|-------------|
+| [high-throughput-performance.jmx](./high-throughput-performance.jmx) | Test plan. It calls `GET /smokes` on both modules |
+| [run.sh](./run.sh) | Runs the test |
+| [reports/aws/run-1/html/index.html](./reports) | HTML summary of one run |
 
-| File                                                                 | Description                         |
-|----------------------------------------------------------------------|-------------------------------------|
-| [high-throughput-performance.jmx](./high-throughput-performance.jmx) | Test plan file                      |
-| [run.sh](./run.sh)                                                   | Shell script for executing the test |
-| [index.html](./reports/html/index.html)                              | HTML summary report                 |
-
-## 🚀 Running the Tests
-
----
+## Running the tests
 
 ```bash
-# Start the application and the database using Docker Compose
-./../../deploy-orchestrator/start.sh
+# Start the application with Docker Compose
+./../../deploy-orchestrator/docker-compose/start.sh
 ```
 ```bash
-# Run the test using the provided shell script
+# Run the test
 ./run.sh
 ```
 ```bash
-# Stop the application and the database using Docker Compose
-./../../deploy-orchestrator/stop.sh
+# Stop the application
+./../../deploy-orchestrator/docker-compose/stop.sh
 ```
+
+The runner accepts `ENVIRONMENT`, `RUNS`, `THREADS` (default `7000`), `RAMP_UP` (default `20` seconds) and `LOOPS` (default `20`). See [testing conventions](../Readme.md).

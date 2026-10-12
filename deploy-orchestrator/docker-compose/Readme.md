@@ -5,35 +5,27 @@ title: orchestrator (compose)
 
 # orchestrator (compose)
 
-> • [Dependencies](#-dependencies)
-  • [Architecture](#-architecture)
-  • [Usage](#-usage)
-  • [Links](#-links)
+> • [Dependencies](#dependencies)
+  • [Architecture](#architecture)
+  • [Usage](#usage)
+  • [Links](#links)
 
-Based on `docker-compose`
+This deployment uses `docker-compose`.
 
-## ⚙️ Dependencies
-
----
+## Dependencies
 
 * [Docker ~29](https://docs.docker.com/engine/release-notes/29/)
-* [Docker-compose ~2.40](https://docs.docker.com/compose/install/standalone/)
+* [Docker Compose ~2.40](https://docs.docker.com/compose/install/standalone/)
 
-## 🏗️ Architecture
+## Architecture
 
----
-
-Basic deployment with Docker Compose to prioritize simplicity and local development.
+A basic deployment that keeps the setup simple for local development.
 
 ![High Throughput Docker](./images/high-throughput-docker-diagram.svg)
 
-## 🚀 Usage
+## Usage
 
----
-
-### Using Scripts
-
-❗ **Note:** Config the `/etc/hosts` file to map the IP address `127.0.0.1` to the hostnames of the services defined in the `docker-compose` file.
+NOTE: Add the service hostnames from the `docker-compose` file to `/etc/hosts`, and point each one to `127.0.0.1`.
 
 ```bash
 # Start the services
@@ -44,21 +36,14 @@ Basic deployment with Docker Compose to prioritize simplicity and local developm
 ./stop.sh removeImages=true
 ```
 
-## 🔗 Links
+## Links
 
----
-
-* **API:**
-  * [imperative-throughput](http://localhost:8888/imperative-throughput/smokes)
-  * [reactive-throughput](http://localhost:9999/reactive-throughput/smokes)
-  * [WireMock (API Mocking)](http://localhost:8080/__admin/)
-* **Prometheus (Monitoring):**
-  * [Prometheus monitoring dashboard](http://localhost:9090)
-* **Grafana (Monitoring Visualization):**
-  * [Grafana dashboard](http://localhost:3000) (Login: admin/admin)
-* **Elasticsearch (Search Engine):**
-  * [Elasticsearch access](http://localhost:9200/)
-* **Kibana (Search Engine Visualization):**
-  * [Dashboard](http://localhost:5601/app/kibana_overview)
-  * [Indexes](http://localhost:5601/app/management/data/index_management/indices)
-  * [Discover (Data View)](http://localhost:5601/app/discover#/)
+* Imperative module: http://localhost:8888/imperative-throughput/smokes
+* Reactive module: http://localhost:9999/reactive-throughput/smokes
+* WireMock admin: http://localhost:8080/__admin/
+* Prometheus: http://localhost:9090
+* Grafana: http://localhost:3000 (login `admin` / `admin`)
+* Elasticsearch: http://localhost:9200/
+* Kibana dashboard: http://localhost:5601/app/kibana_overview
+* Kibana index management: http://localhost:5601/app/management/data/index_management/indices
+* Kibana discover: http://localhost:5601/app/discover#/

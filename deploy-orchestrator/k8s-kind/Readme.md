@@ -5,73 +5,61 @@ title: orchestrator (k8s) (Kind)
 
 # orchestrator (k8s) (Kind)
 
-> • [Dependencies](#-dependencies)
-  • [Architecture](#-architecture)
-  • [Usage](#-usage)
-  • [Links](#-links)
+> • [Dependencies](#dependencies)
+  • [Architecture](#architecture)
+  • [Usage](#usage)
+  • [Links](#links)
 
-Based on [Kind](https://kind.sigs.k8s.io/) (Kubernetes IN Docker)
+This deployment uses [Kind](https://kind.sigs.k8s.io/) (Kubernetes in Docker).
 
-## ⚙️ Dependencies
-
----
+## Dependencies
 
 * [Docker ~29](https://docs.docker.com/engine/release-notes/29/)
 * [Kind ~0.33](https://kind.sigs.k8s.io/docs/user/quick-start/#installation)
 
-## 🏗️ Architecture
+## Architecture
 
----
-
-Basic deployment with Kind to prioritize simplicity and local development.
+A basic deployment that keeps the setup simple for local development.
 
 ![High Throughput Kind](./images/high-throughput-k8s-diagram.svg)
 
-## 🚀 Usage
+## Usage
 
----
+### Hosts configuration
 
-### 📝 Hosts Configuration
+Before you start the cluster, make sure `/etc/hosts` holds the kind-registry entry.
 
-Before starting the cluster, ensure your `/etc/hosts` file has the proper kind-registry entry
-
-### 🔄 Cluster Management
+### Cluster management
 
 ```bash
-cd clusters
+cd cluster
 ./install.sh
 ./start-cluster.sh
 ./stop-cluster.sh
 ```
 
-### 📡 API Deployment
+### API deployment
 
 ```bash
-# Deploy standard API
 cd API
+# Deploy the standard API
 ./apply.sh buildProjects=true
 ./delete.sh removeImages=true
 ```
 
-### 🔄 Full Setup
+### Full setup
 
-> ⚠️ Requires sudo permissions to install tools and remove tmp files.
+NOTE: This step needs `sudo` to install tools and to remove temporary files.
 
-Use the combined script to set up everything at once:
+The combined script sets up everything at once:
 
 ```bash
-# Run the full setup script
 ./run-cluster-with-api.sh buildProjects=true
 ```
 
-## 🔗 Links
+## Links
 
----
-
-* **API:**
-  * [imperative-throughput](http://localhost:8888/imperative-throughput/smokes)
-  * [reactive-throughput](http://localhost:9999/reactive-throughput/smokes)
-* **Prometheus (Monitoring):**
-  * [Prometheus monitoring dashboard](http://localhost:30000)
-* **Grafana (Monitoring Visualization):**
-  * [Grafana dashboard](http://localhost:31000) (Login: admin/<looking in secrets>)
+* Imperative module: http://localhost:8888/imperative-throughput/smokes
+* Reactive module: http://localhost:9999/reactive-throughput/smokes
+* Prometheus: http://localhost:30000
+* Grafana: http://localhost:31000 (login `admin`; read the password with `kubectl get secret kind-prometheus-grafana -n monitoring-ns -o jsonpath="{.data.admin-password}" | base64 -d`)

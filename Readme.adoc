@@ -36,7 +36,7 @@ image:https://img.shields.io/sonar/quality_gate/JuanPabloJimenezEsclusa_ignacio-
 IMPORTANT: The project compares two concurrency models: imperative with MVC and Tomcat, and reactive with WebFlux and Netty. Both models run on virtual threads. Use imperative by default, and reactive only for streaming or a caller that can wait. They match until a downstream call slows down. Then imperative holds a bounded tail, and reactive loses its slowest calls.
 
 [#_project_structure]
-== 📦 Project Structure
+== Project Structure
 
 The project contains two modules:
 
@@ -44,7 +44,7 @@ The project contains two modules:
 * *link:./reactive-throughput[reactive-throughput]*: Spring WebFlux with non-blocking streams.
 
 [#_technologies]
-== 🛠️ Technologies
+== Technologies
 
 image:https://img.shields.io/badge/OpenJDK-25+-005571.svg["OpenJDK",link="https://adoptium.net/es/temurin/releases/?os=any&arch=any&version=25"]
 image:https://img.shields.io/badge/GraalVM-25+-005571.svg["GraalVM",link="https://www.graalvm.org/jdk25/getting-started/linux/#script-friendly-urls"]
@@ -57,7 +57,7 @@ image:https://img.shields.io/badge/Spring%20Webflux%20(reactive%20module)-7.0+-b
 
 image:https://img.shields.io/badge/K6-1.0+-orange.svg["k6",link="https://github.com/grafana/k6"]
 image:https://img.shields.io/badge/JMeter-5.6+-orange.svg["JMeter",link="https://jmeter.apache.org/"]
-image:https://img.shields.io/badge/Gatling-3.14+-orange.svg["Gatling",link="https://github.com/gatling/gatling"]
+image:https://img.shields.io/badge/Gatling-3.15+-orange.svg["Gatling",link="https://github.com/gatling/gatling"]
 
 image:https://img.shields.io/badge/Docker-29+-brown.svg["Docker",link="https://docs.docker.com/engine/release-notes/29/"]
 image:https://img.shields.io/badge/Docker%20Compose-v2.40+-brown.svg["Docker-compose",link="https://docs.docker.com/compose/install/standalone/"]
@@ -65,7 +65,7 @@ image:https://img.shields.io/badge/Kubernetes-1.37+-brown.svg["Kubernetes",link=
 image:https://img.shields.io/badge/AWS%20CLI-2.34+-brown.svg["AWS CLI",link="https://aws.amazon.com/es/cli/"]
 
 [#_building_modules]
-== 🔨 Building modules
+== Building modules
 
 === Build all modules
 [source,bash]
@@ -131,9 +131,9 @@ mvn rewrite:runNoFork -Popen-rewrite
 ----
 
 [#_running_modules]
-== 🚀 Running modules
+== Running modules
 
-=== Imperative Module
+=== Imperative module
 
 [source,bash]
 ----
@@ -190,7 +190,7 @@ docker run -it --rm \
 
 The application is available at `http://localhost:8888/imperative-throughput/`.
 
-=== Reactive Module
+=== Reactive module
 
 [source,bash]
 ----
@@ -247,9 +247,9 @@ docker run -it --rm \
 The application is available at `http://localhost:9999/reactive-throughput/`.
 
 [#_api_endpoints]
-== 🔌 API Endpoints
+== API Endpoints
 
-=== Imperative Module
+=== Imperative module
 
 * `GET /imperative-throughput/smokes` returns `OK` after 300 ms. The delay runs on a virtual thread, so the request thread does not block.
 
@@ -272,7 +272,7 @@ curl -sv http://localhost:8888/imperative-throughput/actuator/prometheus
 curl -sv http://localhost:8888/imperative-throughput/actuator/metrics | jq
 ----
 
-=== Reactive Module
+=== Reactive module
 
 * `GET /reactive-throughput/smokes` returns `OK` after 300 ms. The delay is non-blocking.
 
@@ -296,7 +296,7 @@ curl -sv http://localhost:9999/reactive-throughput/actuator/metrics | jq
 ----
 
 [#_comparison]
-== ⚖️ Paradigm Comparison
+== Paradigm Comparison
 
 [cols="2,3,3", options="header", width=100%, frame=all, grid=rows, title="Imperative vs Reactive: Design and Behaviour"]
 |===
@@ -364,26 +364,26 @@ curl -sv http://localhost:9999/reactive-throughput/actuator/metrics | jq
 | Endpoint | Imperative | Reactive
 
 | `GET /smokes`: 300 ms baseline latency, returns the thread identity
-| ✅ | ✅
+| Yes | Yes
 
 | `GET /cpu`: Fibonacci(50), a CPU-bound workload
-| ✅ | ✅
+| Yes | Yes
 
 | `GET /io`: downstream HTTP call, blocking in the imperative module and non-blocking in the reactive one
-| ✅ | ✅
+| Yes | Yes
 
 | `GET /aggregate`: three parallel downstream calls, combined
-| ✅ | ✅
+| Yes | Yes
 
 | `GET /resilience[?delayMs=N]`: 500 ms timeout with a fallback
-| ✅ | ✅
+| Yes | Yes
 
 | `GET /stream`: SSE, 10 events of 200 ms, with backpressure
-| ❌ | ✅
+| No | Yes
 |===
 
 [#_deployment]
-== 🛠️ Deployment
+== Deployment
 
 Use one of these options to deploy the application to a local or cloud environment:
 
@@ -394,7 +394,7 @@ Use one of these options to deploy the application to a local or cloud environme
 |===
 
 [#_profiling]
-== 📊 Profiling
+== Profiling
 
 * link:https://www.graalvm.org/jdk24/reference-manual/native-image/debugging-and-diagnostics/jcmd/[Diagnostic Command Tool (jcmd)]
 
@@ -512,7 +512,7 @@ unzip visualvm_22.zip
 |===
 
 [#_testing]
-== 🔍 Testing
+== Testing
 
 Both modules have unit tests and load tests. The load tests run with three tools:
 
@@ -539,7 +539,7 @@ cd testing/k6 && ENVIRONMENT=aws RUNS=1 ./run.sh
 The three runners use the same variables and write one directory per run. The report layout, the `dev` targets and the `aggregate.sh` helper are in link:./testing/Readme.md[testing/Readme.md].
 
 [#_performance_comparison]
-== ⚡ Performance Comparison
+== Performance Comparison
 
 All three tools ran against the same AWS deployment. Each task has 1 vCPU, and the load balancer scales each service from 1 to 3 tasks. In every run, one tool calls both modules, so each implementation receives the same requests. The results come from native images and are not capacity ratings.
 

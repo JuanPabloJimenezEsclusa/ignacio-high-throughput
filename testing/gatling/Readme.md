@@ -5,48 +5,45 @@ title: testing (gatling)
 
 # testing (gatling)
 
-> • [Dependencies](#-dependencies)
-  • [Architecture](#-architecture)
-  • [Running the Tests](#-running-the-tests)
-  • [Exploring plugin options](#-exploring-plugin-options)
+> • [Dependencies](#dependencies)
+  • [Architecture](#architecture)
+  • [Running the tests](#running-the-tests)
+  • [Exploring plugin options](#exploring-plugin-options)
 
-This module contains performance tests for the Spring Boot application using the [Gatling](https://gatling.io/) load testing tool.
+This module holds the performance tests for the Spring Boot application, using [Gatling](https://gatling.io/).
 
-## ⚙️ Dependencies
-
----
+## Dependencies
 
 * [JDK ~25](https://openjdk.org/projects/jdk/25/)
 * [Gatling ~3.15](https://docs.gatling.io/tutorials/scripting-intro/)
 * [Docker ~29](https://docs.docker.com/engine/release-notes/29/)
 
-## 🏗️ Architecture
+## Architecture
 
----
+| File | Description |
+|------|-------------|
+| [GatlingHighThroughputSimulation.java](./src/main/java/dev/jpje/testing/gatling/GatlingHighThroughputSimulation.java) | Test plan. It calls every comparable endpoint on both modules |
+| [run.sh](./run.sh) | Runs the simulation |
+| [index.html](./target/gatling/gatlinghighthroughputsimulation-latest/index.html) | HTML report of the last run |
 
-| File                                                                             | Description                          |
-|----------------------------------------------------------------------------------|--------------------------------------|
-| [run.sh](./run.sh)                                                               | Shell script for executing the tests |
-| [index.html](./target/gatling/gatlinghighthroughputsimulation-latest/index.html) | HTML Gatling report                  |
-
-## 🚀 Running the Tests
-
----
+## Running the tests
 
 ```bash
-# Start the application and the database using Docker Compose
-./../../deploy-orchestrator/start.sh
+# Start the application with Docker Compose
+./../../deploy-orchestrator/docker-compose/start.sh
 ```
 ```bash
-# Run the test using the provided shell script
+# Run the simulation
 ./run.sh
 ```
 ```bash
-# Stop the application and the database using Docker Compose
-./../../deploy-orchestrator/stop.sh
+# Stop the application
+./../../deploy-orchestrator/docker-compose/stop.sh
 ```
 
-## 🔎 Exploring plugin options
+The runner accepts `ENVIRONMENT` and `RUNS`. See [testing conventions](../Readme.md).
+
+## Exploring plugin options
 
 ```bash
 mvn gatling:help -Ddetail=true -Dgoal=test
