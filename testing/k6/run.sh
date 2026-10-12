@@ -85,6 +85,7 @@ run_once() {
   # K6 Test Execution
   # https://grafana.com/docs/k6/latest/set-up/install-k6/?src=k6io&pg=oss-k6&plcmt=deploy-box-1#docker
   time docker run --rm \
+    --user "$(id -u):$(id -g)" \
     --name "k6-load-test-${ENVIRONMENT}-${run_id}" \
     --env K6_WEB_DASHBOARD=true \
     --env K6_WEB_DASHBOARD_HOST=localhost \

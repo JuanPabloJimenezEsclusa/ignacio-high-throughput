@@ -33,22 +33,18 @@ image:https://img.shields.io/sonar/duplicated_lines/JuanPabloJimenezEsclusa_igna
 image:https://img.shields.io/sonar/quality_gate/JuanPabloJimenezEsclusa_ignacio-high-throughput/develop?logo=sonar&server=https://sonarcloud.io[Sonar Quality Gate]
 
 
-IMPORTANT: Two concurrency models, one API surface: thread-per-request (MVC/Tomcat) vs event-loop (WebFlux/Netty). Virtual threads are enabled in both by design — they back the request thread imperatively and the blocking-tolerant work reactively — so this compares models, not virtual threads on/off.
-
-* Virtual threads are on in both applications; the isolated variable is the concurrency model.
-* Workloads are delay-dominated (`/smokes` 300 ms, WireMock 1500 ms): TPS is bounded by latency, not by the stack.
-* Recorded figures are not capacity ratings: JMeter and Gatling ran against the AWS deployment (`tech.jpje.net`); K6's target is not recorded in its report.
+IMPORTANT: The project compares two concurrency models: imperative with MVC and Tomcat, and reactive with WebFlux and Netty. Both models run on virtual threads. Use imperative by default, and reactive only for streaming or a caller that can wait. They match until a downstream call slows down. Then imperative holds a bounded tail, and reactive loses its slowest calls.
 
 [#_project_structure]
-== 📦 Project Structure
+== Project Structure
 
-This is a multi-module project consisting of::
+The project contains two modules:
 
-* *link:./imperative-throughput[imperative-throughput]*: Traditional Spring MVC implementation using blocking operations
-* *link:./reactive-throughput[reactive-throughput]*: Spring WebFlux implementation using non-blocking reactive streams
+* *link:./imperative-throughput[imperative-throughput]*: Spring MVC with blocking calls.
+* *link:./reactive-throughput[reactive-throughput]*: Spring WebFlux with non-blocking streams.
 
 [#_technologies]
-== 🛠️ Technologies
+== Technologies
 
 image:https://img.shields.io/badge/OpenJDK-25+-005571.svg["OpenJDK",link="https://adoptium.net/es/temurin/releases/?os=any&arch=any&version=25"]
 image:https://img.shields.io/badge/GraalVM-25+-005571.svg["GraalVM",link="https://www.graalvm.org/jdk25/getting-started/linux/#script-friendly-urls"]
@@ -61,7 +57,7 @@ image:https://img.shields.io/badge/Spring%20Webflux%20(reactive%20module)-7.0+-b
 
 image:https://img.shields.io/badge/K6-1.0+-orange.svg["k6",link="https://github.com/grafana/k6"]
 image:https://img.shields.io/badge/JMeter-5.6+-orange.svg["JMeter",link="https://jmeter.apache.org/"]
-image:https://img.shields.io/badge/Gatling-3.14+-orange.svg["Gatling",link="https://github.com/gatling/gatling"]
+image:https://img.shields.io/badge/Gatling-3.15+-orange.svg["Gatling",link="https://github.com/gatling/gatling"]
 
 image:https://img.shields.io/badge/Docker-29+-brown.svg["Docker",link="https://docs.docker.com/engine/release-notes/29/"]
 image:https://img.shields.io/badge/Docker%20Compose-v2.40+-brown.svg["Docker-compose",link="https://docs.docker.com/compose/install/standalone/"]
@@ -69,7 +65,7 @@ image:https://img.shields.io/badge/Kubernetes-1.37+-brown.svg["Kubernetes",link=
 image:https://img.shields.io/badge/AWS%20CLI-2.34+-brown.svg["AWS CLI",link="https://aws.amazon.com/es/cli/"]
 
 [#_building_modules]
-== 🔨 Building modules
+== Building modules
 
 === Build all modules
 [source,bash]
@@ -135,9 +131,9 @@ mvn rewrite:runNoFork -Popen-rewrite
 ----
 
 [#_running_modules]
-== 🚀 Running modules
+== Running modules
 
-=== Imperative Module
+=== Imperative module
 
 [source,bash]
 ----
@@ -192,9 +188,9 @@ docker run -it --rm \
   imperative-throughput:1.0.0
 ----
 
-The application will be available at: `http://localhost:8888/imperative-throughput/`
+The application is available at `http://localhost:8888/imperative-throughput/`.
 
-=== Reactive Module
+=== Reactive module
 
 [source,bash]
 ----
@@ -248,14 +244,14 @@ docker run -it --rm \
   reactive-throughput:1.0.0
 ----
 
-The application will be available at: `http://localhost:9999/reactive-throughput/`
+The application is available at `http://localhost:9999/reactive-throughput/`.
 
 [#_api_endpoints]
-== 🔌 API Endpoints
+== API Endpoints
 
-=== Imperative Module
+=== Imperative module
 
-* `GET /imperative-throughput/smokes` - Returns "OK" after a 300 ms delay scheduled on a virtual thread (the request thread is not blocked)
+* `GET /imperative-throughput/smokes` returns `OK` after 300 ms. The delay runs on a virtual thread, so the request thread does not block.
 
 [source,bash]
 ----
@@ -276,9 +272,9 @@ curl -sv http://localhost:8888/imperative-throughput/actuator/prometheus
 curl -sv http://localhost:8888/imperative-throughput/actuator/metrics | jq
 ----
 
-=== Reactive Module
+=== Reactive module
 
-* `GET /reactive-throughput/smokes` - Returns "OK" after a 300ms delay using reactive non-blocking delay
+* `GET /reactive-throughput/smokes` returns `OK` after 300 ms. The delay is non-blocking.
 
 [source,bash]
 ----
@@ -300,55 +296,55 @@ curl -sv http://localhost:9999/reactive-throughput/actuator/metrics | jq
 ----
 
 [#_comparison]
-== ⚖️ Paradigm Comparison
+== Paradigm Comparison
 
-[cols="2,3,3", options="header", width=100%, frame=all, grid=rows, title="Imperative vs Reactive — Design & Behaviour"]
+[cols="2,3,3", options="header", width=100%, frame=all, grid=rows, title="Imperative vs Reactive: Design and Behaviour"]
 |===
 | Dimension | Imperative + Virtual Threads | Reactive (WebFlux + Reactor)
 
 | *Concurrency model*
-| One virtual thread per request. The JVM multiplexes millions of virtual threads onto a small carrier-thread pool. Blocking a virtual thread parks it without consuming a carrier thread.
-| One or few Netty event-loop threads handle all I/O via non-blocking callbacks and operator pipelines. No thread is ever blocked.
+| One virtual thread for each request. The JVM runs many virtual threads on a small pool of carrier threads. When a virtual thread blocks, it leaves its carrier thread free.
+| One or two Netty event-loop threads handle all I/O with non-blocking callbacks and operator pipelines. No thread blocks.
 
 | *Blocking I/O*
-| Safe — blocking unmounts the virtual thread from its carrier and remounts it when I/O completes. `RestClient`, `JDBC`, `Files` work unchanged.
-| Forbidden on event-loop threads. All I/O must go through non-blocking drivers (`WebClient`, R2DBC, reactive file I/O).
+| Safe. Blocking unmounts the virtual thread from its carrier and mounts it again when the I/O completes. `RestClient`, `JDBC` and `Files` work without changes.
+| Forbidden on event-loop threads. All I/O must use non-blocking drivers such as `WebClient`, R2DBC and reactive file I/O.
 
 | *Programming model*
-| Standard sequential Java — `try/catch`, `for` loops, debuggable stack traces. Existing blocking libraries require no changes.
-| Functional pipeline — `Mono`, `Flux`, operators. Requires learning Project Reactor; traces need the Reactor debug agent to be readable.
+| Sequential Java: `try` and `catch`, `for` loops and readable stack traces. Existing blocking libraries need no changes.
+| A functional pipeline of `Mono`, `Flux` and operators. The team must learn Project Reactor, and the stack traces need the Reactor debug agent to stay readable.
 
 | *Parallel fan-out*
-| `CompletableFuture.allOf()` over a shared virtual-thread-per-task executor — fork N tasks, then `join()`; a failed subtask propagates through `join()`.
-| `Flux.mergeSequential()` — subscribe to N concurrent `Mono` pipelines and emit their results in source (id) order; no threads are created.
+| `CompletableFuture.allOf()` on a shared virtual-thread-per-task executor. The code forks N tasks and then calls `join()`, so a failed subtask propagates through `join()`.
+| `Flux.mergeSequential()` subscribes to N `Mono` pipelines and emits the results in source order. It creates no threads.
 
 | *Timeout + fallback*
-| `CompletableFuture.orTimeout(500, MILLISECONDS)` + `.handle()` to substitute a static fallback on `TimeoutException`.
-| `Mono.timeout(Duration.ofMillis(500))` + `.onErrorReturn(fallback)` — inline operator, zero extra threads.
+| `CompletableFuture.orTimeout(500, MILLISECONDS)` with `.handle()` returns a static fallback on `TimeoutException`.
+| `Mono.timeout(Duration.ofMillis(500))` with `.onErrorReturn(fallback)`. The operator is inline and adds no threads.
 
 | *Backpressure / SSE*
-| Not natively supported. A thread-per-connection model cannot propagate consumer-side backpressure to the producer without blocking the producer thread.
-| `Flux.generate` + `.delayElements()` — demand-driven emission. The subscriber controls pace. Used for `GET /stream` (reactive only).
+| Not supported. A thread-per-connection model cannot send consumer backpressure to the producer without blocking the producer thread.
+| `Flux.generate` with `.delayElements()` emits on demand, and the subscriber controls the pace. The reactive module uses it for `GET /stream`.
 
 | *Error handling*
-| `@ControllerAdvice` + `@ExceptionHandler(RuntimeException.class)`; the exception message is returned as the `details` field.
-| `AbstractErrorWebExceptionHandler` (`@Order(-2)`) composing a `ServerResponse`.
+| `@ControllerAdvice` with `@ExceptionHandler(RuntimeException.class)`. The exception message becomes the `details` field.
+| `AbstractErrorWebExceptionHandler` with `@Order(-2)` builds a `ServerResponse`.
 
 | *Error response contract*
 | `{"status":500,"error":"Internal Server Error","details":"..."}`
-| `{"status":<underlying status>,"error":"<reason>","path":"..."}` — the HTTP status is always 500, so a missing path yields `"status":404`/`"error":"Not Found"`.
+| `{"status":<underlying status>,"error":"<reason>","path":"..."}`. The HTTP status is always 500, so a missing path returns `"status":404` and `"error":"Not Found"`.
 
 | *Scheduler / thread pool*
-| `Executors.newVirtualThreadPerTaskExecutor()` (per-request in `/io`, `/cpu` and `/resilience`; shared for `/aggregate`); `Thread.ofVirtual().factory()` for the smoke delay scheduler.
-| Reactor `boundedElastic` for CPU work; Netty event loop for I/O; shared `virtualThreadScheduler` bean for reactive smoke delay.
+| `Executors.newVirtualThreadPerTaskExecutor()` for each request in `/io`, `/cpu` and `/resilience`, and one shared executor for `/aggregate`. `Thread.ofVirtual().factory()` serves the smoke delay.
+| Reactor `boundedElastic` for CPU work, the Netty event loop for I/O, and a shared `virtualThreadScheduler` bean for the smoke delay.
 
 | *Observability*
-| Custom `jvm.threads.platform.live` gauge plus `jvm.threads.virtual.mounted` / `.queued` / `.carriers` gauges from the virtual-thread scheduler MXBean — honest thread signals under load (the JDK cannot enumerate virtual threads).
-| Standard Micrometer timers per endpoint tagged `module=reactive`. Event-loop thread count stays constant regardless of load.
+| A custom `jvm.threads.platform.live` gauge, plus the `jvm.threads.virtual.mounted`, `.queued` and `.carriers` gauges from the virtual-thread scheduler MXBean. These signals stay correct under load, because the JDK cannot list virtual threads.
+| A Micrometer timer for each endpoint, tagged `module=reactive`. The event-loop thread count does not change with load.
 
 | *Test approach*
-| `@WebMvcTest` + `MockMvc` with `asyncStarted` / `asyncDispatch` for `CompletableFuture` responses.
-| `@SpringBootTest(RANDOM_PORT)` + `WebTestClient` + `StepVerifier` for reactive pipelines.
+| `@WebMvcTest` and `MockMvc`, with `asyncStarted` and `asyncDispatch` for `CompletableFuture` responses.
+| `@SpringBootTest(RANDOM_PORT)`, `WebTestClient` and `StepVerifier` for the reactive pipelines.
 
 | *HTTP server*
 | Apache Tomcat 11
@@ -367,29 +363,29 @@ curl -sv http://localhost:9999/reactive-throughput/actuator/metrics | jq
 |===
 | Endpoint | Imperative | Reactive
 
-| `GET /smokes` — 300 ms baseline latency, returns thread identity
-| ✅ | ✅
+| `GET /smokes`: 300 ms baseline latency, returns the thread identity
+| Yes | Yes
 
-| `GET /cpu` — Fibonacci(50) CPU-bound workload
-| ✅ | ✅
+| `GET /cpu`: Fibonacci(50), a CPU-bound workload
+| Yes | Yes
 
-| `GET /io` — blocking / non-blocking downstream HTTP call
-| ✅ | ✅
+| `GET /io`: downstream HTTP call, blocking in the imperative module and non-blocking in the reactive one
+| Yes | Yes
 
-| `GET /aggregate` — 3 parallel downstream calls combined
-| ✅ | ✅
+| `GET /aggregate`: three parallel downstream calls, combined
+| Yes | Yes
 
-| `GET /resilience[?delayMs=N]` — 500 ms timeout + fallback
-| ✅ | ✅
+| `GET /resilience[?delayMs=N]`: 500 ms timeout with a fallback
+| Yes | Yes
 
-| `GET /stream` — SSE, 10 events × 200 ms, backpressure-aware
-| ❌ | ✅
+| `GET /stream`: SSE, 10 events of 200 ms, with backpressure
+| No | Yes
 |===
 
 [#_deployment]
-== 🛠️ Deployment
+== Deployment
 
-Deploy the application to a local or cloud environment using one of the following options:
+Use one of these options to deploy the application to a local or cloud environment:
 
 [cols="1,1,1", options="header", width=100%, frame=none, grid=none, title="Deployment Diagrams"]
 |===
@@ -398,7 +394,7 @@ Deploy the application to a local or cloud environment using one of the followin
 |===
 
 [#_profiling]
-== 📊 Profiling
+== Profiling
 
 * link:https://www.graalvm.org/jdk24/reference-manual/native-image/debugging-and-diagnostics/jcmd/[Diagnostic Command Tool (jcmd)]
 
@@ -408,7 +404,7 @@ Deploy the application to a local or cloud environment using one of the followin
 jcmd -l
 # Look for the imperative-throughput process
 IMPERATIVE_PROCESS_ID="$(pgrep -f imperative-throughput-1.0.0.jar)"
-# List available e
+# List the available events
 jcmd "${IMPERATIVE_PROCESS_ID}" help
 # Dump the thread information to a file
 jcmd "${IMPERATIVE_PROCESS_ID}" Thread.dump_to_file -format=json \
@@ -420,8 +416,8 @@ jcmd "${IMPERATIVE_PROCESS_ID}" Thread.dump_to_file -format=json \
 # List JVM processes
 jcmd -l
 # Look for the reactive-throughput process
-`REACTIVE_PROCESS_ID="$(pgrep -f reactive-throughput-1.0.0.jar)"`
-# List available e
+REACTIVE_PROCESS_ID="$(pgrep -f reactive-throughput-1.0.0.jar)"
+# List the available events
 jcmd "${REACTIVE_PROCESS_ID}" help
 # Dump the thread information to a file
 jcmd "${REACTIVE_PROCESS_ID}" Thread.dump_to_file -format=json \
@@ -516,15 +512,13 @@ unzip visualvm_22.zip
 |===
 
 [#_testing]
-== 🔍 Testing
+== Testing
 
-Both modules include comprehensive test coverage including::
+Both modules have unit tests and load tests. The load tests run with three tools:
 
-* Unit tests
-* Loading tests
-- link:./testing/k6/Readme.md[K6]
-- link:./testing/jmeter/Readme.md[JMeter]
-- link:./testing/gatling/Readme.md[Gatling]
+* link:./testing/k6/Readme.md[K6]
+* link:./testing/jmeter/Readme.md[JMeter]
+* link:./testing/gatling/Readme.md[Gatling]
 
 Run unit tests with:
 
@@ -534,78 +528,67 @@ Run unit tests with:
 mvn test && gradle test
 ----
 
+Run a load battery with:
+
+[source,bash]
+----
+# One run against the AWS deployment
+cd testing/k6 && ENVIRONMENT=aws RUNS=1 ./run.sh
+----
+
+The three runners use the same variables and write one directory per run. The report layout, the `dev` targets and the `aggregate.sh` helper are in link:./testing/Readme.md[testing/Readme.md].
+
 [#_performance_comparison]
-== ⚡ Performance Comparison
+== Performance Comparison
 
-Five JMeter runs (60 k – 2 M samples) hit `/smokes` only (300 ms fixed delay);
-K6 and Gatling exercise every comparable endpoint (`/smokes`, `/cpu`, `/io`, `/aggregate`, `/resilience`, and `/stream` for the reactive module); K6 additionally probes the `/resilience` fallback with `?delayMs=1500`.
-The WireMock downstream applies a fixed 1500 ms delay to `/api/data?delayMs=N`, ignoring the requested value, and no delay to the fan-out call `/api/data/{id}`.
-Both modules ran simultaneously; each implementation received exactly half the load per run.
-K6 and Gatling figures are native-image runs; JVM-mode figures are not tabulated.
+All three tools ran against the same AWS deployment. Each task has 1 vCPU, and the load balancer scales each service from 1 to 3 tasks. In every run, one tool calls both modules, so each implementation receives the same requests. The results come from native images and are not capacity ratings.
 
-=== Test Matrix
+=== JMeter: 7 000 Threads on /smokes
 
-[cols="2,1,1,1,1,1,1", options="header", width=100%, frame=all, grid=rows]
+280 000 samples in 3 min 17 s, at 1 423 requests/s. Both arms returned zero errors.
+
+[cols="2,1,1,1,1,1", options="header", width=90%, frame=all, grid=rows]
 |===
-| Load config | Impl. | Samples | Errors | Error % | Mean (ms) | Max (ms)
-
-.2+| 3 000t · 30s ramp · 10 loops
-| Imperative | 30 000 | 0 | 0% | 302 | 382
-| Reactive   | 30 000 | 0 | 0% | 305 | 382
-
-.2+| 2 500t · 60s ramp · 100 loops
-| Imperative | 250 000 | 0 | 0% | 311 | 3 262
-| Reactive   | 250 000 | 0 | 0% | 304 | 525
-
-.2+| 5 000t · 60s ramp · 25 loops _(carrier saturation point)_
-| Imperative | 125 000 | 0     | 0%     | *731* | 8 439
-| Reactive   | 125 000 | 0     | 0%     | *326* | 1 894
-
-.2+| 5 000t · 60s ramp · 200 loops _(peak sustained load)_
-| *Imperative* | 1 000 000 | *13 335* | *1.33%* | *636* | *31 172*
-| *Reactive*   | 1 000 000 | *0*      | *0%*    | *309* | *2 414*
+| Implementation | Samples | Errors | Mean (ms) | Median (ms) | p95 (ms)
+| Imperative | 140 000 | 0 | 416 | 344 | 445
+| Reactive   | 140 000 | 0 | 410 | 343 | 367
 |===
 
-[cols="1,1", options="header", width=100%, frame=none, grid=none]
+image:./testing/jmeter/images/imperative-vs-reactive.png[]
+
+=== k6: Ramping to 600 Iterations/s Across Every Endpoint
+
+Each iteration makes 13 calls, 6 to the imperative module and 7 to the reactive one. The run peaked at 773 requests/s and dropped 20 947 iterations, so the client could not hold the configured arrival rate once the server saturated. 27.5% of requests failed.
+
+[cols="2,1,1,1", options="header", width=60%, frame=all, grid=rows]
 |===
-| Imperative | Reactive
-| image:./testing/jmeter/images/imperative-time-requests.png[] | image:./testing/jmeter/images/reactive-time-requests.png[]
-| image:./testing/jmeter/images/imperative-transactions.png[]  | image:./testing/jmeter/images/reactive-transactions.png[]
+| Implementation | Median (ms) | p95 (ms) | Max (ms)
+| Imperative |   827 | 5 996 | 11 725
+| Reactive   |   582 | 45 016 | 60 001
 |===
 
-=== K6 — Ramping Arrival Rate (configured 200 → 600 iterations/s, 11 requests per iteration)
+The failures concentrate on the WireMock-backed endpoints. `/io` and `/aggregate` passed 1% to 7% of their checks on both arms, while `/smokes`, `/cpu`, `/resilience`, its fallback and `/stream` passed about 99%.
 
-[cols="3,1,1,1,1", options="header", width=75%, frame=all, grid=rows]
-|===
-| Implementation | Avg (ms) | p90 (ms) | p95 (ms) | Max (ms)
-| Imperative (native) | 812 | 473 | 945 | 48 206
-| Reactive (native)   | 310 | 328 | 357 |    601
-|===
+image:./testing/k6/images/imperative-vs-reactive.png[]
 
-[cols="1,1", options="header", width=100%, frame=none, grid=none]
-|===
-| Imperative | Reactive
-| image:./testing/k6/images/imperative-summary.png[] | image:./testing/k6/images/reactive-summary.png[]
-|===
+=== Gatling: 100 Users/s Across Every Endpoint
 
-=== Gatling — Multi-scenario (all endpoints, 661 req/s)
+66 132 requests per run, zero errors on both arms. At this load the two implementations are indistinguishable.
 
-NOTE: Not conclusive. KO rates differ (11.28% vs 10.82%) and latency is computed over the survivors,
-so the arms did not see identical conditions; one run gives no variance. The direction matches the
-JMeter high-load result but is not established by this run.
-
-[cols="3,1,1,1,1,1", options="header", width=100%, frame=all, grid=rows]
+[cols="2,1,1,1,1", options="header", width=80%, frame=all, grid=rows]
 |===
-| Implementation | Requests | KO % | Mean (ms) | p99 (ms) | Max (ms)
-| Imperative (native) | 120 314 | 11.28% | 2 401 | 24 284 | 29 093
-| Reactive (native)   | 120 314 | 10.82% | 1 363 | 7 675  | 15 082
+| Endpoint | Imperative p50 (ms) | Imperative p95 (ms) | Reactive p50 (ms) | Reactive p95 (ms)
+| /smokes     | 436 | 464 |   436 |   465
+| /cpu        |  44 |  56 |    44 |    57
+| /io         |  46 |  77 |    46 |    73
+| /aggregate  |  47 |  87 |    47 |    85
+| /resilience |  46 |  80 |    46 |    76
+| /stream     |   - |   - | 2 046 | 2 064
 |===
 
-[cols="1,1", options="header", width=100%, frame=none, grid=none]
-|===
-| Imperative | Reactive
-| image:./testing/gatling/images/imperative-responses.png[] | image:./testing/gatling/images/reactive-responses.png[]
-|===
+Each figure covers 6 012 requests per endpoint per arm. `/stream` is reactive only.
+
+image:./testing/gatling/images/imperative-vs-reactive.png[]
 
 === What the Numbers Actually Say
 
@@ -613,32 +596,18 @@ JMeter high-load result but is not established by this run.
 |===
 | Finding | Evidence
 
-| *Parity below ~2 500 concurrent threads*
-| Both deliver ~272 TPS, ~302 ms median, zero errors.
-  Virtual threads handle moderate I/O-wait load as efficiently as a non-blocking event loop.
+| *The two models match while the stub keeps up*
+| At Gatling's load, each comparable endpoint stays within 4 ms of the other arm. Both arms return zero errors. JMeter reports the same result on `/smokes`: 416 ms for imperative and 410 ms for reactive.
 
-| *Carrier-thread saturation is the virtual-thread ceiling*
-| At 5 000t × 25 loops the imperative mean jumps 2.4× (302→731 ms) while reactive stays flat (326 ms).
-  Median remains 302 ms in both — the distribution becomes bimodal as carrier threads queue.
-  This is the pinning/saturation boundary, not a general virtual-thread weakness.
+| *Only the downstream endpoints fail*
+| Every failed request is on `/io` or `/aggregate`, the two endpoints that call WireMock. WireMock reached 100% CPU during the k6 run. `/smokes`, `/cpu`, `/resilience` and `/stream` return zero errors on both arms.
 
-| *Reactive is the only zero-error option under maximum sustained load*
-| At 2 M samples (5 000t × 200 loops) imperative produces 13 335 failures (1.33%) and a 31 s worst-case
-  spike; reactive holds 0 errors and caps at 2.4 s. Aggregate TPS is identical (~540 each), proving
-  the bottleneck is reliability, not capacity.
+| *Imperative keeps a bounded tail when the stub saturates*
+| At k6's load, the imperative p95 is 6.0 s and the maximum is 11.7 s. Threads queue behind the slow downstream call. The distribution slows down, but every request stays inside a known limit.
 
-| *Virtual threads don't prevent tail-latency spikes once carrier threads pin*
-| Imperative p99: 314 ms (light) → 625 ms (5 000t burst) → 472 ms (sustained).
-  Reactive p99 stays within 340–472 ms across all five runs.
+| *Reactive holds the median and loses the tail*
+| The reactive median is 582 ms. The imperative median is 827 ms, so imperative slows down in the middle of the distribution. The reactive tail then reaches the 60 s client timeout, and the reactive p95 is 45 s.
 
-| *Native build = startup + memory, not runtime throughput*
-| GraalVM native cuts startup from >3 s to <1 s and reduces heap usage — valuable for
-  container-dense or serverless deployments. Steady-state TPS and latency are set by the
-  concurrency model, not the execution engine.
-
-| *Choose by concurrency contract, not by hype*
-| Use *imperative + virtual threads* when peak concurrency stays below ~2 500: simpler code,
-  familiar debugging, identical measured performance.
-  Use *reactive* when you must guarantee zero errors and bounded tail latency beyond that threshold,
-  or when you need native SSE/backpressure (`/stream` endpoint).
+| *Choose the model for the tail you can accept*
+| Imperative with virtual threads gives a predictable tail for request and response work. Reactive fits streaming (`/stream`) and callers that accept a long wait. In both cases, the downstream dependency sets the limit.
 |===
