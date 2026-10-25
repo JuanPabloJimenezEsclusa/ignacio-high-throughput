@@ -1,11 +1,16 @@
 package dev.jpje.reactivethroughput.config;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mockStatic;
+
+import java.lang.management.ManagementFactory;
 
 import io.micrometer.core.instrument.Gauge;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
+import jdk.management.VirtualThreadSchedulerMXBean;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.mockito.MockedStatic;
 
 @DisplayName("Metrics Configuration Test")
 class MetricsConfigurationTest {
@@ -69,5 +74,39 @@ class MetricsConfigurationTest {
     final Gauge carriers = freshRegistry.find("jvm.threads.virtual.carriers").tag("module", "reactive").gauge();
     assertThat(carriers).as("carriers gauge must be registered").isNotNull();
     assertThat(carriers.value()).as("carriers gauge value must be non-negative").isGreaterThanOrEqualTo(0.0);
+  }
+
+  @Test
+  @DisplayName("Skips the virtual-thread gauges when the MXBean is not available")
+  void skipsVirtualThreadGaugesWhenMxBeanIsUnavailable() {
+    final var freshRegistry = new SimpleMeterRegistry();
+    final Gauge mounted;
+    try (MockedStatic<ManagementFactory> managementFactory = mockStatic(ManagementFactory.class)) {
+      managementFactory.when(() -> ManagementFactory.getPlatformMXBean(VirtualThreadSchedulerMXBean.class))
+        .thenReturn(null);
+
+      mounted = this.configuration.virtualThreadMountedGauge(freshRegistry);
+    }
+
+    assertThat(mounted).as("mounted gauge must be skipped when the MXBean is unavailable").isNull();
+    assertThat(freshRegistry.find("jvm.threads.virtual.mounted").gauge())
+      .as("no gauge must be registered when the MXBean is unavailable").isNull();
+  }
+
+  @Test
+  @DisplayName("Skips the virtual-thread gauges when the MXBean lookup fails")
+  void skipsVirtualThreadGaugesWhenMxBeanLookupFails() {
+    final var freshRegistry = new SimpleMeterRegistry();
+    final Gauge carriers;
+    try (MockedStatic<ManagementFactory> managementFactory = mockStatic(ManagementFactory.class)) {
+      managementFactory.when(() -> ManagementFactory.getPlatformMXBean(VirtualThreadSchedulerMXBean.class))
+        .thenThrow(new IllegalStateException("VirtualThreadSchedulerMXBean is unavailable"));
+
+      carriers = this.configuration.virtualThreadCarriersGauge(freshRegistry);
+    }
+
+    assertThat(carriers).as("carriers gauge must be skipped when the MXBean lookup fails").isNull();
+    assertThat(freshRegistry.find("jvm.threads.virtual.carriers").gauge())
+      .as("no gauge must be registered when the MXBean lookup fails").isNull();
   }
 }
