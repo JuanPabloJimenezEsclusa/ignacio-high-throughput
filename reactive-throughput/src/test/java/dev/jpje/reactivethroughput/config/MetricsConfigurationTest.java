@@ -10,7 +10,6 @@ import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import jdk.management.VirtualThreadSchedulerMXBean;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.mockito.MockedStatic;
 
 @DisplayName("Metrics Configuration Test")
 class MetricsConfigurationTest {
@@ -81,7 +80,7 @@ class MetricsConfigurationTest {
   void skipsVirtualThreadGaugesWhenMxBeanIsUnavailable() {
     final var freshRegistry = new SimpleMeterRegistry();
     final Gauge mounted;
-    try (MockedStatic<ManagementFactory> managementFactory = mockStatic(ManagementFactory.class)) {
+    try (final var managementFactory = mockStatic(ManagementFactory.class)) {
       managementFactory.when(() -> ManagementFactory.getPlatformMXBean(VirtualThreadSchedulerMXBean.class))
         .thenReturn(null);
 
@@ -98,7 +97,7 @@ class MetricsConfigurationTest {
   void skipsVirtualThreadGaugesWhenMxBeanLookupFails() {
     final var freshRegistry = new SimpleMeterRegistry();
     final Gauge carriers;
-    try (MockedStatic<ManagementFactory> managementFactory = mockStatic(ManagementFactory.class)) {
+    try (final var managementFactory = mockStatic(ManagementFactory.class)) {
       managementFactory.when(() -> ManagementFactory.getPlatformMXBean(VirtualThreadSchedulerMXBean.class))
         .thenThrow(new IllegalStateException("VirtualThreadSchedulerMXBean is unavailable"));
 
