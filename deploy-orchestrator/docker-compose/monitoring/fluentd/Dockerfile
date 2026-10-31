@@ -1,4 +1,4 @@
-FROM fluent/fluentd:v1.19-debian
+FROM fluent/fluentd:v1.20-debian
 
 ARG FLUENTD_VERSION=1.19
 
