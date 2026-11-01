@@ -22,7 +22,7 @@ class BuildPinParityTest {
   private static final String POM_FILE = "pom.xml";
   private static final String GRADLE_FILE = "build.gradle";
   private static final Pattern SPRING_BOOT_PLUGIN = Pattern.compile(
-    "id\\s*\\(?\\s*['\"]org\\.springframework\\.boot['\"]\\s*\\)?\\s+version\\s+['\"]([^'\"]+)['\"]");
+    "id\\s+['\"]org\\.springframework\\.boot['\"]\\s+version\\s+['\"]([^'\"]+)['\"]");
   private static final Pattern JAVA_TOOLCHAIN = Pattern.compile("JavaLanguageVersion\\.of\\(\\s*(\\d+)\\s*\\)");
   private static final Pattern VERSION_ASSIGNMENT = Pattern.compile("\\bversion\\s*=\\s*['\"]([^'\"]+)['\"]");
 
