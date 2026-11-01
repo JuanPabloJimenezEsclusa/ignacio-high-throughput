@@ -53,7 +53,7 @@ jobs:
           --projects imperative-throughput,reactive-throughput
       - name: Transform lowercase - github.repository_owner
         run: |
-          echo "REPOSITORY_OWNER=`echo ${{ github.repository_owner }} | tr '[:upper:]' '[:lower:]'`" >>${GITHUB_ENV}
+          echo "REPOSITORY_OWNER=$(echo ${{ github.repository_owner }} | tr '[:upper:]' '[:lower:]')" >>${GITHUB_ENV}
       - name: Tag images
         run: |
           docker tag ${{ env.IMPERATIVE_THROUGHPUT }} ${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/${{ env.IMPERATIVE_THROUGHPUT }}
