@@ -7,10 +7,15 @@ on:
     branches: [develop]
     types: [opened, synchronize, reopened, ready_for_review]
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 jobs:
   publish:
     if: github.event.pull_request.draft == false
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     permissions:
       contents: read
       packages: write
@@ -28,19 +33,26 @@ jobs:
         uses: gradle/actions/setup-gradle@8da46b539cd8fe6ab27ca75128919a18d757604c
         with:
           gradle-version: '9.8.2'
-      - name: Cache local Maven repository
-        uses: actions/cache@v6
-        with:
-          path: ~/.m2/repository
-          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
-          restore-keys: |
-            ${{ runner.os }}-maven-
       - name: Build with Maven
         run: mvn -B package -Dmaven.test.skip=true --file pom.xml
       - name: Build with Gradle
         run: gradle build -x test --console=plain --no-daemon
-      - name: Deploy with Maven if not exists
-        if: ${{ github.event_name != 'pull_request' }}
-        run: mvn -B deploy -Dmaven.test.skip=true --file pom.xml || true
+      - name: Deploy with Maven if version is new
+        if: github.event_name != 'pull_request'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          mkdir -p ~/.m2
+          cat > ~/.m2/settings.xml <<EOF
+          <settings><servers><server><id>github</id>
+            <username>${GITHUB_ACTOR}</username><password>${GITHUB_TOKEN}</password>
+          </server></servers></settings>
+          EOF
+          version=$(mvn -B -q help:evaluate -DforceStdout -Dexpression=project.version | tail -1)
+          # shortcut: one coordinate decides for the whole reactor; use per-commit versions if modules can publish separately
+          url="https://maven.pkg.github.com/${GITHUB_REPOSITORY,,}/dev/jpje/ignacio-high-throughput/${version}/ignacio-high-throughput-${version}.pom"
+          if [ "$(curl -sS -o /dev/null -w '%{http_code}' -u "${GITHUB_ACTOR}:${GITHUB_TOKEN}" "$url")" = 200 ]; then
+            echo "::notice::ignacio-high-throughput ${version} is already published, skipping deploy"
+            exit 0
+          fi
+          mvn -B deploy -Dmaven.test.skip=true --file pom.xml

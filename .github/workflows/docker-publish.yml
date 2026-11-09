@@ -14,13 +14,14 @@ env:
   SPRING_PROFILES_ACTIVE: native
 
 concurrency:
-  group: docker-publish
-  cancel-in-progress: false
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   deploy-images:
     if: github.event.pull_request.draft == false
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     permissions:
       contents: read
       packages: write
@@ -58,9 +59,6 @@ jobs:
         run: |
           docker tag ${{ env.IMPERATIVE_THROUGHPUT }} ${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/${{ env.IMPERATIVE_THROUGHPUT }}
           docker tag ${{ env.REACTIVE_THROUGHPUT }} ${{ env.REGISTRY }}/${{ env.REPOSITORY_OWNER }}/${{ env.REACTIVE_THROUGHPUT }}
-      - name: Smoke Tests
-        run: |
-          docker images
       - name: Push image to GitHub Packages
         if: ${{ github.event_name != 'pull_request' }}
         run: |
