@@ -6,8 +6,8 @@ on:
     types: [opened, synchronize, reopened]
 
 concurrency:
-  group: commitlint
-  cancel-in-progress: false
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   commitlint:

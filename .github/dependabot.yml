@@ -5,6 +5,7 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
+      time: "02:00"
     groups:
       maven-dependencies:
         patterns:
@@ -15,6 +16,7 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
+      time: "05:00"
     groups:
       gradle-dependencies:
         patterns:
@@ -34,6 +36,7 @@ updates:
     directory: "/deploy-orchestrator/docker-compose/monitoring/fluentd/"
     schedule:
       interval: "weekly"
+      time: "08:00"
     groups:
       infrastructure-dependencies:
         patterns:
@@ -43,6 +46,7 @@ updates:
     directory: "/deploy-orchestrator/docker-compose/"
     schedule:
       interval: "weekly"
+      time: "11:00"
     groups:
       infrastructure-dependencies:
         patterns:
@@ -52,8 +56,8 @@ updates:
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
-      interval: "cron"
-      cronjob: "0 10 * * *"
+      interval: "weekly"
+      time: "14:00"
     groups:
       github-actions-dependencies:
         patterns:

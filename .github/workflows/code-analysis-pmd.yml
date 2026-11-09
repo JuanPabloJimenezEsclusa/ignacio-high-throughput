@@ -11,8 +11,8 @@ permissions:
   contents: read
 
 concurrency:
-  group: code-analysis-pmd
-  cancel-in-progress: false
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   pmd-code-scan:
