@@ -37,7 +37,7 @@ jobs:
         run: mvn -B package -Dmaven.test.skip=true --file pom.xml
       - name: Build with Gradle
         run: gradle build -x test --console=plain --no-daemon
-      - name: Deploy with Maven if version is new
+      - name: Deploy with Maven
         if: github.event_name != 'pull_request'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -48,11 +48,11 @@ jobs:
             <username>${GITHUB_ACTOR}</username><password>${GITHUB_TOKEN}</password>
           </server></servers></settings>
           EOF
-          version=$(mvn -B -q help:evaluate -DforceStdout -Dexpression=project.version | tail -1)
-          # shortcut: one coordinate decides for the whole reactor; use per-commit versions if modules can publish separately
-          url="https://maven.pkg.github.com/${GITHUB_REPOSITORY,,}/dev/jpje/ignacio-high-throughput/${version}/ignacio-high-throughput-${version}.pom"
-          if [ "$(curl -sS -o /dev/null -w '%{http_code}' -u "${GITHUB_ACTOR}:${GITHUB_TOKEN}" "$url")" = 200 ]; then
-            echo "::notice::ignacio-high-throughput ${version} is already published, skipping deploy"
+          set -o pipefail
+          if mvn -B deploy -Dmaven.test.skip=true --file pom.xml 2>&1 | tee deploy.log; then
             exit 0
           fi
-          mvn -B deploy -Dmaven.test.skip=true --file pom.xml
+          # GitHub Packages answers 409 when the version is already published; that is the steady state for a fixed 1.0.0
+          # shortcut: one coordinate decides for the whole reactor; use per-commit versions if modules can publish separately
+          grep -q 'status code: 409' deploy.log &&
+            echo "::notice::ignacio-high-throughput 1.0.0 is already published, nothing to deploy"
