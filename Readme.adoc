@@ -9,10 +9,10 @@
 
 image:https://img.shields.io/badge/Documentation-Wiki-blue.svg["WIKI", link="https://juanpablojimenezesclusa.github.io/ignacio-high-throughput/"]
 
-image:https://github.com/JuanPabloJimenezEsclusa/ignacio-high-throughput/actions/workflows/build-deploy.yml/badge.svg["Deploy", link="https://github.com/JuanPabloJimenezEsclusa/ignacio-high-throughput/actions/workflows/build-deploy.yml.yml"]
-image:https://github.com/JuanPabloJimenezEsclusa/ignacio-high-throughput/actions/workflows/code-analysis-pmd.yml/badge.svg["Deploy", link="https://github.com/JuanPabloJimenezEsclusa/ignacio-high-throughput/actions/workflows/code-analysis-pmd.yml.yml"]
-image:https://github.com/JuanPabloJimenezEsclusa/ignacio-high-throughput/actions/workflows/dependency-review.yml/badge.svg["Dependencies", link="https://github.com/JuanPabloJimenezEsclusa/ignacio-high-throughput/actions/workflows/docker-publish.yml"]
-image:https://github.com/JuanPabloJimenezEsclusa/ignacio-high-throughput/actions/workflows/docker-publish.yml/badge.svg["Dependencies", link="https://github.com/JuanPabloJimenezEsclusa/ignacio-high-throughput/actions/workflows/dependency-review.yml"]
+image:https://github.com/JuanPabloJimenezEsclusa/ignacio-high-throughput/actions/workflows/build-deploy.yml/badge.svg["Deploy", link="https://github.com/JuanPabloJimenezEsclusa/ignacio-high-throughput/actions/workflows/build-deploy.yml"]
+image:https://github.com/JuanPabloJimenezEsclusa/ignacio-high-throughput/actions/workflows/code-analysis-pmd.yml/badge.svg["PMD", link="https://github.com/JuanPabloJimenezEsclusa/ignacio-high-throughput/actions/workflows/code-analysis-pmd.yml"]
+image:https://github.com/JuanPabloJimenezEsclusa/ignacio-high-throughput/actions/workflows/dependency-review.yml/badge.svg["Dependencies", link="https://github.com/JuanPabloJimenezEsclusa/ignacio-high-throughput/actions/workflows/dependency-review.yml"]
+image:https://github.com/JuanPabloJimenezEsclusa/ignacio-high-throughput/actions/workflows/docker-publish.yml/badge.svg["Docker Publish", link="https://github.com/JuanPabloJimenezEsclusa/ignacio-high-throughput/actions/workflows/docker-publish.yml"]
 image:https://github.com/JuanPabloJimenezEsclusa/ignacio-high-throughput/actions/workflows/sonarqube.yml/badge.svg["SonarQube", link="https://github.com/JuanPabloJimenezEsclusa/ignacio-high-throughput/actions/workflows/sonarqube.yml"]
 image:https://img.shields.io/github/license/JuanPabloJimenezEsclusa/ignacio-high-throughput?logo=github["License", link="https://github.com/JuanPabloJimenezEsclusa/ignacio-high-throughput/LICENSE.md"]
 image:https://img.shields.io/github/languages/code-size/JuanPabloJimenezEsclusa/ignacio-high-throughput?logo=github[GitHub code size in bytes]
