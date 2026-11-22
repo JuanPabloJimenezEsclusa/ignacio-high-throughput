@@ -1,0 +1,14 @@
+#!/bin/sh
+# Re-sync readme versions before committing, so a build bump cannot land with
+# stale docs. Enable once with: git config core.hooksPath .githooks
+set -e
+
+changed=$(git diff --cached --name-only -- '*pom.xml' 'Readme.adoc' '*Readme.md' 'build.gradle' '.github/workflows/build-deploy.yml')
+[ -n "$changed" ] || exit 0
+
+scripts/sync-readme-versions.sh
+
+if ! git diff --quiet -- Readme.adoc testing/jmeter/Readme.md testing/gatling/Readme.md; then
+  git add Readme.adoc testing/jmeter/Readme.md testing/gatling/Readme.md
+  echo "Readme versions synced and staged."
+fi
